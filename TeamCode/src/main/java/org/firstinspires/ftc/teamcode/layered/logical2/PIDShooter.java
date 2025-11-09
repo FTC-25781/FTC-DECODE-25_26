@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -19,15 +20,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @TeleOp(name="PID Shooter Fixed", group = "default")
 public class PIDShooter extends LinearOpMode {
     private DcMotorEx shooter;
+    private DcMotorEx lf, lr, rf, rr;
     private Servo angleServo;
     private IMU imu;
     private GoBildaPinpointDriver pinpoint;
+    private VoltageSensor voltageSensor;
 
     // PID constants
-    private final double kP = 0.0005;
-    private final double kI = kP * 0.002;
-    private final double kD = kP * 0.02;
-    private final double kF = 0.35;
+    private final double kP = 0.00055;
+    private final double kI = 0.000001;
+    private final double kD = 0.0008;
+    private final double kF = 0.36;
 
     // State variables
     private double targetRPM = 0;
@@ -43,6 +46,11 @@ public class PIDShooter extends LinearOpMode {
     private final ElapsedTime pidTimer = new ElapsedTime();
     private boolean isFirstUpdate = true;
     private double lastEncoderPosition = 0;
+
+    // for auto-aiming
+    private static final double TURN_KP = 0.012;   // P-controller for turning
+    private static final double MAX_TURN_POWER = 0.6;
+    private static final double HEADING_TOLERANCE = 2.0; // degrees
 
     // Constants
     private static final double TICKS_PER_REV = 28;
@@ -86,10 +94,19 @@ public class PIDShooter extends LinearOpMode {
         telemetry.addData("Status", "Initializing...");
         telemetry.update();
 
-        // Initialize hardware
         shooter = hardwareMap.get(DcMotorEx.class, "shooter_motor");
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        voltageSensor = hardwareMap.voltageSensor.iterator().next();
+        lf = hardwareMap.get(DcMotorEx.class, "lf");
+        lr = hardwareMap.get(DcMotorEx.class, "lr");
+        rf = hardwareMap.get(DcMotorEx.class, "rf");
+        rr = hardwareMap.get(DcMotorEx.class, "rr");
+
+        lf.setDirection(DcMotorEx.Direction.REVERSE);
+        lr.setDirection(DcMotorEx.Direction.REVERSE);
+        rf.setDirection(DcMotorEx.Direction.FORWARD);
+        rr.setDirection(DcMotorEx.Direction.FORWARD);
 
         try {
             imu = hardwareMap.get(IMU.class, "imu");
@@ -159,6 +176,40 @@ public class PIDShooter extends LinearOpMode {
                 robotVelX = poseKalman.getVelX();
                 robotVelY = poseKalman.getVelY();
             }
+            double HEADING_SMOOTH_FACTOR = 0.15;
+            robotHeading = robotHeading * (1 - HEADING_SMOOTH_FACTOR) + poseKalman.getHeading() * HEADING_SMOOTH_FACTOR;
+            if (gamepad1.x) { // Hold button to auto-turn
+                double goalX = isRedAlliance ? ProjectileCalculations.RED_GOAL_X : ProjectileCalculations.BLUE_GOAL_X;
+                double goalY = isRedAlliance ? ProjectileCalculations.RED_GOAL_Y : ProjectileCalculations.BLUE_GOAL_Y;
+
+                double desiredHeading = Math.toDegrees(Math.atan2(goalY - robotY, goalX - robotX));
+                while (desiredHeading > 180) desiredHeading -= 360;
+                while (desiredHeading < -180) desiredHeading += 360;
+
+                double headingError = desiredHeading - robotHeading;
+                while (headingError > 180) headingError -= 360;
+                while (headingError < -180) headingError += 360;
+
+                double turnPower = 0;
+                if (Math.abs(headingError) > HEADING_TOLERANCE) {
+                    turnPower = Range.clip(TURN_KP * headingError, -MAX_TURN_POWER, MAX_TURN_POWER);
+                }
+
+                if (Math.abs(headingError) < HEADING_TOLERANCE) {
+                    applyTurnPower(0);
+                }
+
+                applyTurnPower(turnPower);
+
+                // Optionally enable shooter automatically while aiming
+                if (!shooterEnabled) {
+                    shooterEnabled = true;
+                }
+            } else {
+                // Stop turning if button released
+                applyTurnPower(0);
+            }
+
 
             // Toggle alliance
             boolean currentBState = gamepad1.b;
@@ -193,6 +244,7 @@ public class PIDShooter extends LinearOpMode {
             }
 
             if (telemetryTimer.seconds() > 0.15) { // update only telemetry if 0.15 seconds patssed
+                double voltage = getBatteryVoltage();
                 telemetry.clearAll();
                 double goalX = isRedAlliance ? ProjectileCalculations.RED_GOAL_X : ProjectileCalculations.BLUE_GOAL_X;
                 double goalY = isRedAlliance ? ProjectileCalculations.RED_GOAL_Y : ProjectileCalculations.BLUE_GOAL_Y;
@@ -214,6 +266,7 @@ public class PIDShooter extends LinearOpMode {
                 telemetry.addData("Target RPM", "%.0f", targetRPM);
                 telemetry.addData("Actual RPM", "%.0f", filteredRPM);
                 telemetry.addData("Power", "%.2f", outputPower);
+                telemetry.addData("Voltage (V)", "%.2f", voltage);
                 telemetry.addData("Target Angle (deg)", "%.1f", targetAngle);
                 telemetry.addData("Servo Position", "%.2f", angleServo.getPosition());
                 telemetry.addData("Distance to Goal", "%.1f in", distToGoal);
@@ -224,6 +277,23 @@ public class PIDShooter extends LinearOpMode {
 
         stopShooter();
     }
+
+    private double getBatteryVoltage(){
+        double minVoltage = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double v = sensor.getVoltage();
+            if (v > 6 && v < minVoltage) minVoltage = v;
+        }
+        return minVoltage == Double.POSITIVE_INFINITY ? 13.0 : minVoltage;
+    }
+
+    private void applyTurnPower(double turnPower) {
+        lf.setPower(turnPower);
+        lr.setPower(turnPower);
+        rf.setPower(-turnPower);
+        rr.setPower(-turnPower);
+    }
+
 
     private double smoothServo(double currentPos, double targetPos, double smoothingFactor) {
         return currentPos + (targetPos - currentPos) * smoothingFactor;
@@ -285,6 +355,11 @@ public class PIDShooter extends LinearOpMode {
         // omly run motor if RPM is achievable (within threshold)
         double rpmError = Math.abs(targetRPM - filteredRPM);
 
+        double voltage = getBatteryVoltage();
+        double nominalVoltage = 13.0;
+        double voltageCompFacotr = nominalVoltage / Math.max(voltage, 8.0); // limit at 8 V
+        double compensatedFF = kF * (targetRPM / MAX_MOTOR_RPM) * voltageCompFacotr; // compensate the feedforward even if battery drops bc we need good rpm and stuff
+
         if (rpmError > RPM_READY_THRESHOLD && filteredRPM < 100) {
             // Motor hasn't started spinning yet, don't apply power
             shooter.setPower(0);
@@ -300,9 +375,8 @@ public class PIDShooter extends LinearOpMode {
         integral = Range.clip(integral, INTEGRAL_MIN, INTEGRAL_MAX);
 
         double derivative = -(filteredRPM - previousRPM) / deltaTime;
-        double feedforward = kF * targetRPM / MAX_MOTOR_RPM;
 
-        outputPower = feedforward + (kP * error) + (kI * integral) + (kD * derivative);
+        outputPower = compensatedFF + (kP * error) + (kI * integral) + (kD * derivative);
         outputPower = Range.clip(outputPower, 0.0, 1.0);
 
         if (targetRPM > 0) {

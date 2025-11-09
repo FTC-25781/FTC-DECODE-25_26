@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
-@TeleOp(name="PID Shooter", group = "default")
+@TeleOp(name="PID Shooter Fixed", group = "default")
 public class PIDShooter extends LinearOpMode {
     private DcMotorEx shooter;
     private Servo angleServo;
@@ -25,8 +25,8 @@ public class PIDShooter extends LinearOpMode {
 
     // PID constants
     private final double kP = 0.0005;
-    private final double kI = kP * 0.02;
-    private final double kD = kP * 0.2;
+    private final double kI = kP * 0.002;
+    private final double kD = kP * 0.02;
     private final double kF = 0.35;
 
     // State variables
@@ -38,6 +38,7 @@ public class PIDShooter extends LinearOpMode {
     private double currentRPM = 0;
 
     private KalmanFilter rpmKalman;
+    private SimplePoseKalman poseKalman;
     private double filteredRPM = 0;
     private final ElapsedTime pidTimer = new ElapsedTime();
     private boolean isFirstUpdate = true;
@@ -53,85 +54,179 @@ public class PIDShooter extends LinearOpMode {
     private static final double RED_GOAL_HEIGHT = 40;
     private static final double BLUE_GOAL_HEIGHT = 40;
     private static final double SHOOTER_HEIGHT = 8.334;
+
     private static final double SERVO_MIN_ANGLE = 61.2;
     private static final double SERVO_MAX_ANGLE = 298.8;
     private static final double SERVO_MIN_POSITION = 0.17;
     private static final double SERVO_MAX_POSITION = 0.83;
 
-    // Robot pose tracking
+    // Shooter control
+    private static final double RPM_TOLERANCE = 100;
+    private static final double RPM_READY_THRESHOLD = 200; // Don't spin until within this RPM
+
+    // Robot pose tracking (fused)
     private double robotX = 72;
-    private double robotY = 144;
+    private double robotY = 72;
     private double robotHeading = 0;
     private double robotVelX = 0;
     private double robotVelY = 0;
-    private double lastX = 0;
-    private double lastY = 0;
-    private ElapsedTime velocityTimer = new ElapsedTime();
 
     private boolean isRedAlliance = false;
+    private boolean lastBState = false;
+
+    private boolean shooterEnabled = false;
+    private boolean lastAState = false;
+
+    private boolean hasRumbled = false; // track if we've already rumbled so not uncomfortable for el driver
+    private final ElapsedTime telemetryTimer = new ElapsedTime(); // for making sure telemetry isn't constantly updated in loop
+
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initializing...");
         telemetry.update();
 
+        // Initialize hardware
         shooter = hardwareMap.get(DcMotorEx.class, "shooter_motor");
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
         try {
             imu = hardwareMap.get(IMU.class, "imu");
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            imu = null;
+            telemetry.addData("Warning", "IMU not found");
+        }
 
         configurePinpoint();
 
+        // Initialize robot pose
         Pose2D pose = pinpoint.getPosition();
         robotX = pose.getX(DistanceUnit.INCH);
         robotY = pose.getY(DistanceUnit.INCH);
-        robotHeading = pose.getHeading(AngleUnit.DEGREES);
 
+        double initialHeading = pose.getHeading(AngleUnit.DEGREES);
+        if (imu != null) {
+            try {
+                initialHeading = imu.getRobotOrientation(AxesReference.INTRINSIC,
+                        AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            } catch (Exception ignored) {}
+        }
+        robotHeading = initialHeading;
+
+        // Initialize shooter
         shooter.setDirection(DcMotorEx.Direction.FORWARD);
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rpmKalman = new KalmanFilter(0.0, 100.0, 50.0, 200.0);
+        poseKalman = new SimplePoseKalman(robotX, robotY, robotHeading);
 
         lastEncoderPosition = shooter.getCurrentPosition();
         pidTimer.reset();
-        velocityTimer.reset();
+        // Set servo to safe start position
+        angleServo.setPosition(mapAngleToServo(SERVO_MIN_ANGLE));
 
-        telemetry.addData("Status", "Ready");
+        telemetry.addData("Status", "Ready - Press START to begin");
         telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
             pinpoint.update();
+            double dt = pidTimer.seconds();
+            pidTimer.reset();
 
             Pose2D currentPose = pinpoint.getPosition();
-            robotX = currentPose.getX(DistanceUnit.INCH);
-            robotY = currentPose.getY(DistanceUnit.INCH);
-            robotHeading = currentPose.getHeading(AngleUnit.DEGREES);
+            double pinpointX = currentPose.getX(DistanceUnit.INCH);
+            double pinpointY = currentPose.getY(DistanceUnit.INCH);
+            double pinpointHeading = currentPose.getHeading(AngleUnit.DEGREES);
 
-            // Estimate velocity
-            double dt = velocityTimer.seconds();
-            if (dt > 0.05) {
-                robotVelX = (robotX - lastX) / dt;
-                robotVelY = (robotY - lastY) / dt;
-                lastX = robotX;
-                lastY = robotY;
-                velocityTimer.reset();
+            double imuHeading = pinpointHeading;
+            if (imu != null) {
+                try {
+                    imuHeading = imu.getRobotOrientation(AxesReference.INTRINSIC,
+                            AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+                } catch (Exception ignored) {
+                }
             }
 
-            if (gamepad1.b) {
+            if (dt > 0.001 && dt < 1.0) {
+                poseKalman.predict(dt);
+                poseKalman.update(pinpointX, pinpointY, imuHeading);
+
+                robotX = poseKalman.getX();
+                robotY = poseKalman.getY();
+                robotHeading = poseKalman.getHeading();
+                robotVelX = poseKalman.getVelX();
+                robotVelY = poseKalman.getVelY();
+            }
+
+            // Toggle alliance
+            boolean currentBState = gamepad1.b;
+            if (currentBState && !lastBState) {
                 isRedAlliance = !isRedAlliance;
-                sleep(300);
+            }
+            lastBState = currentBState;
+
+            boolean currentAState = gamepad1.a;
+            if (currentAState && !lastAState) {
+                shooterEnabled = !shooterEnabled;
+            }
+            lastAState = currentAState;
+
+
+            if (shooterEnabled) {
+                updateShooter(dt);
+
+                double targetServoPos = mapAngleToServo(targetAngle);
+                double currentServoPos = angleServo.getPosition();
+                angleServo.setPosition(smoothServo(currentServoPos, targetServoPos, 0.2)); // smoothing
+
+                if (isAtTargetSpeed(RPM_TOLERANCE) && !hasRumbled) {
+                    gamepad1.rumble(300);
+                    hasRumbled = true;
+                } else if (!isAtTargetSpeed(RPM_TOLERANCE)) {
+                    hasRumbled = false; // reset if RPM drops below threshold
+                }
+            } else {
+                stopShooter();
+                hasRumbled = false;
             }
 
-            update(telemetry, robotX, robotY, robotVelX, robotVelY, robotHeading, isRedAlliance);
-            telemetry.update();
-            sleep(20);
+            if (telemetryTimer.seconds() > 0.15) { // update only telemetry if 0.15 seconds patssed
+                telemetry.clearAll();
+                double goalX = isRedAlliance ? ProjectileCalculations.RED_GOAL_X : ProjectileCalculations.BLUE_GOAL_X;
+                double goalY = isRedAlliance ? ProjectileCalculations.RED_GOAL_Y : ProjectileCalculations.BLUE_GOAL_Y;
+                double distToGoal = Math.hypot(goalX - robotX, goalY - robotY);
+
+                if (!shooterEnabled) {
+                    telemetry.addLine("Press 'A' to enable shooter");
+                } else {
+                    telemetry.addLine("Shooter enabled");
+                    telemetry.addLine(isAtTargetSpeed(RPM_TOLERANCE) ? "Target RPM reached, ready to fire" : "Spinning up...");
+                }
+
+                telemetry.addData("Shooter", shooterEnabled ? "enabled" : "off");
+                telemetry.addData("Ready to Fire", isAtTargetSpeed(RPM_TOLERANCE) ? "Yes" : "Spinning up...");
+                telemetry.addData("Alliance", isRedAlliance ? "RED" : "BLUE");
+                telemetry.addData("X (in)", "%.1f", robotX);
+                telemetry.addData("Y (in)", "%.1f", robotY);
+                telemetry.addData("Heading (deg)", "%.1f", robotHeading);
+                telemetry.addData("Target RPM", "%.0f", targetRPM);
+                telemetry.addData("Actual RPM", "%.0f", filteredRPM);
+                telemetry.addData("Power", "%.2f", outputPower);
+                telemetry.addData("Target Angle (deg)", "%.1f", targetAngle);
+                telemetry.addData("Servo Position", "%.2f", angleServo.getPosition());
+                telemetry.addData("Distance to Goal", "%.1f in", distToGoal);
+                telemetry.update();
+                telemetryTimer.reset();
+            }
         }
 
         stopShooter();
+    }
+
+    private double smoothServo(double currentPos, double targetPos, double smoothingFactor) {
+        return currentPos + (targetPos - currentPos) * smoothingFactor;
     }
 
     private void configurePinpoint() {
@@ -143,27 +238,11 @@ public class PIDShooter extends LinearOpMode {
         pinpoint.resetPosAndIMU();
     }
 
-    public void setTargetRPM(double rpm) {
-        double newTarget = Range.clip(rpm, 0, MAX_MOTOR_RPM);
-        if (Math.abs(newTarget - targetRPM) > 500) integral = 0;
-        this.targetRPM = newTarget;
-    }
-
     public boolean isAtTargetSpeed(double tolerance) {
         return targetRPM > 0 && Math.abs(targetRPM - filteredRPM) < tolerance;
     }
 
-    public double getCurrentRPM() { return filteredRPM; }
-
-    public double getTargetAngle() { return targetAngle; }
-
-    public void update(Telemetry telemetry, double robotX, double robotY,
-                       double robotVelX, double robotVelY, double robotHeading,
-                       boolean isRedAlliance) {
-
-        double deltaTime = pidTimer.seconds();
-        pidTimer.reset();
-
+    private void updateShooter(double deltaTime) {
         if (isFirstUpdate || deltaTime < MIN_DELTA_TIME) {
             isFirstUpdate = false;
             lastEncoderPosition = shooter.getCurrentPosition();
@@ -174,27 +253,23 @@ public class PIDShooter extends LinearOpMode {
         double goalY = isRedAlliance ? ProjectileCalculations.RED_GOAL_Y : ProjectileCalculations.BLUE_GOAL_Y;
         double goalHeight = isRedAlliance ? RED_GOAL_HEIGHT : BLUE_GOAL_HEIGHT;
 
-        double robotPitch = 0.0;
-        if (imu != null) {
-            try {
-                robotPitch = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).secondAngle;
-            } catch (Exception ignored) {}
-        }
-
         double angleToGoal = Math.atan2(goalY - robotY, goalX - robotX);
         double velTowardGoal = robotVelX * Math.cos(angleToGoal) + robotVelY * Math.sin(angleToGoal);
 
+        // calculate ballistics
         ProjectileCalculations.BallisticsResult ballistics =
                 ProjectileCalculations.calculateBallisticsWithMovement(
                         robotX, robotY, goalX, goalY, goalHeight, SHOOTER_HEIGHT,
-                        velTowardGoal, robotPitch);
+                        velTowardGoal);
 
         targetAngle = ballistics.angle;
         targetRPM = ballistics.rpm;
 
+        // automatically adjust servo to calculated angle
         double servoPosition = mapAngleToServo(targetAngle);
         angleServo.setPosition(servoPosition);
 
+        // calculate current RPM
         double currentEncoderPosition = shooter.getCurrentPosition();
         double deltaPosition = currentEncoderPosition - lastEncoderPosition;
         if (Math.abs(deltaPosition) > MAX_ENCODER_JUMP) deltaPosition = 0;
@@ -202,10 +277,23 @@ public class PIDShooter extends LinearOpMode {
         currentRPM = (deltaPosition / TICKS_PER_REV) * 60.0 / deltaTime;
         lastEncoderPosition = currentEncoderPosition;
 
+        // Filter RPM
         rpmKalman.predict(deltaTime, 0.0);
         rpmKalman.update(currentRPM);
         filteredRPM = rpmKalman.getState();
 
+        // omly run motor if RPM is achievable (within threshold)
+        double rpmError = Math.abs(targetRPM - filteredRPM);
+
+        if (rpmError > RPM_READY_THRESHOLD && filteredRPM < 100) {
+            // Motor hasn't started spinning yet, don't apply power
+            shooter.setPower(0);
+            integral = 0;
+            previousRPM = filteredRPM;
+            return;
+        }
+
+        // PID control
         double error = targetRPM - filteredRPM;
         integral += error * deltaTime;
         if (targetRPM == 0) integral = 0;
@@ -217,30 +305,23 @@ public class PIDShooter extends LinearOpMode {
         outputPower = feedforward + (kP * error) + (kI * integral) + (kD * derivative);
         outputPower = Range.clip(outputPower, 0.0, 1.0);
 
-        if (targetRPM > 0) shooter.setPower(outputPower);
-        else {
+        if (targetRPM > 0) {
+            shooter.setPower(outputPower);
+        } else {
             shooter.setPower(0);
             integral = 0;
         }
 
         previousRPM = filteredRPM;
-
-        telemetry.addData("Alliance", isRedAlliance ? "RED" : "BLUE");
-        telemetry.addData("Robot X (in)", robotX);
-        telemetry.addData("Robot Y (in)", robotY);
-        telemetry.addData("Heading (deg)", robotHeading);
-        telemetry.addData("Vel X", robotVelX);
-        telemetry.addData("Vel Y", robotVelY);
-        telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("Filtered RPM", filteredRPM);
-        telemetry.addData("Power", outputPower);
-        telemetry.addData("Angle", targetAngle);
-        telemetry.addData("Servo Pos", servoPosition);
     }
 
     private double mapAngleToServo(double angle) {
+        angle = Range.clip(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE);
+
+        // Map linearly from angle to servo position
         double normalized = (angle - SERVO_MIN_ANGLE) / (SERVO_MAX_ANGLE - SERVO_MIN_ANGLE);
         double servoPos = SERVO_MIN_POSITION + normalized * (SERVO_MAX_POSITION - SERVO_MIN_POSITION);
+
         return Range.clip(servoPos, SERVO_MIN_POSITION, SERVO_MAX_POSITION);
     }
 
@@ -248,14 +329,13 @@ public class PIDShooter extends LinearOpMode {
         shooter.setPower(0);
         targetRPM = 0;
         integral = 0;
-        rpmKalman.reset();
     }
 
+    // simple 1D Kalman Filter for RPM
     private static class KalmanFilter {
         private double state;
         private double velocity;
         private double uncertainty;
-        private double velocityUncertainty;
         private final double processNoise;
         private final double measurementNoise;
 
@@ -264,7 +344,6 @@ public class PIDShooter extends LinearOpMode {
             this.state = initialState;
             this.velocity = 0;
             this.uncertainty = initialUncertainty;
-            this.velocityUncertainty = initialUncertainty;
             this.processNoise = processNoise;
             this.measurementNoise = measurementNoise;
         }
@@ -273,7 +352,6 @@ public class PIDShooter extends LinearOpMode {
             state += velocity * dt + 0.5 * acceleration * dt * dt;
             velocity += acceleration * dt;
             uncertainty += processNoise * dt;
-            velocityUncertainty += processNoise * dt;
         }
 
         public void update(double measurement) {
@@ -289,6 +367,80 @@ public class PIDShooter extends LinearOpMode {
         public void reset() { state = 0; velocity = 0; uncertainty = 100.0; }
     }
 
+    // simple Pose Kalman Filter (fuses Pinpoint + IMU)
+    private static class SimplePoseKalman {
+        private double x, y, heading;
+        private double vx, vy, omega;
+        private double xUnc, yUnc, headingUnc;
+
+        private static final double PROCESS_NOISE_POS = 0.5;
+        private static final double PROCESS_NOISE_VEL = 2.0;
+        private static final double MEAS_NOISE_POS = 1.0;
+        private static final double MEAS_NOISE_HEADING = 0.5;
+
+        public SimplePoseKalman(double x0, double y0, double heading0) {
+            this.x = x0;
+            this.y = y0;
+            this.heading = heading0;
+            this.vx = 0;
+            this.vy = 0;
+            this.omega = 0;
+            this.xUnc = 10.0;
+            this.yUnc = 10.0;
+            this.headingUnc = 5.0;
+        }
+
+        public void predict(double dt) {
+            x += vx * dt;
+            y += vy * dt;
+            heading += omega * dt;
+
+            while (heading > 180) heading -= 360;
+            while (heading < -180) heading += 360;
+
+            xUnc += PROCESS_NOISE_POS * dt;
+            yUnc += PROCESS_NOISE_POS * dt;
+            headingUnc += PROCESS_NOISE_POS * dt;
+        }
+
+        public void update(double measX, double measY, double measHeading) {
+            double kx = xUnc / (xUnc + MEAS_NOISE_POS);
+            double dx = measX - x;
+            x += kx * dx;
+            vx += kx * 0.3 * dx;
+            xUnc = (1 - kx) * xUnc;
+            if (xUnc < 0.1) xUnc = 0.1;
+
+            double ky = yUnc / (yUnc + MEAS_NOISE_POS);
+            double dy = measY - y;
+            y += ky * dy;
+            vy += ky * 0.3 * dy;
+            yUnc = (1 - ky) * yUnc;
+            if (yUnc < 0.1) yUnc = 0.1;
+
+            double kh = headingUnc / (headingUnc + MEAS_NOISE_HEADING);
+            double dh = measHeading - heading;
+
+            while (dh > 180) dh -= 360;
+            while (dh < -180) dh += 360;
+
+            heading += kh * dh;
+            omega += kh * 0.2 * dh;
+            headingUnc = (1 - kh) * headingUnc;
+            if (headingUnc < 0.1) headingUnc = 0.1;
+
+            while (heading > 180) heading -= 360;
+            while (heading < -180) heading += 360;
+        }
+
+        public double getX() { return x; }
+        public double getY() { return y; }
+        public double getHeading() { return heading; }
+        public double getVelX() { return vx; }
+        public double getVelY() { return vy; }
+        public double getOmega() { return omega; }
+    }
+
     public static class ProjectileCalculations {
         public static final double RED_GOAL_X = 144;
         public static final double RED_GOAL_Y = 72;
@@ -297,18 +449,19 @@ public class PIDShooter extends LinearOpMode {
         private static final double GRAVITY = 386.4;
         private static final double WHEEL_RADIUS = 2.0;
         private static final double MAX_MOTOR_RPM = 6000.0;
-        private static final double ENERGY_LOSS_MULTIPLIER = 1;
+        private static final double ENERGY_LOSS_MULTIPLIER = 0.85;
 
         public static BallisticsResult calculateBallisticsWithMovement(
                 double robotX, double robotY, double goalX, double goalY, double goalHeight,
-                double shooterHeight, double robotVelTowardGoal, double robotPitch) {
+                double shooterHeight, double robotVelTowardGoal) {
 
             double dx = goalX - robotX;
             double dy = goalY - robotY;
             double horizontalDist = Math.sqrt(dx * dx + dy * dy);
             double verticalDist = goalHeight - shooterHeight;
+
+            // Choose angle based on distance - closer = steeper angle
             double angle = chooseAngle(horizontalDist, verticalDist);
-            angle -= robotPitch;
             angle = Range.clip(angle, 25, 65);
 
             double angleRad = Math.toRadians(angle);
@@ -325,12 +478,16 @@ public class PIDShooter extends LinearOpMode {
         }
 
         private static double chooseAngle(double horizontalDist, double verticalDist) {
+            // Automatically choose angle based on distance
             double angle;
-            if (horizontalDist < 60) angle = 50;
-            else if (horizontalDist < 100) angle = 45;
-            else angle = 40;
-            if (verticalDist > 12) angle += 5;
-            else if (verticalDist < -12) angle -= 5;
+            if (horizontalDist < 60) {
+                angle = 50;  // Close shots - steep angle
+            } else if (horizontalDist < 100) {
+                angle = 45;  // Medium shots
+            } else {
+                angle = 40;  // Far shots - flatter trajectory
+            }
+
             return Range.clip(angle, 25, 65);
         }
 
@@ -346,7 +503,8 @@ public class PIDShooter extends LinearOpMode {
         public static class BallisticsResult {
             public double rpm, angle;
             public BallisticsResult(double rpm, double angle) {
-                this.rpm = rpm; this.angle = angle;
+                this.rpm = rpm;
+                this.angle = angle;
             }
         }
     }

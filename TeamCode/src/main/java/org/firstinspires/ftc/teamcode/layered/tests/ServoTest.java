@@ -1,15 +1,20 @@
 package org.firstinspires.ftc.teamcode.layered.tests;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "CR Servo Encoder Move", group = "Test")
 public class ServoTest extends LinearOpMode {
 
     private CRServo sorterServo;   // Continuous rotation servo
     private DcMotorEx encoder;     // Encoder motor (for tracking movement)
+    public Rev2mDistanceSensor laserSensor;
 
     private boolean aWasPressed = false;
     private int targetPosition = 0;
@@ -19,6 +24,7 @@ public class ServoTest extends LinearOpMode {
     public void runOpMode() {
         sorterServo = hardwareMap.get(CRServo.class, "transfer1");
         encoder = hardwareMap.get(DcMotorEx.class, "encoder");
+        laserSensor = hardwareMap.get(Rev2mDistanceSensor.class, "laser");
 
         encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -42,7 +48,7 @@ public class ServoTest extends LinearOpMode {
             }
 
             // stop when encoder reaches target
-            if (moving && currentPos >= targetPosition) {
+            if ((moving && currentPos >= targetPosition) || (laserSensor.getDistance(DistanceUnit.MM) > 100)) {
                 sorterServo.setPower(0);
                 moving = false;
             }
@@ -50,6 +56,7 @@ public class ServoTest extends LinearOpMode {
             telemetry.addData("Encoder Pos", currentPos);
             telemetry.addData("Target Pos", targetPosition);
             telemetry.addData("Moving", moving);
+            telemetry.addData("Laser Sensor", laserSensor.getDistance(DistanceUnit.MM));
             telemetry.update();
         }
     }

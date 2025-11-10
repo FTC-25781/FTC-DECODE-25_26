@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import Layered.PhysicalLayer.SmartServo; // Your custom servo class
-import Layered.PhysicalLayer.SmartServo.ServoType;
-import Layered.PhysicalLayer.SmartServo.ServoState;
+import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo; // Your custom servo class
+import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo.ServoType;
+import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo.ServoState;
 
 @TeleOp(name = "Smart Servo Test", group = "Testing")
 public class SmartServoTest extends OpMode {

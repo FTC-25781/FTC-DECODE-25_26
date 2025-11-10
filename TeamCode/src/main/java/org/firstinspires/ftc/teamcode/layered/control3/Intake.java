@@ -1,71 +1,208 @@
 package org.firstinspires.ftc.teamcode.layered.control3;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="Intake Test", group="Sensor")
-public class Intake extends OpMode {
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
+import org.firstinspires.ftc.teamcode.layered.physical1.Motor;
 
+public class Intake {
     private DcMotorEx intakeMotor;
-    //private SRSHub.VL53L5CX tofSensor;
-    //private SRSHub srsHub;
+    private CRServo sorterServo;
+    private DcMotorEx encoder;
+    private Rev2mDistanceSensor laserSensor;
+    private LynxModule hub;
 
     public enum INTAKE_STATE {
         IDLE,
         INTAKING,
-        FULL,
-        REVERSING
+        REVERSING,
+        ROTATING,
+        AT_DEPOSIT_POS
     }
 
     private INTAKE_STATE currentState = INTAKE_STATE.IDLE;
-    private INTAKE_STATE lastState = INTAKE_STATE.IDLE;
 
-    private int ballCount = 0;
-    //private boolean lastSensorBlocked = false;
+    private int targetPosition = 0;
+    private boolean moving = false;
 
-    private ElapsedTime debounceTimer = new ElapsedTime();
-    private final double DEBOUNCE_TIME = 0.2;
+    private ElapsedTime intakeTimer                                          = new ElapsedTime();
+    private ElapsedTime rotationTimer                                        = new ElapsedTime();
+    private final double INTAKE_TIMEOUT                                      = 15.0;
+    private final double INTAKE_POWER                                        = 0.8;
+    private final double REVERSE_POWER                                       = -0.5;
+    private final double SORTER_POWER                                        = 0.2;
+    private final int ROTATION_TICKS                                         = 2400;
+    private final double ROTATION_TIMEOUT                                    = 3.0;
+    private final double PLATE_EMPTY_THRESHOLD_MM                            = 100.0;
+    private static final double NOMINAL_BATTERY_VOLTAGE                      = 12.0;
+    private static final double MAX_MOTOR_CURRENT                            = 5.0;
 
-    private ElapsedTime intakeTimer = new ElapsedTime();
-    private final double INTAKE_TIMEOUT = 15.0;
-
-    private final double BALL_THRESHOLD_IN = 5.0;
-    private final double INTAKE_POWER = 0.8;
-    private final double REVERSE_POWER = -0.5;
-    private final int MAX_BALLS = 3;
-
-    @Override
-    public void init() {
-        // Hardware Initialization
+    public Intake(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "imot");
+        sorterServo = hardwareMap.get(CRServo.class, "transfer1");
+        encoder = hardwareMap.get(DcMotorEx.class, "encoder");
+        laserSensor = hardwareMap.get(Rev2mDistanceSensor.class, "laser");
+        hub = hardwareMap.get(LynxModule.class, "Control Hub");
+
+        encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        /*
-        SRSHub.Config config = new SRSHub.Config();
-        tofSensor = new SRSHub.VL53L5CX(SRSHub.VL53L5CX.Resolution.GRID_4x4);
-        config.addI2CDevice(3, tofSensor);
-
-        RobotLog.clearGlobalWarningMsg();
-
-        srsHub = hardwareMap.get(SRSHub.class, "srs");
-        srsHub.init(config);
-        */
-        // Timer Reset
-        debounceTimer.reset();
         intakeTimer.reset();
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
+        rotationTimer.reset();
     }
 
-    @Override
-    public void loop() {
-        //srsHub.update();
+    public void startIntaking() {
+        if (currentState != INTAKE_STATE.ROTATING) {
+            currentState = INTAKE_STATE.INTAKING;
+            intakeTimer.reset();
+        }
+    }
 
-        //double avgDistanceInches = 999;
-        boolean currentSensorBlocked = false;
+    public void stopIntaking() {
+        if (currentState == INTAKE_STATE.INTAKING) {
+            currentState = INTAKE_STATE.IDLE;
+        }
+    }
+
+    public void reverse() {
+        currentState = INTAKE_STATE.REVERSING;
+    }
+
+    public void startRotation() {
+        currentState = INTAKE_STATE.ROTATING;
+        rotationTimer.reset();
+        moving = false;
+    }
+
+    public void returnToIdle() {
+        currentState = INTAKE_STATE.IDLE;
+    }
+
+    public void reset() {
+        currentState = INTAKE_STATE.IDLE;
+        moving = false;
+        sorterServo.setPower(0);
+        intakeMotor.setPower(0);
+    }
+
+    public INTAKE_STATE getState() {
+        return currentState;
+    }
+
+    public boolean isAtDepositPosition() {
+        return currentState == INTAKE_STATE.AT_DEPOSIT_POS;
+    }
+
+    public boolean isPlateEmpty() {
+        return laserSensor.getDistance(DistanceUnit.MM) > PLATE_EMPTY_THRESHOLD_MM;
+    }
+
+    public int getEncoderPosition() {
+        return encoder.getCurrentPosition();
+    }
+
+    private double adjMotorPower(double basePower, double batteryVoltage, double motorCurrent) {
+        double voltageCompensation = NOMINAL_BATTERY_VOLTAGE / batteryVoltage;
+
+        double currentCompensation = 1.0;
+        if (motorCurrent > MAX_MOTOR_CURRENT) {
+            currentCompensation = MAX_MOTOR_CURRENT / motorCurrent;
+        }
+
+        double adjustedPower = basePower * voltageCompensation * currentCompensation;
+        return Math.max(-1.0, Math.min(1.0, adjustedPower));
+    }
+
+    public void update() {
+        int currentPos = encoder.getCurrentPosition();
+        double plateDistance = laserSensor.getDistance(DistanceUnit.MM);
+        boolean plateEmpty = plateDistance > PLATE_EMPTY_THRESHOLD_MM;
+
+        // State machine
+        switch (currentState) {
+            case IDLE:
+                intakeMotor.setPower(0);
+                sorterServo.setPower(0);
+                moving = false;
+                break;
+
+            case INTAKING:
+                intakeMotor.setPower(adjMotorPower(INTAKE_POWER,
+                        hub.getInputVoltage(VoltageUnit.VOLTS),
+                        intakeMotor.getCurrent(CurrentUnit.AMPS)));
+                sorterServo.setPower(0);
+
+                if (intakeTimer.seconds() > INTAKE_TIMEOUT) {
+                    currentState = INTAKE_STATE.IDLE;
+                }
+                break;
+
+            case REVERSING:
+                intakeMotor.setPower(REVERSE_POWER);
+                sorterServo.setPower(-SORTER_POWER);
+                break;
+
+            case ROTATING:
+                intakeMotor.setPower(0);
+
+                // Start rotation on first entry
+                if (!moving) {
+                    targetPosition = currentPos + ROTATION_TICKS;
+                    sorterServo.setPower(SORTER_POWER);
+                    moving = true;
+                }
+
+                if (moving && (currentPos >= targetPosition ||
+                        plateEmpty ||
+                        rotationTimer.seconds() > ROTATION_TIMEOUT)) {
+                    sorterServo.setPower(0);
+                    moving = false;
+                    currentState = INTAKE_STATE.AT_DEPOSIT_POS;
+                }
+                break;
+
+            case AT_DEPOSIT_POS:
+                intakeMotor.setPower(0);
+                sorterServo.setPower(0);
+                moving = false;
+                break;
+        }
+    }
+
+    public void addTelemetry(Telemetry telemetry) {
+        telemetry.addData("IN_State", currentState);
+        telemetry.addData("IN_Motor Power", "%.0f%%", intakeMotor.getPower() * 100);
+        telemetry.addData("IN_Encoder Pos", encoder.getCurrentPosition());
+        telemetry.addData("IN_Plate Distance", "%.1f mm", laserSensor.getDistance(DistanceUnit.MM));
+        telemetry.addData("IN_Plate Empty", isPlateEmpty());
+        telemetry.addData("IN_Moving", moving);
+        if (moving) {
+            telemetry.addData("IN_Target Pos", targetPosition);
+        }
+    }
+
+    public void stop() {
+        intakeMotor.setPower(0);
+        sorterServo.setPower(0);
+    }
+}
+
+//private SRSHub.VL53L5CX tofSensor;
+//private SRSHub srsHub;
+
+// srsHub.update();
+
+// double avgDistanceInches = 999;
+// boolean currentSensorBlocked = false;
         /*
         if (!srsHub.disconnected() && !tofSensor.disconnected) {
             short[] distances = tofSensor.distances;
@@ -99,53 +236,4 @@ public class Intake extends OpMode {
             }
         }
         lastSensorBlocked = currentSensorBlocked;
-        */
-
-
-        if (gamepad1.a && currentState != INTAKE_STATE.FULL) {
-            currentState = INTAKE_STATE.INTAKING;
-            intakeTimer.reset();
-        }
-
-        if (gamepad1.b) {
-            currentState = INTAKE_STATE.IDLE;
-        }
-
-        if (gamepad1.x) {
-            ballCount = 0;
-            currentState = INTAKE_STATE.IDLE;
-        }
-
-        if (currentState == INTAKE_STATE.INTAKING && intakeTimer.seconds() > INTAKE_TIMEOUT) {
-            currentState = INTAKE_STATE.IDLE;
-        }
-
-        switch (currentState) {
-            case IDLE:
-            case FULL:
-                intakeMotor.setPower(0);
-                break;
-
-            case INTAKING:
-                intakeMotor.setPower(INTAKE_POWER);
-                break;
-
-            case REVERSING:
-                intakeMotor.setPower(REVERSE_POWER);
-                break;
-        }
-
-        lastState = currentState;
-
-        telemetry.addData("IN_State", currentState);
-        telemetry.addData("IN_Ball Count", ballCount + "/" + MAX_BALLS);
-        //telemetry.addData("IN_Distance", "%.2f inches", avgDistanceInches);
-        telemetry.addData("IN_Motor Power", "%.0f%%", intakeMotor.getPower() * 100);
-        telemetry.update();
-    }
-
-    @Override
-    public void stop() {
-        intakeMotor.setPower(0);
-    }
-}
+*/

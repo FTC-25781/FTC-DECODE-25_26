@@ -645,10 +645,12 @@ public class PIDShooter extends LinearOpMode {
     private VoltageSensor voltageSensor;
 
     // PID constants
-    private final double kP = 0.00055;
+    private final double kP = 0.00047;
     private final double kI = 0.000001;
     private final double kD = 0.0008;
-    private final double kF = 0.36;
+    private final double kF = 0.45;
+
+
 
     // State variables
     private double targetRPM = 0;
@@ -681,8 +683,8 @@ public class PIDShooter extends LinearOpMode {
     private static final double BLUE_GOAL_HEIGHT = 40;
     private static final double SHOOTER_HEIGHT = 8.334;
 
-    private static final double SERVO_MIN_ANGLE = 61.2;
-    private static final double SERVO_MAX_ANGLE = 298.8;
+    private static final double SERVO_MIN_ANGLE = 25;
+    private static final double SERVO_MAX_ANGLE = 65;
     private static final double SERVO_MIN_POSITION = 0.17;
     private static final double SERVO_MAX_POSITION = 0.83;
 
@@ -726,6 +728,7 @@ public class PIDShooter extends LinearOpMode {
         rf.setDirection(DcMotorEx.Direction.FORWARD);
         rr.setDirection(DcMotorEx.Direction.FORWARD);
 
+
         try {
             imu = hardwareMap.get(IMU.class, "imu");
         } catch (Exception e) {
@@ -743,7 +746,7 @@ public class PIDShooter extends LinearOpMode {
         double initialHeading = pose.getHeading(AngleUnit.DEGREES);
         if (imu != null) {
             try {
-                initialHeading = imu.getRobotOrientation(AxesReference.INTRINSIC,
+                initialHeading = -imu.getRobotOrientation(AxesReference.INTRINSIC,
                         AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             } catch (Exception ignored) {}
         }
@@ -838,8 +841,9 @@ public class PIDShooter extends LinearOpMode {
             boolean currentAState = gamepad1.a;
             if (currentAState && !lastAState) {
                 shooterEnabled = !shooterEnabled;
+                gamepad1.rumble(200);
             }
-            lastAState = currentAState;
+            lastAState = gamepad1.a;
 
 
             if (shooterEnabled) {
@@ -885,6 +889,8 @@ public class PIDShooter extends LinearOpMode {
                 telemetry.addData("Power", "%.2f", outputPower);
                 telemetry.addData("Voltage (V)", "%.2f", voltage);
                 telemetry.addData("Target Angle (deg)", "%.1f", targetAngle);
+                telemetry.addData("Raw Target Angle", targetAngle);
+                telemetry.addData("Mapped Servo Pos", mapAngleToServo(targetAngle));
                 telemetry.addData("Servo Position", "%.2f", angleServo.getPosition());
                 telemetry.addData("Distance to Goal", "%.1f in", distToGoal);
                 telemetry.update();
@@ -910,8 +916,6 @@ public class PIDShooter extends LinearOpMode {
         rf.setPower(-turnPower);
         rr.setPower(-turnPower);
     }
-
-
     private double smoothServo(double currentPos, double targetPos, double smoothingFactor) {
         return currentPos + (targetPos - currentPos) * smoothingFactor;
     }
@@ -949,9 +953,14 @@ public class PIDShooter extends LinearOpMode {
                         robotX, robotY, goalX, goalY, goalHeight, SHOOTER_HEIGHT,
                         velTowardGoal);
 
-        targetAngle = ballistics.angle;
-        targetRPM = ballistics.rpm;
+        double rawAngle = ballistics.angle;
+        double rawRPM   = ballistics.rpm;
 
+        if (Double.isNaN(rawRPM) || rawRPM < 2000) rawRPM = 4000;
+        if (Double.isNaN(rawAngle) || rawAngle < 30 || rawAngle > 65) rawAngle = 45;
+
+        targetAngle = rawAngle;
+        targetRPM   = rawRPM;
         // automatically adjust servo to calculated angle
         double servoPosition = mapAngleToServo(targetAngle);
         angleServo.setPosition(servoPosition);
@@ -969,21 +978,10 @@ public class PIDShooter extends LinearOpMode {
         rpmKalman.update(currentRPM);
         filteredRPM = rpmKalman.getState();
 
-        // omly run motor if RPM is achievable (within threshold)
-        double rpmError = Math.abs(targetRPM - filteredRPM);
-
         double voltage = getBatteryVoltage();
         double nominalVoltage = 13.0;
         double voltageCompFacotr = nominalVoltage / Math.max(voltage, 8.0); // limit at 8 V
         double compensatedFF = kF * (targetRPM / MAX_MOTOR_RPM) * voltageCompFacotr; // compensate the feedforward even if battery drops bc we need good rpm and stuff
-
-        if (rpmError > RPM_READY_THRESHOLD && filteredRPM < 100) {
-            // Motor hasn't started spinning yet, don't apply power
-            shooter.setPower(0);
-            integral = 0;
-            previousRPM = filteredRPM;
-            return;
-        }
 
         // PID control
         double error = targetRPM - filteredRPM;
@@ -1015,6 +1013,8 @@ public class PIDShooter extends LinearOpMode {
 
         return Range.clip(servoPos, SERVO_MIN_POSITION, SERVO_MAX_POSITION);
     }
+
+
 
     public void stopShooter() {
         shooter.setPower(0);

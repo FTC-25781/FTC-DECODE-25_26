@@ -9,8 +9,8 @@ public class CRServoForTransfer {
     private final LimitSwitch limitSwitches;
     private final ElapsedTime debounceTimer = new ElapsedTime(); // for limit switch not going too fast
 
-    private static final double POWER_UP = 1.0;
-    private static final double POWER_DOWN = -1.0;
+    private static final double POWER_UP = -0.2;
+    private static final double POWER_DOWN = 0.2;
     private static final double DEBOUNCE_DELAY = 0.25; // seconds
 
     private boolean movingUp = false;

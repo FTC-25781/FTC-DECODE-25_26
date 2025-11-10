@@ -9,7 +9,7 @@ public class TransferServoSubystem {
     private final ElapsedTime debounceTimer = new ElapsedTime();
 
     public TransferServoSubystem(HardwareMap hardwareMap) {
-        servoHardware = new CRServoForTransfer(hardwareMap);
+        servoHardware = new CRServoForTransfer(hardwareMap); // servo object
     }
 
     public void update() {

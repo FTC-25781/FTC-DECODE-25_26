@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class CRServoForTransfer {
     private final CRServo transferServo;
     private final LimitSwitch limitSwitches;
-    private final ElapsedTime debounceTimer = new ElapsedTime();
+    private final ElapsedTime debounceTimer = new ElapsedTime(); // for limit switch not going too fast
 
     private static final double POWER_UP = 1.0;
     private static final double POWER_DOWN = -1.0;

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.layered.physical1.CRServoForTransfer;
 
-@TeleOp(name="Transfer Subsystem Test", group="test")
+@TeleOp(name="Transfer Subsystem Test")
 public class TransferTest extends LinearOpMode {
 
     @Override

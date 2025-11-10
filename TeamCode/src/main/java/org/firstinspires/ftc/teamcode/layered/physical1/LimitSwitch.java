@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.layered.physical1;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+// Limit Switch Intialization
 public class LimitSwitch {
     private DigitalChannel bottomSwitch;
     private DigitalChannel topSwitch;

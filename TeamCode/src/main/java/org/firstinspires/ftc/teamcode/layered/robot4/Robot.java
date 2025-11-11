@@ -1,19 +1,20 @@
 package org.firstinspires.ftc.teamcode.layered.robot4;
 
-import static org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Tuning.follower;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.layered.control3.Deposit;
-import org.firstinspires.ftc.teamcode.layered.control3.Intake;
+import org.firstinspires.ftc.teamcode.layered.control3.SorterServoSubsystem;
 import org.firstinspires.ftc.teamcode.layered.logical2.PIDShooter;
+import org.firstinspires.ftc.teamcode.layered.physical1.CRServoForTransfer;
+import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "MAIN", group = "MAIN")
 public class Robot extends OpMode {
-    private Intake intake;
-    private Deposit deposit;
+    private IntakeMotor mot;
+    private SorterServoSubsystem servo;
+    private CRServoForTransfer servo_t;
     private PIDShooter shooter;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private boolean aWasPressed = false;
@@ -38,11 +39,11 @@ public class Robot extends OpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        deposit = new Deposit(hardwareMap);
-        intake = new Intake(hardwareMap);
-        shooter = new PIDShooter();
-        shooter.init();
-        deposit.reset();
+        mot = new IntakeMotor(hardwareMap);
+        servo = new SorterServoSubsystem(hardwareMap);
+        servo_t = new CRServoForTransfer(hardwareMap);
+
+        //shooter = new PIDShooter();
 
         telemetry.addData("Status", "67 SIGMA");
         telemetry.addLine();
@@ -56,7 +57,7 @@ public class Robot extends OpMode {
     @Override
     public void loop() {
         // Read joystick inputs
-        double y = gamepad1.left_stick_y; // Forward/back
+        double y = -gamepad1.left_stick_y; // Forward/back
         double x = gamepad1.left_stick_x * 1.1; // Strafe (tweak factor)
         double rx = gamepad1.right_stick_x; // Rotation
 
@@ -77,95 +78,35 @@ public class Robot extends OpMode {
         frontRight.setPower(frontRightPower / max);
         backRight.setPower(backRightPower / max);
 
-        if (gamepad1.a && !aWasPressed) {
-            if (intake.getState() == Intake.INTAKE_STATE.INTAKING) {
-                intake.stopIntaking();
-            } else {
-                intake.startIntaking();
-            }
-        }
-        aWasPressed = gamepad1.a;
-
-        if (gamepad1.b && !bWasPressed) {
-            intake.returnToIdle();
-        }
-        bWasPressed = gamepad1.b;
-
-        if (gamepad1.x && !xWasPressed) {
-            if (intake.getState() == Intake.INTAKE_STATE.REVERSING) {
-                intake.returnToIdle();
-            } else {
-                intake.reverse();
-            }
-        }
-        xWasPressed = gamepad1.x;
-
-        if (gamepad1.y && !yWasPressed) {
-            intake.startRotation();
-        }
-        yWasPressed = gamepad1.y;
-
-        if (gamepad1.dpad_up) {
-            intake.reset();
+        if (gamepad1.a) {
+            mot.startIntaking();
         }
 
-        if (gamepad1.right_trigger > 0.5) {
-            intake.startIntaking();
-        } else if (intake.getState() == Intake.INTAKE_STATE.INTAKING && gamepad1.right_trigger < 0.1) {
-            intake.stopIntaking();
+        if (gamepad1.b) {
+            mot.returnToIdle();
         }
 
-        if (gamepad1.left_trigger > 0.5) {
-            intake.reverse();
-        } else if (intake.getState() == Intake.INTAKE_STATE.REVERSING && gamepad1.left_trigger < 0.1) {
-            intake.returnToIdle();
+        if (gamepad1.x) {
+            mot.startRemoving();
         }
 
-        intake.update();
-
-        if (gamepad1.dpad_up) {
-            deposit.startTransfer();
+        if (gamepad1.y) {
+            servo.start();
         }
 
-        if (gamepad1.dpad_down) {
-            deposit.returnToIdle();
+        if (gamepad1.dpad_left) {
+            servo.startReverse();
         }
 
-//        // DPAD LEFT: Toggle shooter on/off
-//        if (gamepad1.dpad_left && !dpadLeftPressed) {
-//            shooter.toggleEnabled();
-//            if (shooter.isEnabled()) {
-//                gamepad1.rumble(100); // Short rumble for feedback
-//            }
-//        }
-//        dpadLeftPressed = gamepad1.dpad_left;
-//
-//        // DPAD RIGHT: Toggle alliance (Red/Blue)
-//        if (gamepad1.dpad_right && !dpadRightPressed) {
-//            shooter.toggleAlliance();
-//            gamepad1.rumble(200); // Medium rumble for feedback
-//        }
-//        dpadRightPressed = gamepad1.dpad_right;
-//
-//        // DPAD DOWN (Hold): Auto-aim at goal
-//        if (gamepad1.dpad_down) {
-//            shooter.autoAimToGoal();
-//
-//            // Rumble when aimed and ready to fire
-//            if (shooter.isAimedAtGoal() && shooter.isAtTargetSpeed(100)) {
-//                gamepad1.rumble(50); // Continuous light rumble while ready
-//            }
-//
-//            // Automatically enable shooter when auto-aiming
-//            if (!shooter.isEnabled()) {
-//                shooter.enable();
-//            }
-//        } else {
-//            shooter.stopAutoAim();
-//        }
-//
-//        // Update shooter (handles PID, odometry, ballistics)
-//        shooter.update(telemetry);
-        telemetry.update();
+        if(gamepad1.dpad_up) {
+            servo_t.moveUp();
+        }
+        if(gamepad1.dpad_down) {
+            servo_t.moveDown();
+        }
+
+        servo_t.update();
+        mot.update();
+        servo.update();
     }
 }

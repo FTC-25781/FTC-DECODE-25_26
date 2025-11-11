@@ -34,4 +34,8 @@ public class SorterServoSubsystem {
     public void start() {
         servo.StartRotation();
     }
+
+    public void startReverse() {
+        servo.StartRotationReverse();
+    }
 }

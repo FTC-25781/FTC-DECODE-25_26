@@ -1,0 +1,28 @@
+Control Hub
+Motors
+- 0: lf
+- 1: rf
+- 2: rr
+- 3: lr
+
+Servos
+- 0: transfer1
+- 2: liftServo
+- 4: liftServo
+- 5: angle_servo
+
+I2C
+- 1: Pinpoint
+
+Digital
+- 0: bottomSwitch
+- 1: topSwitch
+
+Expansion Hub
+Motor:
+- 0: imot
+- 1: encoder
+- 3: dmot
+
+I2C:
+- 1: laser

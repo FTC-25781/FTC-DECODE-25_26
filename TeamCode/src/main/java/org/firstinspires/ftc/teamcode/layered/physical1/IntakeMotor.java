@@ -25,6 +25,10 @@ public class IntakeMotor {
         intakeMotor.setPower(0);
     }
 
+    public void startRemoving() {
+        intakeMotor.setPower(-1);
+    }
+
     public void update() {
 
     }

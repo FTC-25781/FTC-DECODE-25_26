@@ -15,6 +15,10 @@ public class CRServoForSorter {
         transfer.setPower(0.2);
     }
 
+    public void StartRotationReverse() {
+        transfer.setPower(-0.2);
+    }
+
     public void StopServo() {
         transfer.setPower(0.0);
     }

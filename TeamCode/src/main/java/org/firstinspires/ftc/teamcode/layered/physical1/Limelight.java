@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class Limelight extends LinearOpMode {
     private Limelight3A limelight;
 
-    private static final double CAMERA_HEIGHT_CM = 26.0;
-    private static final double CAMERA_ANGLE_DEG = 31.0;
-    private static final double CAMERA_OFFSET_CM = 10.0;
-    private static final double APRILTAG_HEIGHT_CM = 15.0;
+    private static final double CAMERA_HEIGHT_CM = 25.4; // 10in
+    private static final double CAMERA_ANGLE_DEG = 25.0;
+    private static final double CAMERA_OFFSET_CM = 0;
+    private static final double APRILTAG_HEIGHT_CM = 66.04; // 26 in
 
     @Override
     public void runOpMode()

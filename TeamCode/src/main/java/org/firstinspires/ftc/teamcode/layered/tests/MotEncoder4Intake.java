@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp(name = "Encoder Test", group = "Test")
 public class MotEncoder4Intake extends LinearOpMode {
-
     private DcMotorEx encoder;
 
     @Override
@@ -19,7 +18,6 @@ public class MotEncoder4Intake extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
             telemetry.addData("Encoder Pos", "power (%.2f)", encoder.getCurrentPosition());
             telemetry.update();
         }

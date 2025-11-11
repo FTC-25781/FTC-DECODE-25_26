@@ -19,7 +19,7 @@ public class TestMiniTransfer extends OpMode {
 
     @Override
     public void init() {
-        miniTransfer = hardwareMap.get(CRServo.class, "lift_servo");
+        miniTransfer = hardwareMap.get(CRServo.class, "liftServo");
         digitalTouch = hardwareMap.get(DigitalChannel.class, "digitalTouch");
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 

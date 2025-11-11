@@ -1,63 +1,51 @@
 package org.firstinspires.ftc.teamcode.layered.physical1;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "Limelight Test")
+@TeleOp(name = "Limelight Test", group = "Test")
 public class Limelight extends LinearOpMode {
-    private Limelight3A limelight;
-
-    private static final double CAMERA_HEIGHT_CM = 25.4; // 10in
-    private static final double CAMERA_ANGLE_DEG = 25.0;
-    private static final double CAMERA_OFFSET_CM = 0;
-    private static final double APRILTAG_HEIGHT_CM = 66.04; // 26 in
-
     @Override
-    public void runOpMode()
-    {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        telemetry.setMsTransmissionInterval(11);
+    public void runOpMode() {
+        // Get the Limelight camera from the configuration
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         limelight.start();
 
         waitForStart();
 
         while (opModeIsActive()) {
+            // Request the latest result
             LLResult result = limelight.getLatestResult();
 
             if (result != null && result.isValid()) {
-                double ty = result.getTy();  // Vertical offset in degrees
-                double distance = calculateDistance(ty);
+                double ty = result.getTy(); // Vertical offset angle
+                double tx = result.getTx(); // Horizontal offset angle
+                double ta = result.getTa(); // Target area (optional)
 
-                telemetry.addData("APRILTAG", "DETECTED");
-                telemetry.addData("Distance", "%.1f cm", distance);
-                telemetry.addData("X Offset", "%.1f deg", result.getTx());
+                // Limelight and target parameters
+                double limelightMountAngleDegrees = 25.0;
+                double limelightLensHeightInches = 11.5;
+                double goalHeightInches = 26.0;
+
+                // Calculate distance using vertical offset
+                double angleToGoalDegrees = limelightMountAngleDegrees + ty;
+                double angleToGoalRadians = Math.toRadians(angleToGoalDegrees);
+
+                double distanceFromLimelightToGoalInches =
+                        (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+
+                telemetry.addData("tx", tx);
+                telemetry.addData("ty", ty);
+                telemetry.addData("ta", ta);
+                telemetry.addData("Distance (in)", distanceFromLimelightToGoalInches);
             } else {
-                telemetry.addData("APRILTAG", "Not Detected");
+                telemetry.addData("Status", "No valid target");
             }
 
             telemetry.update();
         }
-    }
-
-    private double calculateDistance(double tyOffset) {
-        // Angle to target
-        double angleToTarget = CAMERA_ANGLE_DEG + tyOffset;
-
-        // Slant distance using sin
-        double distanceFromCamera = (APRILTAG_HEIGHT_CM - CAMERA_HEIGHT_CM)
-                / Math.sin(Math.toRadians(angleToTarget));
-
-        // Horizontal distance
-        double horizontalDistance = Math.sqrt(
-                Math.pow(distanceFromCamera, 2)
-                        - Math.pow(APRILTAG_HEIGHT_CM - CAMERA_HEIGHT_CM, 2));
-
-        // Add camera offset
-        double distanceFromRobot = horizontalDistance + CAMERA_OFFSET_CM;
-
-        return distanceFromRobot;
     }
 }

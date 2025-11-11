@@ -8,8 +8,6 @@ Motors
 Servos
 - 0: transfer1
 - 2: liftServo
-- 4: liftServo
-- 5: angle_servo
 
 I2C
 - 1: Pinpoint
@@ -23,6 +21,9 @@ Motor:
 - 0: imot
 - 1: encoder
 - 3: dmot
+
+Servos:
+- 0: angle_servo
 
 I2C:
 - 1: laser

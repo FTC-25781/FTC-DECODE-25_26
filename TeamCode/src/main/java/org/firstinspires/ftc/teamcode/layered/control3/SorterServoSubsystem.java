@@ -18,7 +18,7 @@ public class SorterServoSubsystem {
     }
 
     public boolean isAtPos() {
-        if (laser.isAtTraget() || encoder.isAtTarget()) {
+        if (encoder.isAtTarget()) {
             encoder.resetEncoder();
             return true;
         }

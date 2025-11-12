@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.layered.robot4;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layered.control3.SorterServoSubsystem;
@@ -20,6 +21,7 @@ public class Robot extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(0,0,0));
         follower.update();
 
         mot = new IntakeMotor(hardwareMap);
@@ -44,6 +46,8 @@ public class Robot extends OpMode {
 
     @Override
     public void loop() {
+        follower.update();
+
         // Read joystick inputs
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.layered.robot4;
 
-
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;

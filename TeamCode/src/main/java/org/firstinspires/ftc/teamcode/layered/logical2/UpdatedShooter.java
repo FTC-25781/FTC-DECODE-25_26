@@ -18,7 +18,7 @@ public class UpdatedShooter extends LinearOpMode {
     public double power = 0;
     public boolean lastDPadUp = false;
     public boolean lastDPadDown = false;
-    public Pose startingPose = new Pose(72, 72, Math.toRadians(45));
+    public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // need to figure this out later because how to transition from auto to teleop
     private Follower follower;
     public double outputPower=0.0;
 

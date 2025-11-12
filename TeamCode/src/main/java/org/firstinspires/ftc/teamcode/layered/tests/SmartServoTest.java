@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo; // Your cust
 import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo.ServoType;
 import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo.ServoState;
 
-@TeleOp(name = "Smart Servo Test", group = "Testing")
+@TeleOp(name = "Smart Servo Test", group = "tests")
 public class SmartServoTest extends OpMode {
 
     private SmartServo testServo;

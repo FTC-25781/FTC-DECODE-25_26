@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "Test Mini Transfer", group = "Test")
+@TeleOp(name = "Test Mini Transfer", group = "tests")
 public class TestMiniTransfer extends OpMode {
     private CRServo miniTransfer;
     private DigitalChannel digitalTouch;

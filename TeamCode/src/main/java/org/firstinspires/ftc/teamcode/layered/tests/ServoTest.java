@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "CR Servo Encoder Move", group = "Test")
+@TeleOp(name = "CR Servo Encoder Move", group = "tests")
 public class ServoTest extends LinearOpMode {
 
     private CRServo sorterServo;   // Continuous rotation servo

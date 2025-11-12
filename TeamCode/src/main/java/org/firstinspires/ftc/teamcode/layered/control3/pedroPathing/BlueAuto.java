@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.layered.control3.pedroPathing; // make su
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -19,19 +17,19 @@ public class BlueAuto extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(34, 134, Math.toRadians(0));
-    private final Pose obelisqueScanPose = new Pose(72, 71, Math.toRadians(90));
-    private final Pose shootPose = new Pose(72, 71, Math.toRadians(135));
-    private final Pose pickup1Pose = new Pose(44, 84, Math.toRadians(180));
-    private final Pose pickup1EndPose = new Pose(17, 84, Math.toRadians(180));
-    private final Pose pickup2Pose = new Pose(58, 60, Math.toRadians(180));
-    private final Pose pickup2EndPose = new Pose(17, 60, Math.toRadians(180));
-    private final Pose pickup3Pose = new Pose(58, 36, Math.toRadians(180));
-    private final Pose pickup3EndPose = new Pose(17, 36, Math.toRadians(180));
-    private PathChain getObeliskScan, scorePreload;
+    private final Pose obelisqueScanPose = new Pose(72, 71, Math.toRadians(-90));
+    private final Pose shootPose = new Pose(72, 71, Math.toRadians(-45));
+    private final Pose pickup1Pose = new Pose(44, 84, Math.toRadians(0));
+    private final Pose pickup1EndPose = new Pose(17, 84, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(58, 60, Math.toRadians(0));
+    private final Pose pickup2EndPose = new Pose(17, 60, Math.toRadians(0));
+    private final Pose pickup3Pose = new Pose(58, 36, Math.toRadians(0));
+    private final Pose pickup3EndPose = new Pose(17, 36, Math.toRadians(0));
+    private PathChain getObelisqueScan, scorePreload;
     private PathChain goToPickup1, grabPickup1, scorePickup1, goToPickup2, grabPickup2, scorePickup2, goToPickup3, grabPickup3, scorePickup3;
 
     public void buildPaths() {
-        getObeliskScan = follower.pathBuilder()
+        getObelisqueScan = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, obelisqueScanPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), obelisqueScanPose.getHeading())
                 .build();
@@ -91,7 +89,7 @@ public class BlueAuto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(getObeliskScan, true);
+                follower.followPath(getObelisqueScan, true);
                 setPathState(1);
                 break;
             case 1:

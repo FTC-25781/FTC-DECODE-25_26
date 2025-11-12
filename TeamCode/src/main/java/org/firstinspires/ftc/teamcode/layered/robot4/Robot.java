@@ -5,16 +5,16 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layered.control3.SorterServoSubsystem;
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.layered.physical1.CRServoForTransfer;
+import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "MAIN", group = "MAIN")
+@TeleOp(name = "TeleOp", group = "TeleOp")
 public class Robot extends OpMode {
     private IntakeMotor mot;
     private SorterServoSubsystem servo;
-    private CRServoForTransfer servo_t;
+    private ServoForTransfer servo_t;
     private Follower follower;
 
     @Override
@@ -24,7 +24,7 @@ public class Robot extends OpMode {
 
         mot = new IntakeMotor(hardwareMap);
         servo = new SorterServoSubsystem(hardwareMap);
-        servo_t = new CRServoForTransfer(hardwareMap);
+        servo_t = new ServoForTransfer(hardwareMap);
 
         //shooter = new PIDShooter();
 
@@ -49,7 +49,7 @@ public class Robot extends OpMode {
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x,
-                true // Robot Centric
+                true
         );
 
         if (gamepad1.a) {

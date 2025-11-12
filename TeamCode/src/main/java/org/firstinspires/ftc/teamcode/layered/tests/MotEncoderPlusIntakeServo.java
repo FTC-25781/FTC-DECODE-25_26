@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "Encoder + CRServo", group = "Test")
+@TeleOp(name = "Encoder + CRServo", group = "tests")
 public class MotEncoderPlusIntakeServo extends LinearOpMode {
 
     private DcMotorEx encoder;

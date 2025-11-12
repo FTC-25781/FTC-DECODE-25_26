@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "intakeServoTest")
+@TeleOp(name = "intakeServoTest", group = "tests")
 public class intakeServoTest extends LinearOpMode {
 
     private CRServo servo;

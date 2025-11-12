@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "TestMotors", group="tests")
+@TeleOp(name = "TestMotors", group = "tests")
 public class MotorsTest extends OpMode {
     private DcMotorEx Dmot;
     private DcMotorEx Imot;

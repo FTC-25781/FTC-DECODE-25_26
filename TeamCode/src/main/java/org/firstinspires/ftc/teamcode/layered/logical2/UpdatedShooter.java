@@ -61,7 +61,7 @@ public class UpdatedShooter extends LinearOpMode {
             telemetry.update();
         }
     }
-    private double calculateTargetPower(double targetRPM1) { // mathematical function
+    private double calculateTargetPower(double targetRPM1) { // mathematical functions
         double x = targetRPM1;
 
         final double C4 = 8.89811E-9;

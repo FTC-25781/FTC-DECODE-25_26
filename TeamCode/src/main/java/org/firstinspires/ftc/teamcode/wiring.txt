@@ -19,11 +19,11 @@ Digital
 Expansion Hub
 Motor:
 - 0: imot
-- 1: encoder
+- 1: encoder (Disbanded)
 - 3: dmot
 
 Servos:
 - 0: angle_servo
 
 I2C:
-- 1: laser
+- 1: laser (Disbanded)

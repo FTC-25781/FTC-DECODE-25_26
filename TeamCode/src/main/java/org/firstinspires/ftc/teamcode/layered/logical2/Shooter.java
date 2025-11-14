@@ -4,8 +4,6 @@ package org.firstinspires.ftc.teamcode.layered.logical2;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -14,13 +12,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
 
 //@TeleOp(name="shooter")
-public class UpdatedShooter {
+public class Shooter {
     private DcMotorEx shooter_motor;
     private GoBildaPinpointDriver pinpoint;
     public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // TODO: Integrate the pose from auto
     private Follower follower;
 
-    public UpdatedShooter(HardwareMap hardwareMap) {
+    public Shooter(HardwareMap hardwareMap) {
         shooter_motor = hardwareMap.get(DcMotorEx.class, "dmot");
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         follower = Constants.createFollower(hardwareMap);

@@ -9,7 +9,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.layered.logical2.UpdatedShooter;
+import org.firstinspires.ftc.teamcode.layered.logical2.Shooter;
 import org.firstinspires.ftc.teamcode.layered.physical1.EncoderForIntake;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
@@ -28,8 +28,7 @@ public class Robot extends OpMode {
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
     private Follower follower;
-    private UpdatedShooter shooter;
-
+    private Shooter shooter;
     private boolean lastDpadRight = false;
     private boolean lastDpadLeft = false;
 
@@ -43,7 +42,7 @@ public class Robot extends OpMode {
         servo = new ServoForSorter(hardwareMap);
         servo_t = new ServoForTransfer(hardwareMap);
         encoder = new EncoderForIntake(hardwareMap);
-        shooter = new UpdatedShooter(hardwareMap);
+        shooter = new Shooter(hardwareMap);
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierPoint(follower::getPose)))

@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.layered.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Disabled
 @TeleOp(name = "Test Mini Transfer", group = "tests")
 public class TestMiniTransfer extends OpMode {
     private CRServo miniTransfer;

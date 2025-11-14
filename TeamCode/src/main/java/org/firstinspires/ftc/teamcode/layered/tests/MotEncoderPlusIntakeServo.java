@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.layered.tests;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 import com.bylazar.telemetry.PanelsTelemetry;
 
+@Disabled
 @Configurable
 @TeleOp(name = "PID Controlled CRServo", group = "tests")
 public class MotEncoderPlusIntakeServo extends LinearOpMode {

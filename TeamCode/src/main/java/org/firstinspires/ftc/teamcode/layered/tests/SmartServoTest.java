@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.layered.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo; // Your cust
 import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo.ServoType;
 import org.firstinspires.ftc.teamcode.layered.physical1.SmartServo.ServoState;
 
+@Disabled
 @TeleOp(name = "Smart Servo Test", group = "tests")
 public class SmartServoTest extends OpMode {
 

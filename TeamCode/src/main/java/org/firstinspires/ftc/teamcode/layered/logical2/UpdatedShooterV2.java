@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.layered.logical2;
 
 import com.pedropathing.follower.Follower;
@@ -95,4 +94,3 @@ public class UpdatedShooterV2 extends LinearOpMode {
         return Range.clip(power, 0.0, 1.0);
     }
 }
-

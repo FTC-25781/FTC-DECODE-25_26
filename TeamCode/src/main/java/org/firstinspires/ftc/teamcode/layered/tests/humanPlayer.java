@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.layered.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+@Disabled
 @TeleOp(name = "Human Player", group = "test code")
 public class humanPlayer extends LinearOpMode {
     private DcMotorEx motor;

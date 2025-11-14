@@ -7,61 +7,27 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
 
-@TeleOp(name="shooter")
-public class UpdatedShooter extends LinearOpMode {
+//@TeleOp(name="shooter")
+public class UpdatedShooter {
     private DcMotorEx shooter_motor;
     private GoBildaPinpointDriver pinpoint;
-    public double power = 0;
-    public boolean lastDPadUp = false;
-    public boolean lastDPadDown = false;
-    public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // need to figure this out later because how to transition from auto to teleop
+    public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // TODO: Integrate the pose from auto
     private Follower follower;
-    public double outputPower=0.0;
 
-    @Override
-    public void runOpMode() {
-
+    public UpdatedShooter(HardwareMap hardwareMap) {
         shooter_motor = hardwareMap.get(DcMotorEx.class, "dmot");
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose);
-        follower.update();
-
-        waitForStart();
-        follower.startTeleopDrive();
-
-        while (opModeIsActive()) {
-
-            follower.update();
-
-            follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true
-            );
-            double targetRPM = Math.sqrt(Math.pow(follower.getPose().getX() - 132, 2) + Math.pow(follower.getPose().getY() - 132, 2));
-
-            if(gamepad1.a){
-                outputPower = calculateTargetPower(targetRPM);
-            }
-            else if (gamepad1.b){
-                outputPower=gamepad1.right_trigger;
-            }
-
-            shooter_motor.setPower(outputPower);
-
-            telemetry.addData("Power", outputPower);
-            telemetry.addData("Follower Pose", follower);
-            telemetry.addData("Distance", targetRPM);
-            telemetry.update();
-        }
     }
-    private double calculateTargetPower(double targetRPM1) { // mathematical functions
+
+    public double calculateTargetPower(double targetRPM1) {
         double x = targetRPM1;
 
         final double C4 = 8.89811E-9;
@@ -78,6 +44,18 @@ public class UpdatedShooter extends LinearOpMode {
 
         return Range.clip(power, 0.0, 1.0);
     }
+
+    public double targetRPM() {
+        return Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()) - 132, 2) + Math.pow(Math.abs(follower.getPose().getY()) - 132, 2));
+    }
+
+    public void shoot(double pow){
+        shooter_motor.setPower(pow);
+    }
+
+    public void update(Telemetry telemetry) {
+        telemetry.addData("Deposit Power", shooter_motor.getPower());
+        telemetry.addData("Distance", targetRPM());
+        telemetry.update();
+    }
 }
-
-

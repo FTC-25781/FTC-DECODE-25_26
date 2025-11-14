@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class EncoderForIntake {
     private DcMotorEx encoder;
-    private int target = 400;
+    private int target = 800;
 
     public EncoderForIntake(HardwareMap hardwareMap) {
         encoder = hardwareMap.get(DcMotorEx.class, "encoder");
@@ -20,6 +20,10 @@ public class EncoderForIntake {
     }
 
     public boolean isAtTarget() {
-        return Math.abs(encoder.getCurrentPosition()) > target;
+        return Math.abs(encoder.getCurrentPosition()) >= target;
+    }
+
+    public float pos() {
+        return encoder.getCurrentPosition();
     }
 }

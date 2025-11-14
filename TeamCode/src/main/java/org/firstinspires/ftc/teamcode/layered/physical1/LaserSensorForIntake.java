@@ -14,6 +14,6 @@ public class LaserSensorForIntake {
     }
 
     public boolean isAtTraget() {
-        return laserSensor.getDistance(DistanceUnit.MM) > PLATE_EMPTY_THRESHOLD_MM;
+        return laserSensor.getDistance(DistanceUnit.MM) >= PLATE_EMPTY_THRESHOLD_MM;
     }
 }

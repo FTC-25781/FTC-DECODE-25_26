@@ -9,14 +9,14 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.layered.logical2.Shooter;
+//import org.firstinspires.ftc.teamcode.layered.logical2.Shooter;
 import org.firstinspires.ftc.teamcode.layered.physical1.EncoderForIntake;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
+import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import java.util.function.Supplier;
 
@@ -29,10 +29,11 @@ public class Robot extends OpMode {
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
     private Follower follower;
-    private Shooter shooter;
+    private ShooterV2 shooter;
     private boolean lastDpadRight = false;
     private boolean lastDpadLeft = false;
-    private VoltageSensor voltageSensor;
+    private boolean lastLTrigger = false;
+    private boolean lastRTrigger = false;
 
     @Override
     public void init() {
@@ -44,8 +45,7 @@ public class Robot extends OpMode {
         servo = new ServoForSorter(hardwareMap);
         servo_t = new ServoForTransfer(hardwareMap);
         encoder = new EncoderForIntake(hardwareMap);
-        shooter = new Shooter(hardwareMap);
-        voltageSensor = hardwareMap.voltageSensor.iterator().next();
+        shooter = new ShooterV2(hardwareMap);
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierPoint(follower::getPose)))
@@ -107,23 +107,33 @@ public class Robot extends OpMode {
         }
 
         if (gamepad1.right_trigger>0.1) {
-            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower), voltageSensor.getVoltage()));
+//            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM()));
+            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                     .addPath(new Path(new BezierPoint(follower::getPose)))
-                    .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())))
+                    .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((144-follower.getPose().getY())/(144-follower.getPose().getX())))
+//                    .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())))
                     .build();
             follower.followPath(pathChain.get());
             automatedDrive = true;
         }
 
         if (gamepad1.right_bumper) {
-            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower), voltageSensor.getVoltage()));
+            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                     .addPath(new Path(new BezierPoint(follower::getPose)))
                     .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())), 0.7))
                     .build();
             follower.followPath(pathChain.get());
             automatedDrive = true;
+        }
+
+        if (gamepad2.right_bumper && !lastRTrigger) {
+            shooter.variation += 0.02;
+        }
+
+        if (gamepad2.left_bumper && !lastLTrigger) {
+            shooter.variation -= 0.02;
         }
 
         //Stop automated following if the follower is done
@@ -144,10 +154,13 @@ public class Robot extends OpMode {
         servo_t.update();
         mot.update();
         servo.update(telemetry);
-        shooter.update(telemetry, follower);
+        shooter.update(telemetry);
 
         lastDpadRight = gamepad1.dpad_right;
         lastDpadLeft = gamepad1.dpad_left;
+
+        lastRTrigger = gamepad1.right_bumper;
+        lastLTrigger = gamepad1.left_bumper;
 
         telemetry.addData("Follower Pose X", follower.getPose().getX());
         telemetry.addData("Follower Pose Y", follower.getPose().getY());

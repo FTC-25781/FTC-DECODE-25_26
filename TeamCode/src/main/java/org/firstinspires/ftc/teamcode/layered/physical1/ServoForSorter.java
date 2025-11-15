@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class ServoForSorter {
     public ServoImplEx transfer;
 
-    double[] positions = {0.73, 0.01, 0.34}; // 0-2 Intake 3-5 Deposit | 0.19, 0.56, 0.94,
+    double[] positions = {0.06, 0.44, 0.82}; // 0-2 Intake 3-5 Deposit | 0.19, 0.56, 0.94,
 
     int current_Pos = 0;
 

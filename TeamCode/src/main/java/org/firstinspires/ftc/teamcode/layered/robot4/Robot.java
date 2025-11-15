@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import java.util.function.Supplier;
 
@@ -31,6 +32,7 @@ public class Robot extends OpMode {
     private Shooter shooter;
     private boolean lastDpadRight = false;
     private boolean lastDpadLeft = false;
+    private VoltageSensor voltageSensor;
 
     @Override
     public void init() {
@@ -43,6 +45,7 @@ public class Robot extends OpMode {
         servo_t = new ServoForTransfer(hardwareMap);
         encoder = new EncoderForIntake(hardwareMap);
         shooter = new Shooter(hardwareMap);
+        voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierPoint(follower::getPose)))
@@ -104,7 +107,7 @@ public class Robot extends OpMode {
         }
 
         if (gamepad1.right_trigger>0.1) {
-            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower), voltageSensor.getVoltage()));
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                     .addPath(new Path(new BezierPoint(follower::getPose)))
                     .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())))
@@ -114,7 +117,7 @@ public class Robot extends OpMode {
         }
 
         if (gamepad1.right_bumper) {
-            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower), voltageSensor.getVoltage()));
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                     .addPath(new Path(new BezierPoint(follower::getPose)))
                     .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())), 0.7))
@@ -141,7 +144,7 @@ public class Robot extends OpMode {
         servo_t.update();
         mot.update();
         servo.update(telemetry);
-        shooter.update(telemetry);
+        shooter.update(telemetry, follower);
 
         lastDpadRight = gamepad1.dpad_right;
         lastDpadLeft = gamepad1.dpad_left;

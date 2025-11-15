@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.layered.PositionContract;
 import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
+import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class RedAuto extends OpMode {
     //    private Shooter shooter;
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
-
+    private ShooterV2 shooter;
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
@@ -77,7 +78,40 @@ public class RedAuto extends OpMode {
 //                    }
 
                     follower.followPath(shootPreload, true);
-                    setPathState(-1);
+                    setPathState(2);
+                }
+                break;
+            case 2: // GPP, id 21
+
+                if(pathTimer.getElapsedTime() < 3){
+                    servo.goTo2();
+                    shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+                }
+                if(pathTimer.getElapsedTime() >= 3 && pathTimer.getElapsedTime() <= 3.1){
+                    servo_t.moveUp();
+                }
+                if(pathTimer.getElapsedTime() > 3.1 && pathTimer.getElapsedTime() < 3.2){
+                    servo_t.moveDown();
+                }
+                if(pathTimer.getElapsedTime() >= 3.5 && pathTimer.getElapsedTime() <= 3.6){
+                    servo.goTo0();
+                    shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+                }
+                if(pathTimer.getElapsedTime() >= 5.5 && pathTimer.getElapsedTime() <= 5.6){
+                    servo_t.moveUp();
+                }
+                if(pathTimer.getElapsedTime() > 5.8 && pathTimer.getElapsedTime() < 6){
+                    servo_t.moveDown();
+                }
+                if(pathTimer.getElapsedTime() >= 6.2 && pathTimer.getElapsedTime() <= 6.4){
+                    servo.goTo1();
+                    shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+                }
+                if(pathTimer.getElapsedTime() >= 8.4 && pathTimer.getElapsedTime() <= 8.5){
+                    servo_t.moveUp();
+                }
+                if(pathTimer.getElapsedTime() > 8.8 && pathTimer.getElapsedTime() < 8.9){
+                    servo_t.moveDown();
                 }
                 break;
         }
@@ -145,7 +179,9 @@ public class RedAuto extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
-
+        shooter = new ShooterV2(hardwareMap);
+        servo = new ServoForSorter(hardwareMap);
+        servo_t = new ServoForTransfer(hardwareMap);
     }
 
     /**
@@ -153,6 +189,7 @@ public class RedAuto extends OpMode {
      **/
     @Override
     public void init_loop() {
+        servo_t.moveDown();
     }
 
     /**
@@ -162,7 +199,7 @@ public class RedAuto extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
-//        actionTimer.resetTimer();
+        //actionTimer.resetTimer();
         setPathState(0);
     }
 

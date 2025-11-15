@@ -109,13 +109,13 @@ public class Robot extends OpMode {
                 double heading = cursor.getDouble(headingIndex);
 
                 finalPose = new Pose(x, y, heading);
-                telemetry.log().add("Loaded starting pose from Auto DB.");
+                telemetry.addLine("Loaded starting pose from Auto DB.");
 
             } else {
-                telemetry.log().add("Auto DB empty so starting at default pose.");
+                telemetry.addLine("Auto DB empty so starting at default pose.");
             }
         } catch (SQLiteException e) {
-            telemetry.log().add("Database read failed so starting at default pose" + e.getMessage());
+            telemetry.addLine("Database read failed so starting at default pose" + e.getMessage());
         } finally {
             if(cursor != null) cursor.close();
             if(db != null) db.close();

@@ -119,7 +119,7 @@ public class Shooter {
                         (C2 * Math.pow(x, 2)) +
                         (C1 * x) +
                         C0;
-            double voltageFactor = NOMINAL_VOLTAGE/ batteryVoltage;
+            double voltageFactor = NOMINAL_VOLTAGE/ batteryVoltage; // voltage compensation
 
             double power = rawPower * voltageFactor;
 

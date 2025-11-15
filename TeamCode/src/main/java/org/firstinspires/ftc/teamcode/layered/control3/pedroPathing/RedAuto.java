@@ -6,6 +6,9 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import android.content.ContentValues;
@@ -16,6 +19,9 @@ import org.firstinspires.ftc.teamcode.layered.PositionContract;
 import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Autonomous(name = "Red Auto", group = "Blue")
 @Configurable
@@ -28,10 +34,16 @@ public class RedAuto extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(110, 133, Math.toRadians(180));
+    private final Pose startPose = new Pose(122, 122, Math.toRadians(45));
     private final Pose scanPose = new Pose(72, 72, Math.toRadians(90));
     private final Pose shootPose = new Pose(80, 80, Math.toRadians(45));
     private PathChain getScan, shootPreload;
+    private Limelight3A limelight;
+
+    ArrayList<Integer> tags = new ArrayList<Integer>();
+
+    static int obeliskValue = 0;
+
 
     public void buildPaths() {
         getScan = follower.pathBuilder()
@@ -52,7 +64,10 @@ public class RedAuto extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTime() >= 3) {
+
+
+
 //                    if (actionTimer.getElapsedTime() == 1.0) {
 //
 //                    }
@@ -77,6 +92,19 @@ public class RedAuto extends OpMode {
     public void loop() {
         follower.update();
         autonomousPathUpdate();
+        LLResult result = limelight.getLatestResult();
+
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        for (LLResultTypes.FiducialResult fiducial : fiducials) {
+            int id = fiducial.getFiducialId(); // The ID number of the fiducial
+            double StrafeDistance_3D = fiducial.getRobotPoseTargetSpace().getPosition().y;
+            telemetry.addData("Fiducial " + id, "is " + StrafeDistance_3D + " meters away");
+            if(!tags.contains(obeliskValue)){
+                if(tags.contains(id)){
+                    obeliskValue = id;
+                }
+            }
+        }
 
 //        servo_t.update();
 //        servo.update(telemetry);
@@ -85,6 +113,7 @@ public class RedAuto extends OpMode {
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("Obelisk Value", obeliskValue);
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
     }
@@ -94,6 +123,20 @@ public class RedAuto extends OpMode {
 //        servo = new ServoForSorter(hardwareMap);
 //        servo_t = new ServoForTransfer(hardwareMap);
 //        shooter = new Shooter(hardwareMap);
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        telemetry.setMsTransmissionInterval(11);
+
+        limelight.pipelineSwitch(0);
+
+        /*
+         * Starts polling for data.
+         */
+        limelight.start();
+
+        tags.add(21);
+        tags.add(22);
+        tags.add(23);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();

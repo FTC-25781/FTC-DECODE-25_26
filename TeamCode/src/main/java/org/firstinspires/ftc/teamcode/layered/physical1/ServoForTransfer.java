@@ -49,12 +49,12 @@ public class ServoForTransfer {
         return transferServo.getPosition();
     }
 
-    public double returnDownMax(){
-        return DOWN_POS;
+    public boolean returnDownMax(){
+        return !(limitSwitches.isBottomPressed()) ;
     }
 
-    public double returnTopMax(){
-        return TOP_POS;
+    public boolean returnTopMax(){
+        return !(limitSwitches.isTopPressed()) ;
     }
 }
 

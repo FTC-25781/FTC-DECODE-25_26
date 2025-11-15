@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.layered.control3.pedroPathing;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -11,21 +14,19 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 
 import org.firstinspires.ftc.teamcode.layered.PositionContract;
 import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
+import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
-import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Red Auto dont use this", group = "Blue")
+@Autonomous(name = "Red Far", group = "Blue")
 @Configurable
-public class RedAuto extends OpMode {
+public class RedBackuop extends OpMode {
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
     private ShooterV2 shooter;
@@ -33,8 +34,8 @@ public class RedAuto extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(122, 122, Math.toRadians(45));
-    private final Pose scanPose = new Pose(72, 72, Math.toRadians(90));
+    private final Pose startPose = new Pose(84, 8, Math.toRadians(90));
+    private final Pose scanPose = new Pose(115, 38, Math.toRadians(90));
     private final Pose shootPose = new Pose(80, 80, Math.toRadians(45));
     private PathChain getScan, shootPreload;
     private Limelight3A limelight;
@@ -63,7 +64,7 @@ public class RedAuto extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(getScan, true);
-                setPathState(1);
+                setPathState(-1);
                 break;
 
             case 1:
@@ -82,15 +83,14 @@ public class RedAuto extends OpMode {
                 break;
 
             case 2:
-                if (!follower.isBusy()) {
+//                if (!follower.isBusy()) {
 
-                    if (pathTimer.getElapsedTime() < 2) {
-                        servo.goTo2();
-                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
 
-                    }
+                servo.goTo2();
+                shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
 
-                    else if (pathTimer.getElapsedTime() <= 3) {
+
+                if (pathTimer.getElapsedTime() <= 3) {
                         servo_t.moveUp();
                     }
                     else if (pathTimer.getElapsedTime() < 4) {
@@ -123,11 +123,13 @@ public class RedAuto extends OpMode {
 //                    else if (pathTimer.getElapsedTime() > 11) {
 //                        setPathState(3);
 //                    }
-                }
+//                }
                 break;
 
             case 3:
                 servo_t.moveUp();
+//                if (servo_t)
+                servo_t.moveDown();
                 break;
         }
     }

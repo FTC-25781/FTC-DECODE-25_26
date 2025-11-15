@@ -1,17 +1,14 @@
 package org.firstinspires.ftc.teamcode.layered.logical2;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
 
 //@TeleOp(name="shooter")
-public class ShooterV2 {
+public class ShooterV2Blue {
     private DcMotorEx shooter_motor;
     public double variation=0;
 
@@ -19,7 +16,7 @@ public class ShooterV2 {
 //    public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // TODO: Integrate the pose from auto
 //    private Follower follower;
 
-    public ShooterV2(HardwareMap hardwareMap) {
+    public ShooterV2Blue(HardwareMap hardwareMap) {
         shooter_motor = hardwareMap.get(DcMotorEx.class, "dmot");
 //        follower = Constants.createFollower(hardwareMap);
 //        follower.setStartingPose(startingPose);
@@ -76,10 +73,10 @@ public class ShooterV2 {
 //    public double targetRPM() {
         public double targetRPM(Follower follower) {
            if (follower.getPose().getY()<50){
-               return Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()) - 144, 2) + Math.pow(Math.abs(follower.getPose().getY()) - 144, 2));
+               return Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()), 2) + Math.pow(Math.abs(follower.getPose().getY()) - 144, 2));
 
            }else{
-               return Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()) - 132, 2) + Math.pow(Math.abs(follower.getPose().getY()) - 132, 2));
+               return Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()), 2) + Math.pow(Math.abs(follower.getPose().getY()) - 132, 2));
            }
         }
 

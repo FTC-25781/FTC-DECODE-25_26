@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.layered.control3.pedroPathing;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -11,21 +14,19 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 
 import org.firstinspires.ftc.teamcode.layered.PositionContract;
 import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
+import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
-import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Red Auto dont use this", group = "Blue")
+@Autonomous(name = "Red Auto Close Dont use", group = "Blue")
 @Configurable
-public class RedAuto extends OpMode {
+public class RedAutoClose extends OpMode {
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
     private ShooterV2 shooter;
@@ -76,59 +77,96 @@ public class RedAuto extends OpMode {
                         follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
                         shooter.shoot(0.7);
+                        servo_t.moveDown();
+
                         setPathState(2);
                     }
                 }
                 break;
 
             case 2:
-                if (!follower.isBusy()) {
+//                if (!follower.isBusy()) {
 
-                    if (pathTimer.getElapsedTime() < 2) {
-                        servo.goTo2();
-                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
 
-                    }
+                servo.goTo2();
+                shooter.shoot(0.73);
 
-                    else if (pathTimer.getElapsedTime() <= 3) {
-                        servo_t.moveUp();
-                    }
-                    else if (pathTimer.getElapsedTime() < 4) {
-                        servo_t.moveDown();
-                    }
 
-                    else if (pathTimer.getElapsedTime() <= 5) {
-                        servo.goTo0();
-                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
-                    }
-                    else if (pathTimer.getElapsedTime() <= 6) {
-                        servo_t.moveUp();
-                    }
-                    else if (pathTimer.getElapsedTime() < 7) {
-                        servo_t.moveDown();
-                    }
+//                if (pathTimer.getElapsedTime() <= 3) {
+//                        servo_t.moveUp();
+//                    }
+//                    else if (pathTimer.getElapsedTime() < 4) {
+//                        servo_t.moveDown();
+//                    }
 
-                    else if (pathTimer.getElapsedTime() <= 8) {
-                        servo.goTo1();
-                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
-                    }
-                    else if (pathTimer.getElapsedTime() <= 9) {
-                        servo_t.moveUp();
-                    }
-                    else if (pathTimer.getElapsedTime() < 10) {
-                        servo_t.moveDown();
-                    }
+//                     if (pathTimer.getElapsedTime() <= 5) {
+//                        servo.goTo0();
+//                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+//                    }
+//                    if (pathTimer.getElapsedTime() <= 6) {
+//                        servo_t.moveUp();
+//                    }
+//                    if (pathTimer.getElapsedTime() < 7) {
+//                        servo_t.moveDown();
+//                    }
 
-                    setPathState(2);
+//                    if (pathTimer.getElapsedTime() <= 8) {
+//                        servo.goTo1();
+//                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+//                    }
+//                    if (pathTimer.getElapsedTime() <= 9) {
+////                        servo_t.moveUp();
+//                    }
+//                    else if (pathTimer.getElapsedTime() < 10) {
+//                        servo_t.moveDown();
+//                    }
+
+                    setPathState(3);
 //                    else if (pathTimer.getElapsedTime() > 11) {
 //                        setPathState(3);
 //                    }
-                }
+//                }
                 break;
 
             case 3:
-                servo_t.moveUp();
+                if (pathTimer.getElapsedTimeSeconds()<2){
+                servo_t.moveUp();}
+                else{servo_t.moveDown();
+                    setPathState(4);
+                }
                 break;
+            case 4:
+                if (pathTimer.getElapsedTimeSeconds()<0.5) {
+                    servo.goTo0();
+                    shooter.shoot(0.73);
+                    setPathState(5);
+                }
+            case 5:
+                if (pathTimer.getElapsedTimeSeconds()<2){
+                    servo_t.moveUp();
+                }
+
+                else{servo_t.moveDown();
+                    setPathState(7);
+                }
+
+            case 7:
+                if (pathTimer.getElapsedTimeSeconds()<0.5) {
+
+                    servo.goTo1();
+                    shooter.shoot(0.73);
+                    setPathState(8);
+                }
+            case 8:
+                if (pathTimer.getElapsedTimeSeconds()<2){
+                    servo_t.moveUp();}
+//                if (servo_t)
+                else{servo_t.moveDown();
+                    setPathState(9);
+                }
+            case 9:
+//                servo_t.moveUp();
+                setPathState(-1);
         }
     }
 

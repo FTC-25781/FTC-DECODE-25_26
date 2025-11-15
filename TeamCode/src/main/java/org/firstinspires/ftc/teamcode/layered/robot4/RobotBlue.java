@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.layered.robot4;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.geometry.Pose;
@@ -7,44 +11,40 @@ import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
-//import org.firstinspires.ftc.teamcode.layered.logical2.Shooter;
-import org.firstinspires.ftc.teamcode.layered.physical1.EncoderForIntake;
-import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
-import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
-import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
-import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import org.firstinspires.ftc.teamcode.layered.PositionContract;
 import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
-
-
-
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
+import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2Blue;
+import org.firstinspires.ftc.teamcode.layered.physical1.EncoderForIntake;
+import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
+import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
+import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 
 import java.util.function.Supplier;
 
-@TeleOp(name = "TeleOp", group = "TeleOp")
-public class Robot extends OpMode {
+@TeleOp(name = "TeleOp Blue", group = "TeleOp")
+public class RobotBlue extends OpMode {
     private IntakeMotor mot;
     private EncoderForIntake encoder;
     private boolean automatedDrive;
     private Supplier<PathChain> pathChain;
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
-    public double variation = 0;
     private Follower follower;
-    private ShooterV2 shooter;
+    private ShooterV2Blue shooter;
     private boolean lastDpadRight = false;
-    private boolean lastDpadUp = false;
     private boolean lastDpadLeft = false;
+    public double variation = 0;
+
+    private boolean lastDpadUp = false;
     private boolean lastLTrigger = false;
     private boolean lastRTrigger = false;
 
-    private final Pose DEFAULT_START_POSE =      new Pose(122, 122, Math.toRadians(45));
+    private final Pose DEFAULT_START_POSE =  new Pose(122-72, 122, Math.toRadians(135));
+
 
     @Override
     public void init() {
@@ -57,7 +57,7 @@ public class Robot extends OpMode {
         servo = new ServoForSorter(hardwareMap);
         servo_t = new ServoForTransfer(hardwareMap);
         encoder = new EncoderForIntake(hardwareMap);
-        shooter = new ShooterV2(hardwareMap);
+        shooter = new ShooterV2Blue(hardwareMap);
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierPoint(follower::getPose)))
@@ -208,7 +208,7 @@ public class Robot extends OpMode {
         }
 
         if (gamepad1.left_trigger > 0.1) {
-            shooter.shoot(0.9+variation);
+            shooter.shoot(0.9 + variation);
         }
 
         if (gamepad2.right_bumper && !lastRTrigger) {
@@ -220,10 +220,10 @@ public class Robot extends OpMode {
         }
 
         //Stop automated following if the follower is done
-//        if (automatedDrive && (gamepad1.left_trigger>0.1 || !follower.isBusy())) {
-//            follower.startTeleopDrive();
-//            automatedDrive = false;
-//        }
+        if (automatedDrive && (gamepad1.left_trigger>0.1 || !follower.isBusy())) {
+            follower.startTeleopDrive();
+            automatedDrive = false;
+        }
 
         if(gamepad1.left_bumper) {
             shooter.shoot(0);
@@ -235,8 +235,9 @@ public class Robot extends OpMode {
             servo_t.moveDown();
         }
 
+
         if (gamepad2.dpad_down) {
-            follower.setPose(new Pose(10, 10, 90));
+            follower.setPose(new Pose(130, 11, 90));
         }
 
         servo_t.update();

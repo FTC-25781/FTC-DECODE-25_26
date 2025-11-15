@@ -107,7 +107,7 @@ public class Robot extends OpMode {
             shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM()));
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                     .addPath(new Path(new BezierPoint(follower::getPose)))
-                    .setConstantHeadingInterpolation(Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())))
+                    .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((144-follower.getPose().getY())/(144-follower.getPose().getX())))
                     .build();
             follower.followPath(pathChain.get());
             automatedDrive = true;

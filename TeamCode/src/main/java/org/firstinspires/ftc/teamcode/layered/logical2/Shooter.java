@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.layered.logical2;
 
 import com.pedropathing.follower.Follower;
@@ -25,20 +24,37 @@ public class Shooter {
         follower.setStartingPose(startingPose);
     }
 
+    //    public double calculateTargetPower(double targetRPM1) { //old
+//        double x = targetRPM1;
+//
+//        final double C4 = 8.89811E-9;
+//        final double C3 = -0.00000379115;
+//        final double C2 = 0.000566876;
+//        final double C1 = -0.0316266;
+//        final double C0 = 1.24078;
+//
+//        double power = (C4 * Math.pow(x, 4)) +
+//                (C3 * Math.pow(x, 3)) +
+//                (C2 * Math.pow(x, 2)) +
+//                (C1 * x) +
+//                C0;
+//
+//        return Range.clip(power, 0.0, 1.0);
+//    }
     public double calculateTargetPower(double targetRPM1) {
         double x = targetRPM1;
 
-        final double C4 = 8.89811E-9;
-        final double C3 = -0.00000379115;
-        final double C2 = 0.000566876;
-        final double C1 = -0.0316266;
-        final double C0 = 1.24078;
+//        final double C4 = 8.89811E-9;
+        final double C3 = -(1.3473E-7);
+        final double C2 = 0.0000454968;
+        final double C1 = -0.00233777;
+        final double C0 = 0.682012;
 
-        double power = (C4 * Math.pow(x, 4)) +
+        double power =
                 (C3 * Math.pow(x, 3)) +
-                (C2 * Math.pow(x, 2)) +
-                (C1 * x) +
-                C0;
+                        (C2 * Math.pow(x, 2)) +
+                        (C1 * x) +
+                        C0;
 
         return Range.clip(power, 0.0, 1.0);
     }
@@ -57,3 +73,4 @@ public class Shooter {
         telemetry.update();
     }
 }
+

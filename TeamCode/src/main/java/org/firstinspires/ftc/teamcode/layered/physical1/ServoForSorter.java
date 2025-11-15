@@ -8,9 +8,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class ServoForSorter {
     public Servo transfer;
 
-    double[] positions = {0.19, 0.56, 0.94, 0.73, 0.01, 0.34}; // 1-3 Intake 4-6 Deposit
+    double[] positions = {0.19, 0.56, 0.94, 0.73, 0.01, 0.34}; // 0-2 Intake 3-5 Deposit
 
-    int current_Pos = 0;
+    int current_Pos = 3;
 
     public ServoForSorter(HardwareMap hardwareMap) {
         transfer = hardwareMap.get(Servo.class, "transfer1");
@@ -20,17 +20,19 @@ public class ServoForSorter {
     public void GoForwards() {
         if (current_Pos != 5) {
             current_Pos += 1;
+            transfer.setPosition(positions[current_Pos]);
         }
     }
 
     public void GoBackwards() {
         if (current_Pos != 0) {
             current_Pos -= 1;
+            transfer.setPosition(positions[current_Pos]);
         }
     }
 
     public void update(Telemetry telemetry) {
-        transfer.setPosition(positions[current_Pos]);
+
         telemetry.addData("Current State", current_Pos);
         telemetry.addData("Servo Pos", transfer.getPosition());
     }

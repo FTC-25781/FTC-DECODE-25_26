@@ -48,6 +48,7 @@ public class Robot extends OpMode {
     public void init() {
         follower = Constants.createFollower(hardwareMap);
         Pose savedPose = readSavedPose();
+        follower.setStartingPose(savedPose);
         follower.update();
 
         mot = new IntakeMotor(hardwareMap);
@@ -62,6 +63,8 @@ public class Robot extends OpMode {
                 .build();
 
         telemetry.addData("Status", "We go to worlds????");
+        telemetry.addData("staring pose", "X: %.1f, Y: %.1f, H: %.1f deg",
+                savedPose.getX(), savedPose.getY(), Math.toDegrees(savedPose.getHeading()));
         telemetry.addLine();
         telemetry.addLine("Shooter Controls:");
         telemetry.addLine("DPAD LEFT - Toggle Shooter On/Off");
@@ -106,20 +109,20 @@ public class Robot extends OpMode {
                 double heading = cursor.getDouble(headingIndex);
 
                 finalPose = new Pose(x, y, heading);
-                telemetry.log().add("INFO: Loaded starting pose from Auto DB.");
+                telemetry.log().add("Loaded starting pose from Auto DB.");
 
             } else {
                 telemetry.log().add("Auto DB empty so starting at default pose.");
             }
         } catch (SQLiteException e) {
-            telemetry.log().add("Database read failed so starting at default pose");
+            telemetry.log().add("Database read failed so starting at default pose" + e.getMessage());
         } finally {
             if(cursor != null) cursor.close();
+            if(db != null) db.close();
             if(positiondbHelper != null) positiondbHelper.close();
         }
         return finalPose;
     }
-
     @Override
     public void start() {
         follower.startTeleopDrive();

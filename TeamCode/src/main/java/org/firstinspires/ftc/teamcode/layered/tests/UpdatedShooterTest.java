@@ -68,7 +68,7 @@ public class UpdatedShooterTest extends LinearOpMode {
                     -gamepad1.right_stick_x,
                     true
             );
-            double targetRPM = Math.sqrt(Math.pow((follower.getPose().getX()) - 132, 2) + Math.pow((follower.getPose().getY() - 132), 2));
+            double targetRPM = Math.sqrt(Math.pow((132 - follower.getPose().getX()), 2) + Math.pow((132 - follower.getPose().getY()), 2));
 
             if(gamepad1.dpad_up && !lastDPadUp){
                 outputPower += 0.01;

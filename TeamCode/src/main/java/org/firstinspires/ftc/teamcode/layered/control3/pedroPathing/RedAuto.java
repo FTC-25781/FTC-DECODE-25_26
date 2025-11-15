@@ -8,16 +8,19 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 
 //import org.firstinspires.ftc.teamcode.layered.logical2.Shooter;
-import org.firstinspires.ftc.teamcode.layered.physical1.EncoderForIntake;
+import org.firstinspires.ftc.teamcode.layered.PositionContract;
+import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 
 @Autonomous(name = "Red Auto", group = "Blue")
 @Configurable
 public class RedAuto extends OpMode {
-//    private Shooter shooter;
+    //    private Shooter shooter;
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
 
@@ -49,7 +52,7 @@ public class RedAuto extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if(!follower.isBusy()) {
+                if (!follower.isBusy()) {
 //                    if (actionTimer.getElapsedTime() == 1.0) {
 //
 //                    }
@@ -102,12 +105,17 @@ public class RedAuto extends OpMode {
 
     }
 
-    /** This method is called continuously after Init while waiting for "play". **/
+    /**
+     * This method is called continuously after Init while waiting for "play".
+     **/
     @Override
-    public void init_loop() {}
+    public void init_loop() {
+    }
 
-    /** This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system **/
+    /**
+     * This method is called once at the start of the OpMode.
+     * It runs all the setup actions, including building paths and starting the path system
+     **/
     @Override
     public void start() {
         opmodeTimer.resetTimer();
@@ -115,7 +123,27 @@ public class RedAuto extends OpMode {
         setPathState(0);
     }
 
-    /** We do not use this because everything should automatically disable **/
+    /**
+     * We do not use this because everything should automatically disable
+     **/
     @Override
-    public void stop() {}
+    public void stop() {
+        Pose finalPose = follower.getPose();
+
+        PositiondbHelper positiondbHelper = new PositiondbHelper(hardwareMap.appContext);
+        SQLiteDatabase db = positiondbHelper.getWritableDatabase();
+
+        db.delete(PositionContract.PositionEntry.TABLE_NAME, null, null);
+
+        ContentValues values = new ContentValues();
+        values.put(PositionContract.PositionEntry.COLUMN_NAME_X, finalPose.getX());
+        values.put(PositionContract.PositionEntry.COLUMN_NAME_Y, finalPose.getY());
+        values.put(PositionContract.PositionEntry.COLUMN_NAME_HEADING, finalPose.getHeading());
+
+        long newRowId = db.insert(PositionContract.PositionEntry.TABLE_NAME, null, values);
+
+        db.close();
+        positiondbHelper.close();
+    }
 }
+

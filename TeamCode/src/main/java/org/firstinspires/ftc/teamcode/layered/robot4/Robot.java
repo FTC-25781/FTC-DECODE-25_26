@@ -15,6 +15,13 @@ import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
 import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import org.firstinspires.ftc.teamcode.layered.PositionContract;
+import org.firstinspires.ftc.teamcode.layered.PositiondbHelper;
+
+
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -35,10 +42,12 @@ public class Robot extends OpMode {
     private boolean lastLTrigger = false;
     private boolean lastRTrigger = false;
 
+    private final Pose DEFAULT_START_POSE = new Pose(72, 72, Math.toRadians(45));
+
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(72,72,45));
+        Pose savedPose = readSavedPose();
         follower.update();
 
         mot = new IntakeMotor(hardwareMap);
@@ -59,6 +68,56 @@ public class Robot extends OpMode {
         telemetry.addLine("DPAD RIGHT - Toggle Alliance (Red/Blue)");
         telemetry.addLine("DPAD DOWN (Hold) - Auto-aim at goal");
         telemetry.update();
+    }
+
+    public Pose readSavedPose(){
+        PositiondbHelper positiondbHelper = null;
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        Pose finalPose = DEFAULT_START_POSE;
+
+        try{
+            positiondbHelper = new PositiondbHelper(hardwareMap.appContext);
+            db = positiondbHelper.getReadableDatabase();
+
+            String[] projection = {
+                    PositionContract.PositionEntry.COLUMN_NAME_X,
+                    PositionContract.PositionEntry.COLUMN_NAME_Y,
+                    PositionContract.PositionEntry.COLUMN_NAME_HEADING
+            };
+            cursor = db.query(
+                    PositionContract.PositionEntry.TABLE_NAME,
+                    projection,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+            if (cursor.moveToFirst()) {
+                // Get column indices
+                int xIndex = cursor.getColumnIndexOrThrow(PositionContract.PositionEntry.COLUMN_NAME_X);
+                int yIndex = cursor.getColumnIndexOrThrow(PositionContract.PositionEntry.COLUMN_NAME_Y);
+                int headingIndex = cursor.getColumnIndexOrThrow(PositionContract.PositionEntry.COLUMN_NAME_HEADING);
+
+                // Read the real values
+                double x = cursor.getDouble(xIndex);
+                double y = cursor.getDouble(yIndex);
+                double heading = cursor.getDouble(headingIndex);
+
+                finalPose = new Pose(x, y, heading);
+                telemetry.log().add("INFO: Loaded starting pose from Auto DB.");
+
+            } else {
+                telemetry.log().add("Auto DB empty so starting at default pose.");
+            }
+        } catch (SQLiteException e) {
+            telemetry.log().add("Database read failed so starting at default pose");
+        } finally {
+            if(cursor != null) cursor.close();
+            if(positiondbHelper != null) positiondbHelper.close();
+        }
+        return finalPose;
     }
 
     @Override

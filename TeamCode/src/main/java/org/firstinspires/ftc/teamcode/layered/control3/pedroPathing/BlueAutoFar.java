@@ -35,8 +35,8 @@ public class BlueAutoFar extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
-    private final Pose scanPose = new Pose(57, 16, Math.toRadians(55.8));
-    private final Pose shootPose = new Pose(80, 80, Math.toRadians(45));
+    private final Pose scanPose = new Pose(55, 25, Math.toRadians(64.406));
+    private final Pose shootPose = new Pose(37, 33, Math.toRadians(90));
     private PathChain getScan, shootPreload;
     private Limelight3A limelight;
 
@@ -64,6 +64,7 @@ public class BlueAutoFar extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(getScan, true);
+                servo_t.moveDown();
                 setPathState(1);
                 break;
 
@@ -74,9 +75,10 @@ public class BlueAutoFar extends OpMode {
 
                     if ((pathTimer.getElapsedTime() >= 1.0) ||
                             pathTimer.getElapsedTime() >= 4.0) {
-                        follower.followPath(shootPreload, true);
+//                        follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
                         shooter.shoot(0.91);
+                        servo.goTo2();
                         setPathState(2);
                     }
                 }
@@ -84,52 +86,25 @@ public class BlueAutoFar extends OpMode {
 
             case 2:
 //                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds()>5) {
 
+                    servo_t.moveUp();
 
-                servo.goTo2();
-                shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+                    setPathState(3);
+                }
+//                shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
 
-
-                if (pathTimer.getElapsedTime() <= 3) {
-                        servo_t.moveUp();
-                    }
-                    else if (pathTimer.getElapsedTime() < 4) {
-                        servo_t.moveDown();
-                    }
-
-                    else if (pathTimer.getElapsedTime() <= 5) {
-                        servo.goTo0();
-                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
-                    }
-                    else if (pathTimer.getElapsedTime() <= 6) {
-                        servo_t.moveUp();
-                    }
-                    else if (pathTimer.getElapsedTime() < 7) {
-                        servo_t.moveDown();
-                    }
-
-                    else if (pathTimer.getElapsedTime() <= 8) {
-                        servo.goTo1();
-                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
-                    }
-                    else if (pathTimer.getElapsedTime() <= 9) {
-                        servo_t.moveUp();
-                    }
-                    else if (pathTimer.getElapsedTime() < 10) {
-                        servo_t.moveDown();
-                    }
-
-                    setPathState(2);
-//                    else if (pathTimer.getElapsedTime() > 11) {
-//                        setPathState(3);
-//                    }
-//                }
                 break;
 
             case 3:
-                servo_t.moveUp();
-//                if (servo_t)
-                servo_t.moveDown();
+                follower.followPath(shootPreload, true);
+                setPathState(4);
+                break;
+
+            case 4:
+                if (!follower.isBusy()) {
+                    setPathState(-1);
+                }
                 break;
         }
     }

@@ -95,13 +95,13 @@ public class RedAutoClose extends OpMode {
                 break;
 
             case 3:
-                if (pathTimer.getElapsedTimeSeconds()<5){
+                if (pathTimer.getElapsedTimeSeconds()>3){
                     servo_t.moveUp();
                     setPathState(31);
                 }
                 break;
             case 31:
-                if (pathTimer.getElapsedTimeSeconds()<2) {
+                if (pathTimer.getElapsedTimeSeconds()>2) {
                     servo_t.moveDown();
                     setPathState(4);
                 }

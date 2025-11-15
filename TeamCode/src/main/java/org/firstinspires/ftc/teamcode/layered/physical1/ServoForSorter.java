@@ -11,7 +11,7 @@ public class ServoForSorter {
 
     double[] positions = {0.06, 0.44, 0.82}; // 0-2 Intake 3-5 Deposit | 0.19, 0.56, 0.94,
 
-    int current_Pos = 0;
+    public int current_Pos = 0;
 
     public ServoForSorter(HardwareMap hardwareMap) {
         transfer = hardwareMap.get(ServoImplEx.class, "transfer1");
@@ -24,6 +24,18 @@ public class ServoForSorter {
             current_Pos += 1;
             transfer.setPosition(positions[current_Pos]);
         }
+    }
+
+    public void goTo0() {
+        current_Pos = 0;
+    }
+
+    public void goTo1() {
+        current_Pos = 1;
+    }
+
+    public void goTo2() {
+        current_Pos = 2;
     }
 
     public void GoBackwards() {

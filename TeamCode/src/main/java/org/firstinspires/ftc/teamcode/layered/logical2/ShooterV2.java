@@ -15,6 +15,8 @@ public class ShooterV2 {
     private DcMotorEx shooter_motor;
     private GoBildaPinpointDriver pinpoint;
     public double variation=0;
+
+    public double power = 0;
 //    public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // TODO: Integrate the pose from auto
 //    private Follower follower;
 
@@ -45,17 +47,30 @@ public class ShooterV2 {
     public double calculateTargetPower(double targetRPM1) {
         double x = targetRPM1;
 
-        final double C4 = 7.13229E-9;
-        final double C3 = -(0.00000244252);
-        final double C2 = 0.000297598;
-        final double C1 = -0.0129613;
-        final double C0 = 0.819973;
+//        final double C4 = 7.13229E-9;
+//        final double C3 = -(0.00000244252);
+//        final double C2 = 0.000297598;
+//        final double C1 = -0.0129613;
+//        final double C0 = 0.819973;
+//
+//        double power =(C4 * Math.pow(x, 4)) +
+//                (C3 * Math.pow(x, 3)) +
+//                        (C2 * Math.pow(x, 2)) +
+//                        (C1 * x) +
+//                        C0;
 
-        double power =(C4 * Math.pow(x, 4)) +
+
+//        final double C4 = 7.13229E-9;
+        final double C3 = -(1.3473E-7);
+        final double C2 = 0.0000454968;
+        final double C1 = -0.00233777;
+        final double C0 = 0.682012;
+
+        double power =
                 (C3 * Math.pow(x, 3)) +
-                        (C2 * Math.pow(x, 2)) +
-                        (C1 * x) +
-                        C0;
+                (C2 * Math.pow(x, 2)) +
+                (C1 * x) +
+                C0;
 
         return Range.clip(power+variation, 0.0, 1.0); // variation + 0.02
     }
@@ -66,15 +81,17 @@ public class ShooterV2 {
         }
 
         public void reverseDepositMotor() {
-            shooter_motor.setPower(-0.4);
+            shooter_motor.setPower(-0.55);
         }
 
         public void shoot(double pow){
             shooter_motor.setPower(pow);
+
         }
 
         public void update(Telemetry telemetry) {
             telemetry.addData("Deposit Power", shooter_motor.getPower());
+            telemetry.addData("Variation", variation);
 //            telemetry.addData("Distance", targetRPM());
 //            telemetry.update();
 

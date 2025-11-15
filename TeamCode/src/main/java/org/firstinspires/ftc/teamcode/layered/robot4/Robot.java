@@ -140,31 +140,31 @@ public class Robot extends OpMode {
                 true
         );
 
-        if (gamepad1.a) {
-            mot.startIntaking();
+        if (gamepad2.a == true && servo_t.returnPosition() == servo_t.returnDownMax()) {
+            servo.current_Pos=0;
         }
 
-        if (gamepad1.b) {
-            mot.returnToIdle();
+        if (gamepad2.b == true && servo_t.returnPosition() == servo_t.returnDownMax()) {
+            servo.current_Pos=1;
         }
 
-        if (gamepad1.x) {
-            mot.startRemoving();
+        if (gamepad2.x == true && servo_t.returnPosition() == servo_t.returnDownMax()) {
+            servo.current_Pos=2;
         }
 
-        if (gamepad1.dpad_right && !lastDpadRight) {
+        if (gamepad2.dpad_right && !lastDpadRight) {
             servo.GoForwards();
         }
 
-        if (gamepad1.dpad_left && !lastDpadLeft ) {
+        if (gamepad2.dpad_left && !lastDpadLeft ) {
             servo.GoBackwards();
         }
 
-        if(gamepad1.dpad_up) {
+        if(gamepad2.dpad_up) {
             servo_t.moveUp();
         }
 
-        if(gamepad1.dpad_down) {
+        if(gamepad2.dpad_down) {
             servo_t.moveDown();
         }
 
@@ -206,7 +206,6 @@ public class Robot extends OpMode {
 
         if(gamepad1.left_trigger>0.1) {
             shooter.shoot(0);
-//            servo_t.moveDown();
         }
 
         if (gamepad1.left_bumper) {
@@ -218,17 +217,19 @@ public class Robot extends OpMode {
         servo.update(telemetry);
         shooter.update(telemetry);
 
-        lastDpadRight = gamepad1.dpad_right;
-        lastDpadLeft = gamepad1.dpad_left;
+        lastDpadRight = gamepad2.dpad_right;
+        lastDpadLeft = gamepad2.dpad_left;
 
-        lastRTrigger = gamepad1.right_bumper;
-        lastLTrigger = gamepad1.left_bumper;
+        lastRTrigger = gamepad2.right_bumper;
+        lastLTrigger = gamepad2.left_bumper;
 
         telemetry.addData("Follower Pose X", follower.getPose().getX());
         telemetry.addData("Follower Pose Y", follower.getPose().getY());
         telemetry.addData("Follower Pose Head", follower.getPose().getHeading());
         telemetry.addData("Distance", Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()) - 132, 2) + Math.pow(Math.abs(follower.getPose().getY()) - 132, 2)));
         telemetry.addData("Encoder Pos: ", encoder.pos());
+        telemetry.addData("Idly Pos: ", servo.current_Pos);
+
         telemetry.addData("Angle of robot", Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())));
         telemetry.update();
     }

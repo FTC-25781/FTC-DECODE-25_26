@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ServoForTransfer {
-    private final Servo transferServo;
+    public  Servo transferServo;
     private final LimitSwitch limitSwitches;
     private final ElapsedTime debounceTimer = new ElapsedTime(); // for limit switch not going too fast
 

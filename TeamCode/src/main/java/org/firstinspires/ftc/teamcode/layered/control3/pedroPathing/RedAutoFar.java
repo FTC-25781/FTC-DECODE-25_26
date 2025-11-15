@@ -24,9 +24,9 @@ import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Blue Auto Far Dont use", group = "Blue")
+@Autonomous(name = "Red Auto Far Dont use", group = "Blue")
 @Configurable
-public class BlueAutoFar extends OpMode {
+public class RedAutoFar extends OpMode {
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
     private ShooterV2 shooter;
@@ -34,10 +34,15 @@ public class BlueAutoFar extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
-    private final Pose scanPose = new Pose(55, 25, Math.toRadians(180-64.406));
-    private final Pose shootPose = new Pose(37, 33, Math.toRadians(90));
+    private final Pose startPose = new Pose(84, 8, Math.toRadians(90));
+    private final Pose scanPose = new Pose(72+12, 20, Math.toRadians(67.406));
+    private final Pose shootPose = new Pose(72+35, 33, Math.toRadians(90));
     private PathChain getScan, shootPreload;
+    private boolean lastDpadRight = false;
+    private boolean lastDpadUp = false;
+    private boolean lastDpadLeft = false;
+    private boolean lastLTrigger = false;
+    private boolean lastRTrigger = false;
     private Limelight3A limelight;
 
     ArrayList<Integer> tags = new ArrayList<Integer>();
@@ -78,33 +83,109 @@ public class BlueAutoFar extends OpMode {
 //                        follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
                         shooter.shoot(0.89);
-                        servo.goTo2();
+                        servo.transfer.setPosition(0.82);
+                        servo.update(telemetry);
+                        pathTimer.resetTimer();
+
                         setPathState(2);
+
                     }
                 }
                 break;
 
             case 2:
-//                if (!follower.isBusy()) {
-                if (pathTimer.getElapsedTimeSeconds()>5) {
+                if (pathTimer.getElapsedTimeSeconds()>4) {
 
                     servo_t.moveUp();
+                    pathTimer.resetTimer();
 
-                    setPathState(3);
+
+                    setPathState(4);
                 }
-//                shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
 
                 break;
-
-            case 3:
-                follower.followPath(shootPreload, true);
-                setPathState(4);
-                break;
+//
+//            case 3:
+//                follower.followPath(shootPreload, true);
+//                pathTimer.resetTimer();
+//
+//                setPathState(4);
+//                break;
 
             case 4:
+                if (pathTimer.getElapsedTimeSeconds()>2) {
+                    servo_t.moveDown();
+                    pathTimer.resetTimer();
+
+                    setPathState(5);
+                }
+                break;
+
+            case 5:
+                if (pathTimer.getElapsedTimeSeconds() > 1.5) {
+                    servo.transfer.setPosition(0.06);
+                    servo.update(telemetry);
+                    pathTimer.resetTimer();
+
+                    setPathState(6);
+                }
+
+                break;
+
+            case 6:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    servo_t.moveUp();
+                    pathTimer.resetTimer();
+
+                    setPathState(7);
+                }
+
+                break;
+
+            case 7:
+                if (pathTimer.getElapsedTimeSeconds() > 2) {
+                    servo_t.moveDown();
+                    pathTimer.resetTimer();
+
+                    setPathState(8);
+                }
+
+                break;
+            case 8:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    servo.transfer.setPosition(0.44);
+                    servo.update(telemetry);
+                    pathTimer.resetTimer();
+
+                    setPathState(9);
+                }
+
+                 break;
+            case 9:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    servo_t.moveUp();
+                    pathTimer.resetTimer();
+
+                    setPathState(10);
+                }
+                break;
+
+            case 10:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    follower.followPath(shootPreload, true);
+                    servo_t.moveDown();
+                    pathTimer.resetTimer();
+
+                    setPathState(11);
+                }
+
+                break;
+
+            case 11:
                 if (!follower.isBusy()) {
                     setPathState(-1);
                 }
+
                 break;
         }
     }
@@ -174,11 +255,30 @@ public class BlueAutoFar extends OpMode {
         shooter = new ShooterV2(hardwareMap);
         servo = new ServoForSorter(hardwareMap);
         servo_t = new ServoForTransfer(hardwareMap);
+
+
     }
 
     @Override
     public void init_loop() {
         servo_t.moveDown();
+
+        if (gamepad2.dpad_right && !lastDpadRight) {
+            servo.GoForwards();
+        }
+
+        if (gamepad2.dpad_left && !lastDpadLeft ) {
+            servo.GoBackwards();
+        }
+
+        lastDpadRight = gamepad2.dpad_right;
+        lastDpadLeft = gamepad2.dpad_left;
+        lastDpadUp = gamepad2.dpad_up;
+
+        lastRTrigger = gamepad2.right_bumper;
+        lastLTrigger = gamepad2.left_bumper;
+        servo.update(telemetry);
+
     }
 
     @Override

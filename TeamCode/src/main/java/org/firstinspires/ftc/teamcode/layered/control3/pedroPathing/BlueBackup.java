@@ -35,7 +35,7 @@ public class BlueBackup extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
-    private final Pose scanPose = new Pose(37, 33, Math.toRadians(90));
+    private final Pose scanPose = new Pose(37, 24, Math.toRadians(90));
     private final Pose shootPose = new Pose(80, 80, Math.toRadians(45));
     private PathChain getScan, shootPreload;
     private Limelight3A limelight;

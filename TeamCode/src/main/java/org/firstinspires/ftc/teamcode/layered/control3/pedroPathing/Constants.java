@@ -16,9 +16,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(4)
-            .forwardZeroPowerAcceleration(-28.65328927291838)
-            .lateralZeroPowerAcceleration(-46.3877339637834)
+            .mass(12)
+            .forwardZeroPowerAcceleration(-81.33886425187481)
+            .lateralZeroPowerAcceleration(-96.88532453596744)
             .useSecondaryDrivePIDF(true)
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
@@ -33,8 +33,8 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(0)
-            .strafePodX(-3)
+            .forwardPodY(4)
+            .strafePodX(7)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
@@ -51,8 +51,9 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(63.40911144346703)
-            .yVelocity(50.080473652036176);
+            .xVelocity(100.92210087)
+            .yVelocity(80.78120914969858);
+
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

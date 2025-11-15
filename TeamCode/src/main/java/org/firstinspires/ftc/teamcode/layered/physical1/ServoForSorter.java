@@ -2,18 +2,20 @@ package org.firstinspires.ftc.teamcode.layered.physical1;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class ServoForSorter {
-    public Servo transfer;
+    public ServoImplEx transfer;
 
     double[] positions = {0.73, 0.01, 0.34}; // 0-2 Intake 3-5 Deposit | 0.19, 0.56, 0.94,
 
     int current_Pos = 0;
 
     public ServoForSorter(HardwareMap hardwareMap) {
-        transfer = hardwareMap.get(Servo.class, "transfer1");
+        transfer = hardwareMap.get(ServoImplEx.class, "transfer1");
+        transfer.setPwmEnable();
 //        transfer.setPosition(0.16);
     }
 

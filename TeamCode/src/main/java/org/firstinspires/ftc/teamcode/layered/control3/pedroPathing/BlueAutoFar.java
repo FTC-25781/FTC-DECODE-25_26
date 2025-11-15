@@ -35,7 +35,7 @@ public class BlueAutoFar extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
-    private final Pose scanPose = new Pose(55, 25, Math.toRadians(180-64.406));
+    private final Pose scanPose = new Pose(55, 25, Math.toRadians(180-66.406));
     private final Pose shootPose = new Pose(37, 33, Math.toRadians(90));
     private PathChain getScan, shootPreload;
     private Limelight3A limelight;
@@ -108,7 +108,7 @@ public class BlueAutoFar extends OpMode {
 //                break;
 
             case 4:
-                if (pathTimer.getElapsedTimeSeconds()>2) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     servo_t.moveDown();
                     pathTimer.resetTimer();
 
@@ -128,7 +128,7 @@ public class BlueAutoFar extends OpMode {
                 break;
 
             case 6:
-                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                if (pathTimer.getElapsedTimeSeconds() > 2){
                     servo_t.moveUp();
                     pathTimer.resetTimer();
 
@@ -138,7 +138,7 @@ public class BlueAutoFar extends OpMode {
                 break;
 
             case 7:
-                if (pathTimer.getElapsedTimeSeconds() > 2) {
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     servo_t.moveDown();
                     pathTimer.resetTimer();
 
@@ -157,7 +157,7 @@ public class BlueAutoFar extends OpMode {
 
                 break;
             case 9:
-                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                if (pathTimer.getElapsedTimeSeconds() > 2) {
                     servo_t.moveUp();
                     pathTimer.resetTimer();
 
@@ -166,7 +166,7 @@ public class BlueAutoFar extends OpMode {
                 break;
 
             case 10:
-                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                if (pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(shootPreload, true);
                     servo_t.moveDown();
                     pathTimer.resetTimer();

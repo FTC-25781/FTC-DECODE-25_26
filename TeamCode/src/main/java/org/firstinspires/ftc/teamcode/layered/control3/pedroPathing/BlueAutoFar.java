@@ -79,32 +79,108 @@ public class BlueAutoFar extends OpMode {
                         pathTimer.resetTimer();
                         shooter.shoot(0.89);
                         servo.goTo2();
+                        servo.update(telemetry);
+                        pathTimer.resetTimer();
+
                         setPathState(2);
+
                     }
                 }
                 break;
 
             case 2:
-//                if (!follower.isBusy()) {
-                if (pathTimer.getElapsedTimeSeconds()>5) {
+                if (pathTimer.getElapsedTimeSeconds()>4) {
 
                     servo_t.moveUp();
+                    pathTimer.resetTimer();
 
-                    setPathState(3);
+
+                    setPathState(4);
                 }
-//                shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
 
                 break;
-
-            case 3:
-                follower.followPath(shootPreload, true);
-                setPathState(4);
-                break;
+//
+//            case 3:
+//                follower.followPath(shootPreload, true);
+//                pathTimer.resetTimer();
+//
+//                setPathState(4);
+//                break;
 
             case 4:
+                if (pathTimer.getElapsedTimeSeconds()>2) {
+                    servo_t.moveDown();
+                    pathTimer.resetTimer();
+
+                    setPathState(5);
+                }
+                break;
+
+            case 5:
+                if (pathTimer.getElapsedTimeSeconds() > 1.5) {
+                    servo.goTo0();
+                    servo.update(telemetry);
+                    pathTimer.resetTimer();
+
+                    setPathState(6);
+                }
+
+                break;
+
+            case 6:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    servo_t.moveUp();
+                    pathTimer.resetTimer();
+
+                    setPathState(7);
+                }
+
+                break;
+
+            case 7:
+                if (pathTimer.getElapsedTimeSeconds() > 2) {
+                    servo_t.moveDown();
+                    pathTimer.resetTimer();
+
+                    setPathState(8);
+                }
+
+                break;
+            case 8:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    servo.goTo1();
+                    servo.update(telemetry);
+                    pathTimer.resetTimer();
+
+                    setPathState(9);
+                }
+
+                break;
+            case 9:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    servo_t.moveUp();
+                    pathTimer.resetTimer();
+
+                    setPathState(10);
+                }
+                break;
+
+            case 10:
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    follower.followPath(shootPreload, true);
+                    servo_t.moveDown();
+                    pathTimer.resetTimer();
+
+                    setPathState(11);
+                }
+
+                break;
+
+            case 11:
                 if (!follower.isBusy()) {
                     setPathState(-1);
                 }
+
                 break;
         }
     }

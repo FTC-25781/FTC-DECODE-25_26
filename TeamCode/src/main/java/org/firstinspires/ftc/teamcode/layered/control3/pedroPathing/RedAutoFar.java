@@ -83,7 +83,7 @@ public class RedAutoFar extends OpMode {
 //                        follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
                         shooter.shoot(0.89);
-                        servo.transfer.setPosition(0.82);
+                        servo.goTo2();
                         servo.update(telemetry);
                         pathTimer.resetTimer();
 
@@ -123,7 +123,7 @@ public class RedAutoFar extends OpMode {
 
             case 5:
                 if (pathTimer.getElapsedTimeSeconds() > 1.5) {
-                    servo.transfer.setPosition(0.06);
+                    servo.goTo0();
                     servo.update(telemetry);
                     pathTimer.resetTimer();
 
@@ -153,7 +153,7 @@ public class RedAutoFar extends OpMode {
                 break;
             case 8:
                 if (pathTimer.getElapsedTimeSeconds() > 2.5) {
-                    servo.transfer.setPosition(0.44);
+                    servo.goTo1();
                     servo.update(telemetry);
                     pathTimer.resetTimer();
 

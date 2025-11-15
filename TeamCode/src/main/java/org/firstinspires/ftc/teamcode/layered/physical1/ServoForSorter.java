@@ -28,14 +28,17 @@ public class ServoForSorter {
 
     public void goTo0() {
         current_Pos = 0;
+        transfer.setPosition(positions[current_Pos]);
     }
 
     public void goTo1() {
         current_Pos = 1;
+        transfer.setPosition(positions[current_Pos]);
     }
 
     public void goTo2() {
         current_Pos = 2;
+        transfer.setPosition(positions[current_Pos]);
     }
 
     public void GoBackwards() {

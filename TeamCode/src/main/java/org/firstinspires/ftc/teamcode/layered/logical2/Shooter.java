@@ -59,8 +59,12 @@ public class Shooter {
         return Range.clip(power, 0.0, 1.0);
     }
 
-    public double targetRPM() {
+    public double targetRPM(Follower follower) {
         return Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()) - 132, 2) + Math.pow(Math.abs(follower.getPose().getY()) - 132, 2));
+    }
+
+    public void reverseDepositMotor() {
+        shooter_motor.setPower(0.4);
     }
 
     public void shoot(double pow){
@@ -69,8 +73,8 @@ public class Shooter {
 
     public void update(Telemetry telemetry) {
         telemetry.addData("Deposit Power", shooter_motor.getPower());
-        telemetry.addData("Distance", targetRPM());
-        telemetry.update();
+
+//        telemetry.update();
     }
 }
 

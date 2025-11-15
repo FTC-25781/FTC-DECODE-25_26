@@ -9,8 +9,8 @@ public class ServoForTransfer {
     private final LimitSwitch limitSwitches;
     private final ElapsedTime debounceTimer = new ElapsedTime(); // for limit switch not going too fast
 
-    private static final double TOP_POS = 0.65;
-    private static final double DOWN_POS = 0.22;
+    private static final double TOP_POS = 0.63;
+    private static final double DOWN_POS = 0.10;
     private static final double DEBOUNCE_DELAY = 0.25; // seconds
 
     private boolean movingUp = false;

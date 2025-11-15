@@ -104,14 +104,25 @@ public class Robot extends OpMode {
         }
 
         if (gamepad1.right_trigger>0.1) {
-            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM()));
+            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                     .addPath(new Path(new BezierPoint(follower::getPose)))
-                    .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((144-follower.getPose().getY())/(144-follower.getPose().getX())))
+                    .setLinearHeadingInterpolation(follower.getPose().getPose().getHeading(), Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())))
                     .build();
             follower.followPath(pathChain.get());
             automatedDrive = true;
         }
+
+        if (gamepad1.right_bumper) {
+            shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+            pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                    .addPath(new Path(new BezierPoint(follower::getPose)))
+                    .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())), 0.7))
+                    .build();
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
+        }
+
         //Stop automated following if the follower is done
         if (automatedDrive && (gamepad1.left_trigger>0.1 || !follower.isBusy())) {
             follower.startTeleopDrive();
@@ -121,7 +132,10 @@ public class Robot extends OpMode {
         if(gamepad1.left_trigger>0.1) {
             shooter.shoot(0);
 //            servo_t.moveDown();
+        }
 
+        if (gamepad1.left_bumper) {
+            shooter.reverseDepositMotor();
         }
 
         servo_t.update();
@@ -135,7 +149,9 @@ public class Robot extends OpMode {
         telemetry.addData("Follower Pose X", follower.getPose().getX());
         telemetry.addData("Follower Pose Y", follower.getPose().getY());
         telemetry.addData("Follower Pose Head", follower.getPose().getHeading());
+        telemetry.addData("Distance", Math.sqrt(Math.pow(Math.abs(follower.getPose().getX()) - 132, 2) + Math.pow(Math.abs(follower.getPose().getY()) - 132, 2)));
         telemetry.addData("Encoder Pos: ", encoder.pos());
+        telemetry.addData("Angle of robot", Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())));
         telemetry.update();
     }
 }

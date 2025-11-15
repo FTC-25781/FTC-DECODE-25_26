@@ -24,9 +24,9 @@ import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Red Auto Close Dont use", group = "Blue")
+@Autonomous(name = "Blue Far", group = "Blue")
 @Configurable
-public class RedAutoClose extends OpMode {
+public class BlueBackup extends OpMode {
     private ServoForSorter servo;
     private ServoForTransfer servo_t;
     private ShooterV2 shooter;
@@ -34,8 +34,8 @@ public class RedAutoClose extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(122, 122, Math.toRadians(45));
-    private final Pose scanPose = new Pose(72, 72, Math.toRadians(90));
+    private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
+    private final Pose scanPose = new Pose(37, 33, Math.toRadians(90));
     private final Pose shootPose = new Pose(80, 80, Math.toRadians(45));
     private PathChain getScan, shootPreload;
     private Limelight3A limelight;
@@ -64,205 +64,73 @@ public class RedAutoClose extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(getScan, true);
-                setPathState(1);
+                setPathState(-1);
                 break;
 
             case 1:
                 // Vision-based centering on obelisk
                 if (!follower.isBusy()) {
+
+
                     if ((pathTimer.getElapsedTime() >= 1.0) ||
                             pathTimer.getElapsedTime() >= 4.0) {
                         follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
                         shooter.shoot(0.7);
-                        servo_t.moveDown();
-
-                        if (obeliskValue == 23) {
-                            setPathState(18);
-                        } else if (obeliskValue == 22) {
-                            setPathState(10);
-                        } else {
-                            setPathState(2);
-                        }
+                        setPathState(2);
                     }
                 }
                 break;
 
             case 2:
+//                if (!follower.isBusy()) {
+
+
                 servo.goTo2();
-                shooter.shoot(0.73);
-                setPathState(3);
+                shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+
+
+                if (pathTimer.getElapsedTime() <= 3) {
+                        servo_t.moveUp();
+                    }
+                    else if (pathTimer.getElapsedTime() < 4) {
+                        servo_t.moveDown();
+                    }
+
+                    else if (pathTimer.getElapsedTime() <= 5) {
+                        servo.goTo0();
+                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+                    }
+                    else if (pathTimer.getElapsedTime() <= 6) {
+                        servo_t.moveUp();
+                    }
+                    else if (pathTimer.getElapsedTime() < 7) {
+                        servo_t.moveDown();
+                    }
+
+                    else if (pathTimer.getElapsedTime() <= 8) {
+                        servo.goTo1();
+                        shooter.shoot(shooter.calculateTargetPower(shooter.targetRPM(follower)));
+                    }
+                    else if (pathTimer.getElapsedTime() <= 9) {
+                        servo_t.moveUp();
+                    }
+                    else if (pathTimer.getElapsedTime() < 10) {
+                        servo_t.moveDown();
+                    }
+
+                    setPathState(2);
+//                    else if (pathTimer.getElapsedTime() > 11) {
+//                        setPathState(3);
+//                    }
+//                }
                 break;
 
             case 3:
-                if (pathTimer.getElapsedTimeSeconds()<5){
-                    servo_t.moveUp();
-                    setPathState(31);
-                }
+                servo_t.moveUp();
+//                if (servo_t)
+                servo_t.moveDown();
                 break;
-            case 31:
-                if (pathTimer.getElapsedTimeSeconds()<2) {
-                    servo_t.moveDown();
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                if (pathTimer.getElapsedTimeSeconds()<2) {
-                    servo.goTo0();
-//                    shooter.shoot(0.73);
-                    setPathState(5);
-                }
-            case 5:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-
-                else{servo_t.moveDown();
-                    setPathState(6);
-                }
-
-            case 6:
-                if (pathTimer.getElapsedTimeSeconds()<2) {
-
-                    servo.goTo1();
-//                    shooter.shoot(0.73);
-                    setPathState(7);
-                }
-            case 7:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-                else{servo_t.moveDown();
-                    setPathState(8);
-                }
-            case 8:
-                setPathState(-1);
-
-
-
-            case 10:
-                // Vision-based centering on obelisk
-                if (!follower.isBusy()) {
-                    if ((pathTimer.getElapsedTime() >= 1.0) ||
-                            pathTimer.getElapsedTime() >= 4.0) {
-                        follower.followPath(shootPreload, true);
-                        pathTimer.resetTimer();
-                        shooter.shoot(0.7);
-                        servo_t.moveDown();
-
-                        setPathState(11);
-                    }
-                }
-                break;
-
-            case 11:
-                servo.goTo0();
-                shooter.shoot(0.73);
-                setPathState(12);
-                break;
-
-            case 12:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-                else {
-                    servo_t.moveDown();
-                    setPathState(13);
-                }
-                break;
-            case 13:
-                if (pathTimer.getElapsedTimeSeconds()<1) {
-                    servo.goTo2();
-                    shooter.shoot(0.73);
-                    setPathState(14);
-                }
-            case 14:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-
-                else{servo_t.moveDown();
-                    setPathState(15);
-                }
-
-            case 15:
-                if (pathTimer.getElapsedTimeSeconds()<1) {
-
-                    servo.goTo1();
-                    shooter.shoot(0.73);
-                    setPathState(16);
-                }
-            case 16:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-                else{servo_t.moveDown();
-                    setPathState(17);
-                }
-            case 17:
-                setPathState(-1);
-
-            case 18:
-                // Vision-based centering on obelisk
-                if (!follower.isBusy()) {
-                    if ((pathTimer.getElapsedTime() >= 1.0) ||
-                            pathTimer.getElapsedTime() >= 4.0) {
-                        follower.followPath(shootPreload, true);
-                        pathTimer.resetTimer();
-                        shooter.shoot(0.7);
-                        servo_t.moveDown();
-
-                        setPathState(19);
-                    }
-                }
-                break;
-
-            case 19:
-                servo.goTo0();
-                shooter.shoot(0.73);
-                setPathState(21);
-                break;
-
-            case 21:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-                else {
-                    servo_t.moveDown();
-                    setPathState(22);
-                }
-                break;
-            case 22:
-                if (pathTimer.getElapsedTimeSeconds()<1) {
-                    servo.goTo1();
-                    shooter.shoot(0.73);
-                    setPathState(23);
-                }
-            case 23:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-
-                else{servo_t.moveDown();
-                    setPathState(24);
-                }
-
-            case 24:
-                if (pathTimer.getElapsedTimeSeconds()<1) {
-
-                    servo.goTo2();
-                    shooter.shoot(0.73);
-                    setPathState(25);
-                }
-            case 25:
-                if (pathTimer.getElapsedTimeSeconds()<2){
-                    servo_t.moveUp();
-                }
-                else{servo_t.moveDown();
-                    setPathState(26);
-                }
-            case 26:
-                setPathState(-1);
         }
     }
 

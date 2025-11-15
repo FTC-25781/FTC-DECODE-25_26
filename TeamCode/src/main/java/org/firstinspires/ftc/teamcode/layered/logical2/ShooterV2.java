@@ -94,7 +94,7 @@ public class ShooterV2 {
 
         public void update(Telemetry telemetry) {
             telemetry.addData("Deposit Power", shooter_motor.getPower());
-            telemetry.addData("Variation", variation);
+//            telemetry.addData("Variation", variation);
 //            telemetry.addData("Distance", targetRPM());
 //            telemetry.update();
 

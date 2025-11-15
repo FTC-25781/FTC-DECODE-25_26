@@ -200,11 +200,11 @@ public class Robot extends OpMode {
         //left trigger = all the way back (0.9)
 
         if (gamepad1.right_trigger >0.1) {
-            shooter.shoot(0.7+variation);
+            shooter.shoot(0.78+variation);
         }
 
         if (gamepad1.right_bumper) {
-            shooter.shoot(0.6+variation);
+            shooter.shoot(0.72+variation);
         }
 
         if (gamepad1.left_trigger > 0.1) {
@@ -258,6 +258,7 @@ public class Robot extends OpMode {
         telemetry.addData("Encoder Pos: ", encoder.pos());
         telemetry.addData("Idly Pos: ", servo.current_Pos);
 
+        telemetry.addData("Variation", variation);
         telemetry.addData("Angle of robot", Math.atan((132-follower.getPose().getY())/(132-follower.getPose().getX())));
         telemetry.update();
     }

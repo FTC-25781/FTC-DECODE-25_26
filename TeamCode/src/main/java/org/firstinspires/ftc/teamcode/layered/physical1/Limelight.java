@@ -4,6 +4,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.IMU;
 
 @TeleOp(name = "Limelight Test", group = "Test")
 public class Limelight extends LinearOpMode {
@@ -13,6 +14,7 @@ public class Limelight extends LinearOpMode {
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         limelight.start();
+        IMU imu = hardwareMap.get(IMU.class, "imu");
 
         waitForStart();
 
@@ -46,6 +48,9 @@ public class Limelight extends LinearOpMode {
             }
 
             telemetry.update();
+            // localization code
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+            
         }
     }
 }

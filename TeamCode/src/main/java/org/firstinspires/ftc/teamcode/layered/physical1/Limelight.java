@@ -49,8 +49,16 @@ public class Limelight extends LinearOpMode {
 
             telemetry.update();
             // localization code
-            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-            
+//            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+//            limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
+//            result = limelight.getLatestResult();
+//            if(result!=null && result.isValid()){
+//                Pose3D botpose = result.getBotpose_MT2();
+//                if (botpose != null){
+//                    double x = botpose.getPosition().x;
+//                    double y = botpose.getPosition().y;
+//                }
+//            }
         }
     }
 }

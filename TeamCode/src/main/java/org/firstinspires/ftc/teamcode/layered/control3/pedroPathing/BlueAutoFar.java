@@ -78,7 +78,11 @@ public class BlueAutoFar extends OpMode {
 //                        follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
                         shooter.shoot(0.89);
-                        servo.goTo2();
+                        if (obeliskValue == 21 || obeliskValue == 22) {
+                            servo.goTo0();
+                        } else {
+                            servo.goTo2();
+                        }
                         servo.update(telemetry);
                         pathTimer.resetTimer();
 
@@ -118,7 +122,11 @@ public class BlueAutoFar extends OpMode {
 
             case 5:
                 if (pathTimer.getElapsedTimeSeconds() > 1.5) {
-                    servo.goTo0();
+                    if (obeliskValue == 21 || obeliskValue == 23) {
+                        servo.goTo1(); // green ball
+                    } else {
+                        servo.goTo2();
+                    }
                     servo.update(telemetry);
                     pathTimer.resetTimer();
 
@@ -148,7 +156,11 @@ public class BlueAutoFar extends OpMode {
                 break;
             case 8:
                 if (pathTimer.getElapsedTimeSeconds() > 2.5) {
-                    servo.goTo1();
+                    if (obeliskValue == 22 || obeliskValue == 23) {
+                        servo.goTo1(); // green ball
+                    } else {
+                        servo.goTo2();
+                    }
                     servo.update(telemetry);
                     pathTimer.resetTimer();
 

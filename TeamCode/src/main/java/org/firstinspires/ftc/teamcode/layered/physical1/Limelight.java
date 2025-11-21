@@ -6,20 +6,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
 @TeleOp(name = "Limelight Test", group = "Test")
 public class Limelight extends LinearOpMode {
-    private IMU imu;
     @Override
     public void runOpMode() {
         // Get the Limelight camera from the configuration
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        imu = hardwareMap.get(IMU.class, "imu");
         limelight.pipelineSwitch(0);
         limelight.start();
+        IMU imu = hardwareMap.get(IMU.class, "imu");
 
         waitForStart();
 
@@ -53,17 +48,9 @@ public class Limelight extends LinearOpMode {
             }
 
             telemetry.update();
-            //Localization code
-//            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-//            limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
-//            result = limelight.getLatestResult();
-//            if(result!=null && result.isValid()){
-//                Pose3D botpose = result.getBotpose_MT2();
-//                if (botpose != null){
-//                    double x = botpose.getPosition().x;
-//                    double y = botpose.getPosition().y;
-//                }
-//            }
+            // localization code
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+            
         }
     }
 }

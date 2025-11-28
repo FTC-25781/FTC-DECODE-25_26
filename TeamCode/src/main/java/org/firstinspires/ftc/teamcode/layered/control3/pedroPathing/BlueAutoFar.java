@@ -35,7 +35,7 @@ public class BlueAutoFar extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
-    private final Pose scanPose = new Pose(55, 25, Math.toRadians(180-66.406));
+    private final Pose scanPose = new Pose(55, 25, Math.toRadians(180-64.406));
     private final Pose shootPose = new Pose(37, 33, Math.toRadians(90));
     private PathChain getScan, shootPreload;
     private Limelight3A limelight;
@@ -43,10 +43,10 @@ public class BlueAutoFar extends OpMode {
     ArrayList<Integer> tags = new ArrayList<Integer>();
     static int obeliskValue = 0;
 
-    // Vision centering variables
-    private boolean isCentered = false;
-    private static final double CENTER_TOLERANCE = 3.0;
-    private static final double STRAFE_CORRECTION_GAIN = 0.09; // adjust this value
+//    // Vision centering variables
+//    private boolean isCentered = false;
+//    private static final double CENTER_TOLERANCE = 3.0;
+//    private static final double STRAFE_CORRECTION_GAIN = 0.09; // adjust this value
 
     public void buildPaths() {
         getScan = follower.pathBuilder()
@@ -72,12 +72,11 @@ public class BlueAutoFar extends OpMode {
                 // Vision-based centering on obelisk
                 if (!follower.isBusy()) {
 
-
                     if ((pathTimer.getElapsedTime() >= 1.0) ||
                             pathTimer.getElapsedTime() >= 4.0) {
 //                        follower.followPath(shootPreload, true);
                         pathTimer.resetTimer();
-                        shooter.shoot(0.89);
+                        shooter.shoot(0.87);
                         if (obeliskValue == 21 || obeliskValue == 22) {
                             servo.goTo0();
                         } else {
@@ -86,8 +85,16 @@ public class BlueAutoFar extends OpMode {
                         servo.update(telemetry);
                         pathTimer.resetTimer();
 
-                        setPathState(2);
-
+                        if(obeliskValue == 23){ // PPG
+                            setPathState(5);
+                        }
+                        else if(obeliskValue==22){ // PGP
+                            setPathState(12);
+                        }
+                        else{
+                            setPathState(2); // GPP
+                        }
+//                            setPathState(2);
                     }
                 }
                 break;
@@ -186,14 +193,52 @@ public class BlueAutoFar extends OpMode {
                     setPathState(11);
                 }
 
+            case 13:
+                if (pathTimer.getElapsedTimeSeconds()<2){
+                    servo_t.moveUp();
+                }
+                else {
+                    servo_t.moveDown();
+                    setPathState(14);
+                }
                 break;
 
             case 11:
                 if (!follower.isBusy()) {
                     setPathState(-1);
                 }
+                break;
+            case 12:
+                servo.goTo0();
+                shooter.shoot(0.73);
+                setPathState(13);
+                break;
 
                 break;
+            case 14:
+                if (pathTimer.getElapsedTimeSeconds()<1) {
+                    servo.goTo2();
+                    shooter.shoot(0.73);
+                    setPathState(15);
+                }
+            case 15:
+                if (pathTimer.getElapsedTimeSeconds()<2){
+                    servo_t.moveUp();
+                }
+
+                else{servo_t.moveDown();
+                    setPathState(16);
+                }
+
+            case 16:
+                if (pathTimer.getElapsedTimeSeconds()<1) {
+
+                    servo.goTo1();
+                    shooter.shoot(0.73);
+                    setPathState(17);
+                }
+            case 17:
+                setPathState(-1);
         }
     }
 

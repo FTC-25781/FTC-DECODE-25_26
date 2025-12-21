@@ -12,8 +12,8 @@ public class GetDistanceToGoal {
     boolean isBlue;
     public GetDistanceToGoal(Follower follower, boolean isBlue ) {
 
-        follower = follower;
-        isBlue = isBlue;
+        this.follower = follower;
+        this.isBlue = isBlue;
     }
 
     public double getDistanceToGoal(){

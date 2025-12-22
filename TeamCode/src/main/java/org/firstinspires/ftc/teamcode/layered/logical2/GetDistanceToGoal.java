@@ -30,6 +30,7 @@ public class GetDistanceToGoal {
         double dy = goalY - robotPose.getY();
         double distanceToGoal = Math.sqrt(dx * dx + dy * dy);
 
-        return distanceToGoal;
+        // converting inches to mm
+        return distanceToGoal*25.4;
     }
 }

@@ -7,11 +7,11 @@ public class BallisticsCalculator {
 
     // TUNABLE PARAMETERS - adjust these for your robot
     public static double LAUNCH_ANGLE_DEG = 51.0;      // Launch angle in degrees
-    public static double SHOOTER_HEIGHT_INCHES = 11.0;  // Height of shooter off ground
-    public static double TARGET_HEIGHT_INCHES = 43.0;   // Height of target basket
-    public static double WHEEL_DIAMETER_INCHES = 3.779528;   // Diameter of flywheel
-    public static double VELOCITY_EFFICIENCY = 0.85;    // Ball exit velocity / wheel velocity (0.7-0.9 typical)
-    public static double GRAVITY = 386.22;              // Gravity in inches/s² (32.185 ft/s² = 386.22 in/s²)
+    public static double SHOOTER_HEIGHT = 11.0*25.4;  // Height of shooter off ground
+    public static double TARGET_HEIGHT = 43*25.4;   // Height of target basket
+    public static double WHEEL_DIAMETER = 96;   // Diameter of flywheel
+    public static double VELOCITY_EFFICIENCY = 0.75;    // Ball exit velocity / wheel velocity (0.7-0.9 typical)
+    public static double GRAVITY = 9800;              // Gravity in inches/s² (32.185 ft/s² = 386.22 in/s²)
 
     /**
      * Calculate required RPM based on horizontal distance to target
@@ -23,7 +23,7 @@ public class BallisticsCalculator {
         double launchAngleRad = Math.toRadians(LAUNCH_ANGLE_DEG);
 
         // Calculate height difference
-        double heightDifference = TARGET_HEIGHT_INCHES - SHOOTER_HEIGHT_INCHES;
+        double heightDifference = TARGET_HEIGHT - SHOOTER_HEIGHT;
 
         // Projectile motion equation for initial velocity:
         // v₀ = sqrt( g * d² / (2 * cos²(θ) * (d * tan(θ) - h)) )
@@ -52,16 +52,17 @@ public class BallisticsCalculator {
 
         // Convert wheel velocity to RPM
         // Wheel circumference = π * diameter
-        // Velocity (in/s) = RPM * circumference / 60
+        // Velocity (mm/s) = RPM/60 * circumference
         // Therefore: RPM = (velocity * 60) / (π * diameter)
-        double wheelCircumference = Math.PI * WHEEL_DIAMETER_INCHES;
+        double wheelCircumference = Math.PI * WHEEL_DIAMETER;
         double requiredRPM = (requiredWheelVelocity * 60.0) / wheelCircumference;
 
         return requiredRPM;
     }
+    // Coverts RPM to angular Velocity in rad/sec
     public static double calculateRange(double rpm) {
         // Convert RPM to wheel velocity
-        double wheelCircumference = Math.PI * WHEEL_DIAMETER_INCHES;
+        double wheelCircumference = Math.PI * WHEEL_DIAMETER;
         double wheelVelocity = (rpm * wheelCircumference) / 60.0;
 
         // Account for efficiency
@@ -69,7 +70,7 @@ public class BallisticsCalculator {
 
         // Convert angle to radians
         double launchAngleRad = Math.toRadians(LAUNCH_ANGLE_DEG);
-        double heightDifference = TARGET_HEIGHT_INCHES - SHOOTER_HEIGHT_INCHES;
+        double heightDifference = TARGET_HEIGHT - SHOOTER_HEIGHT;
 
         // Projectile range equation:
         // R = (v₀² / g) * (sin(2θ) + sqrt(sin²(2θ) + (2gh/v₀²)))

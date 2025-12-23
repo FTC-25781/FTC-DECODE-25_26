@@ -14,7 +14,7 @@ public class FlywheelMotor {
     private Telemetry telemetry;
     private VoltageSensor batteryVoltage;
     public static final double TICKS_PER_REV = 28.0;
-    public static final double RPM_TOLERANCE = 50.0;
+    public static final double RPM_TOLERANCE = 75.0;
     private double targetRPM = 0;
     public static double kP = 10.10;  // Start here, increase if sluggish
     public static double kI = 0.0000;   // Keep small to prevent windup

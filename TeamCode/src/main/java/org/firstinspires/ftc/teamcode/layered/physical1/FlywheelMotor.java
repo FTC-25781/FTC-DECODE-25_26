@@ -6,117 +6,150 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @Config
 public class FlywheelMotor {
     public DcMotorEx flywheelShooter;
-    Telemetry telemetryF;
-    public VoltageSensor batteryVoltage;
-
-    // Motor specs
+    private Telemetry telemetry;
+    private VoltageSensor batteryVoltage;
     public static final double TICKS_PER_REV = 28.0;
     public static final double RPM_TOLERANCE = 50.0;
-    public double targetRPM;
-    public static double kS_TICKS = 120;
-    public static double kV_TICKS = 0.02;
-    public static double NOMINAL_VOLTAGE = 13.5;
-
-    public static double LAUNCH_ANGLE_DEG = 51.0;      // Launch angle in degrees
-    public static double SHOOTER_HEIGHT = 11.0*25.4;  // Height of shooter off ground
-    public static double TARGET_HEIGHT = 43*25.4;   // Height of target basket
-    public static double WHEEL_DIAMETER = 96;   // Diameter of flywheel
-    public static double VELOCITY_EFFICIENCY = 0.75;    // Ball exit velocity / wheel velocity (0.7-0.9 typical)
-    public static double GRAVITY = 9800;              // Gravity in inches/s² (32.185 ft/s² = 386.22 in/s²)
-
-//    public static double kP = 9.25;
-//    public static double kI = 2.2;
-//    public static double kD = 7.0;
-//    public static double kF = 11.7;
-
+    private double targetRPM = 0;
+    public static double kP = 10.10;  // Start here, increase if sluggish
+    public static double kI = 0.0000;   // Keep small to prevent windup
+    public static double kD = 5.40;   // Helps reduce overshoot
+    public static double kF = 13.40;  // Most important - gets you close to target
+    public static double LAUNCH_ANGLE_DEG = 51.0;
+    public static double SHOOTER_HEIGHT_MM = 11.0 * 25.4;  // 279.4mm
+    public static double TARGET_HEIGHT_MM = 43.0 * 25.4;   // 1092.2mm
+    public static double WHEEL_DIAMETER_MM = 96.0;
+    public static double VELOCITY_EFFICIENCY = 0.325;  // Empirically tuned (replaces 1.99x)
+    public static double GRAVITY_MM = 9800.0;  //  mm/s²
+    public static double RPM_CORRECTION_FACTOR = 1.172;
     public FlywheelMotor(HardwareMap hardwareMap, Telemetry telemetry) {
-        flywheelShooter = hardwareMap.get(DcMotorEx.class, "dmot");
-        telemetryF = telemetry;
-        batteryVoltage = hardwareMap.voltageSensor.iterator().next();
+        this.flywheelShooter = hardwareMap.get(DcMotorEx.class, "dmot");
+        this.telemetry = telemetry;
+        this.batteryVoltage = hardwareMap.voltageSensor.iterator().next();
 
         flywheelShooter.setDirection(DcMotorEx.Direction.FORWARD);
         flywheelShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        // Use RUN_USING_ENCODER like your working test code
-        // flywheelShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        flywheelShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         flywheelShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        // updatePIDFCoefficients();
+
+        updatePIDFCoefficients();
+    }
+    public void updatePIDFCoefficients() {
+        PIDFCoefficients pidfNew = new PIDFCoefficients(kP, kI, kD, kF);
+        flywheelShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+
+        PIDFCoefficients pidfActual = flywheelShooter.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("PIDF Set", "P=%.1f, I=%.2f, D=%.1f, F=%.1f",
+                pidfActual.p, pidfActual.i, pidfActual.d, pidfActual.f);
+    }
+    public double getVelocityEfficiency(double distanceMM) {
+        if (distanceMM <= 2000) return 0.327;
+        if (distanceMM >= 4500) return 0.36;
+
+        // Linear interpolation
+        double ratio = (distanceMM - 2000) / (4500 - 2000);
+        return 0.327 + ratio * (0.36 - 0.327);
     }
 
     public void setRPM(double targetRPM) {
         this.targetRPM = targetRPM;
 
-        // Convert RPM to ticks per seconds
+        if (targetRPM <= 0) {
+            flywheelShooter.setPower(0);
+            return;
+        }
+
+        // Convert RPM to ticks per second
         double targetTicksPerSecond = targetRPM * TICKS_PER_REV / 60.0;
 
-        double feedforwardTicks = kS_TICKS + kV_TICKS * targetTicksPerSecond;
-        targetTicksPerSecond += feedforwardTicks;
 
-        double voltageCompensation = NOMINAL_VOLTAGE / batteryVoltage.getVoltage();
-        targetTicksPerSecond *= voltageCompensation;
-
+        // Set velocity - PIDF controller handles the rest
         flywheelShooter.setVelocity(targetTicksPerSecond);
-        telemetryF.addData("Target Ticks/Sec", targetTicksPerSecond);
+
+        telemetry.addData("Target RPM", "%.0f", targetRPM);
+        telemetry.addData("Target Ticks/Sec", "%.0f", targetTicksPerSecond);
+        telemetry.addData("Battery Voltage", "%.1fV", batteryVoltage.getVoltage());
+        telemetry.update();
     }
 
     public boolean isShooterReady() {
-        return Math.abs(targetRPM - getCurrentRPM()) < RPM_TOLERANCE;
+        double currentRPM = getCurrentRPM();
+        double error = Math.abs(targetRPM - currentRPM);
+        boolean ready = error < RPM_TOLERANCE && targetRPM > 0;
+
+        telemetry.addData("RPM Error", "%.0f RPM", error);
+        telemetry.addData("Shooter Ready", ready ? "YES" : "NO");
+
+        return ready;
     }
 
-    public double targetRPM(double distance) {
-        double calculatedRPM = calculateRequiredRPM(distance);
-        calculatedRPM *= 1.99;
-        return Range.clip(calculatedRPM, 0, 6000);
+    public double targetRPM(double distanceMM) {
+        double calculatedRPM = calculateRequiredRPM(distanceMM);
+
+        ///calculatedRPM *= RPM_CORRECTION_FACTOR;
+
+        double clampedRPM = Range.clip(calculatedRPM, 0, 6000);
+
+        telemetry.addData("Calc RPM (raw)", "%.0f", calculatedRPM);
+        telemetry.addData("Target RPM (final)", "%.0f", clampedRPM);
+
+        return clampedRPM;
     }
 
     public double getCurrentRPM() {
-        // Convert ticks/sec back to RPM
         double ticksPerSecond = flywheelShooter.getVelocity();
-        return ticksPerSecond * 60.0 / TICKS_PER_REV;
+        return (ticksPerSecond * 60.0) / TICKS_PER_REV;
     }
-
-    public double calculateRequiredRPM(double horizontalDistance) {
+    private double calculateRequiredRPM(double horizontalDistanceMM) {
         // Convert angle to radians
         double launchAngleRad = Math.toRadians(LAUNCH_ANGLE_DEG);
 
         // Calculate height difference
-        double verticalDistance = TARGET_HEIGHT - SHOOTER_HEIGHT;
+        double verticalDistanceMM = TARGET_HEIGHT_MM - SHOOTER_HEIGHT_MM;
 
-        // Projectile motion equation for initial velocity:
-        // v₀ = sqrt( g * d² / (2 * cos²(θ) * (d * tan(θ) - h)) )
-        // where: g = gravity, d = horizontal distance, θ = launch angle, h = height difference
-
+        // Trig values
         double cosAngle = Math.cos(launchAngleRad);
         double tanAngle = Math.tan(launchAngleRad);
 
-        // Calculate denominator: 2 * cos²(θ) * (d * tan(θ) - h)
+        // Projectile motion equation:
+        // v₀ = sqrt( g * d² / (2 * cos²(θ) * (d * tan(θ) - h)) )
         double denominator = 2.0 * cosAngle * cosAngle *
-                (horizontalDistance * tanAngle - verticalDistance);
+                (horizontalDistanceMM * tanAngle - verticalDistanceMM);
 
-        // Check for invalid trajectory (target below/behind shooter with this angle)
+        // Check for invalid trajectory
         if (denominator <= 0) {
-            return 0; // Invalid trajectory
+            telemetry.addData("WARNING", "Invalid trajectory at %.0fmm", horizontalDistanceMM);
+            return 0;
         }
 
-        // Calculate numerator: g * d²
-        double numerator = GRAVITY * horizontalDistance * horizontalDistance;
+        double numerator = GRAVITY_MM * horizontalDistanceMM * horizontalDistanceMM;
 
-        // Calculate required ball exit velocity (inches/second)
+        // Calculate required ball exit velocity (mm/s)
         double requiredBallVelocity = Math.sqrt(numerator / denominator);
 
-        // Account for energy loss: wheel needs to spin faster than ball exit velocity
-        double requiredWheelVelocity = requiredBallVelocity / VELOCITY_EFFICIENCY;
+        double efficiency = getVelocityEfficiency(horizontalDistanceMM);
+        double requiredWheelVelocity = requiredBallVelocity / efficiency;
 
-        // Convert wheel velocity to RPM
-        // Wheel circumference = π * diameter
-        // Velocity (mm/s) = RPM/60 * circumference
-        // Therefore: RPM = (velocity * 60) / (π * diameter)
-        double wheelCircumference = Math.PI * WHEEL_DIAMETER;
+        telemetry.addData("Velocity Efficiency", "%.3f", efficiency);
+
+        // Convert to RPM: RPM = (velocity * 60) / (π * diameter)
+        double wheelCircumference = Math.PI * WHEEL_DIAMETER_MM;
         double requiredRPM = (requiredWheelVelocity * 60.0) / wheelCircumference;
+
+        telemetry.addData("Ball Velocity", "%.0f mm/s", requiredBallVelocity);
+        telemetry.addData("Wheel Velocity", "%.0f mm/s", requiredWheelVelocity);
+
         return requiredRPM;
+    }
+
+    public void stop() {
+        targetRPM = 0;
+        flywheelShooter.setPower(0);
     }
 }

@@ -51,6 +51,7 @@ public class PIDShooter extends LinearOpMode {
             telemetry.addData("Ready", flywheel.isShooterReady());
             telemetry.update();
         }
+        flywheel.stop();
     }
     public void initHardware() {
         servo = hardwareMap.get(Servo.class, "liftServo");

@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /*
  What is class about?
@@ -14,12 +13,11 @@ public class Turret {
     public TurretTracker turretOrientation;
     public double rotationSpeed = 0.3; // max speed for turret
     public double angleTolerance = Math.toRadians(5); // 5 degrees of angle tolerance
-
     public Turret(HardwareMap hardwareMap, Follower follower) {
-        servo = hardwareMap.get(CRServo.class, "turretServo");
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
-    }
+        servo = hardwareMap.get(CRServo.class, "turretServo");
 
+    }
     /*
     Calcultes the error of the turret to the goal.
     Sets servo speed originally to 0
@@ -34,7 +32,8 @@ public class Turret {
             servoSpeed = Math.signum(error) * rotationSpeed;
         }
         else{
-            servo.setPower(0);        }
+            servo.setPower(0);
+        }
         servo.setPower(servoSpeed);
     }
     public boolean isOnTarget() {

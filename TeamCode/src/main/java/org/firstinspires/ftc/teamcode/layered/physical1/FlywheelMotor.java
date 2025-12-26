@@ -32,8 +32,8 @@ public class FlywheelMotor {
 
     // --- Trajectory & Environment Constants ---
     public static final double LAUNCH_ANGLE_DEG = 35.0;      // Fixed angle of the shooter's exit ramp
-    public static final double SHOOTER_HEIGHT_MM = 177.8;    // 7.0 inches converted to mm
-    public static final double TARGET_HEIGHT_MM = 1092.2;    // 43.0 inches converted to mm
+    public static final double SHOOTER_HEIGHT_MM = 7.0*25.4;    // 7.0 inches converted to mm
+    public static final double TARGET_HEIGHT_MM = 43*25.4;    // 43.0 inches converted to mm
     public static final double WHEEL_DIAMETER_MM = 96.0;     // Diameter of the flywheel (e.g., compliant wheel)
     public static final double GRAVITY_MM = 9800.0;          // Acceleration due to gravity in mm/s²
 

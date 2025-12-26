@@ -10,8 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.layered.logical2.ShooterV2;
-import org.firstinspires.ftc.teamcode.layered.physical1.EncoderForIntake;
 import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;

@@ -46,7 +46,7 @@ public class PIDShooter extends LinearOpMode {
             telemetry.addData("Current Position-Y:", follower.getPose().getY());
             telemetry.addData("Current Heading:", follower.getPose().getHeading());
 
-            telemetry.addData("Distance", distance);
+            telemetry.addData("Distance (inches):", distanceCalculation.getDistanceInInches());
             telemetry.addData("Target RPM", targetRPM);
             telemetry.addData("Current RPM", flywheel.getCurrentRPM());
 
@@ -77,6 +77,6 @@ public class PIDShooter extends LinearOpMode {
 
         // Initialize the distance calculator, linking it to the follower's position
         // The 'true' likely indicates a specific goal side or calculation mode
-        distanceCalculation = new GetDistanceToGoal(follower, true);
+        distanceCalculation = new GetDistanceToGoal(follower, true,telemetry);
     }
 }

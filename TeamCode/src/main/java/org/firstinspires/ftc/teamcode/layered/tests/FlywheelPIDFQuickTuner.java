@@ -59,7 +59,7 @@ public class FlywheelPIDFQuickTuner extends LinearOpMode {
             if (gamepad1.x) FlywheelMotor.kF -= 0.1;
 
             // Apply the new PIDF values to the motor controller hardware
-            flywheel.updatePIDFCoefficients();
+            // flywheel.updatePIDFCoefficients();
 
             // Command the motor to the (potentially updated) target RPM
             flywheel.setRPM(targetRPM);

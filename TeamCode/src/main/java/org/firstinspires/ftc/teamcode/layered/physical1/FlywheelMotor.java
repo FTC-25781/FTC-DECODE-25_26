@@ -54,21 +54,21 @@ public class FlywheelMotor {
         // FLOAT ensures the motor coasts to a stop rather than braking abruptly, protecting the motor/gears
         flywheelShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
-        updatePIDFCoefficients();
+        // updatePIDFCoefficients();
     }
 
     /**
      * Applies the defined PIDF coefficients to the motor controller.
      */
-    public void updatePIDFCoefficients() {
-        PIDFCoefficients pidfNew = new PIDFCoefficients(kP, kI, kD, kF);
-        flywheelShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
-
-        // Confirmation of settings via telemetry
-        PIDFCoefficients pidfActual = flywheelShooter.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        telemetry.addData("PIDF Applied", "P=%.1f, I=%.2f, D=%.1f, F=%.1f",
-                pidfActual.p, pidfActual.i, pidfActual.d, pidfActual.f);
-    }
+//    public void updatePIDFCoefficients() {
+//        PIDFCoefficients pidfNew = new PIDFCoefficients(kP, kI, kD, kF);
+//        flywheelShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+//
+//        // Confirmation of settings via telemetry
+//        PIDFCoefficients pidfActual = flywheelShooter.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+//        telemetry.addData("PIDF Applied", "P=%.1f, I=%.2f, D=%.1f, F=%.1f",
+//                pidfActual.p, pidfActual.i, pidfActual.d, pidfActual.f);
+//    }
 
     /**
      * Accounts for "Slip" or efficiency loss between the wheel and the ball.
@@ -151,8 +151,6 @@ public class FlywheelMotor {
         double tanAngle = Math.tan(launchAngleRad);
 
         // Physics: v0 = sqrt( (g * d^2) / (2 * cos(theta)^2 * (d * tan(theta) - h)) )
-
-
         double denominator = 2.0 * (cosAngle * cosAngle) *
                 (horizontalDistanceMM * tanAngle - verticalDistanceMM);
 

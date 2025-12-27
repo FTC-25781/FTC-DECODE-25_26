@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
 
 /**
@@ -14,15 +15,18 @@ public class GetDistanceToGoal {
 
     Follower follower; // The Pedro Pathing follower that tracks robot position (X, Y)
     boolean isBlue;    // Flag to determine which side of the field (and which goal) to target
+    double distance;
+    Telemetry telemetry;// The calculated distance to the goal
 
     /**
      * Constructor for the distance calculator.
      * @param follower The localization engine (Pedro Pathing)
      * @param isBlue   True if playing on the Blue alliance, False for Red
      */
-    public GetDistanceToGoal(Follower follower, boolean isBlue ) {
+    public GetDistanceToGoal(Follower follower, boolean isBlue, Telemetry telemetry) {
         this.follower = follower;
         this.isBlue = isBlue;
+        this.telemetry = telemetry;
     }
 
     /**
@@ -31,8 +35,7 @@ public class GetDistanceToGoal {
      */
     public double getDistanceToGoal(){
         // Get the current estimated position (Pose) of the robot from the follower
-        Pose robotPose = follower.getPose();
-
+        Pose robotPose = this.follower.getPose();
         double goalX;
 
         // Define Goal X-coordinate based on Alliance color.
@@ -52,13 +55,23 @@ public class GetDistanceToGoal {
         double dx = goalX - robotPose.getX();
         double dy = goalY - robotPose.getY();
 
+        telemetry.addData("GoalX:", goalX);
+        telemetry.addData("GoalY:", goalY);
+        telemetry.addData("dX:", dx);
+        telemetry.addData("dY:", dy);
+        telemetry.update();
+
         // Use the Pythagorean Theorem: Distance = sqrt(dx² + dy²)
         // This gives the "as-the-crow-flies" distance in inches.
-
-        double distanceToGoal = Math.sqrt(dx * dx + dy * dy);
+        distance  = Math.sqrt(dx * dx + dy * dy);
 
         // The physics engine (FlywheelMotor) requires millimeters.
         // 1 inch = 25.4 millimeters.
-        return distanceToGoal * 25.4;
+        return distance * 25.4;
+    }
+
+    double getDistanceInInches()
+    {
+        return distance;
     }
 }

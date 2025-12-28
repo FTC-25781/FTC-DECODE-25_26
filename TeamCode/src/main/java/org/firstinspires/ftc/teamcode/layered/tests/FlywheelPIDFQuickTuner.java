@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.layered.physical1.FlywheelMotor;
  * This OpMode allows you to tune your Flywheel PIDF coefficients live using a gamepad.
  * Since constants are static, changes made here will persist in the code until the OpMode is restarted.
  */
+
+@Disabled
 @TeleOp(name="Flywheel PIDF Quick Tuner", group="test")
 public class FlywheelPIDFQuickTuner extends LinearOpMode {
 

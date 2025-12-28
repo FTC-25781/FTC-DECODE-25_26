@@ -16,8 +16,8 @@ public class Turret {
     public Turret(HardwareMap hardwareMap, Follower follower) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
         servo = hardwareMap.get(CRServo.class, "turretServo");
-
     }
+
     /*
     Calcultes the error of the turret to the goal.
     Sets servo speed originally to 0
@@ -36,6 +36,7 @@ public class Turret {
         }
         servo.setPower(servoSpeed);
     }
+
     public boolean isOnTarget() {
         double error = turretOrientation.calculateError();
         return Math.abs(error) <= angleTolerance;

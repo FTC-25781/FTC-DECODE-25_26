@@ -25,9 +25,9 @@ public class FlywheelMotor {
     // --- PIDF Coefficients ---
     // These control how the motor reaches and maintains its speed.
     // kF (Feedforward) is the primary driver for high-velocity flywheels.
-    public static double kP = 0.0;
-    public static double kI = 0.0000;
-    public static double kD = 0.0;
+    public static double kP = 0.1;
+    public static double kI = 0.0001;
+    public static double kD = 0.1;
     public static double kF = 11.60;
 
     // --- Trajectory & Environment Constants ---
@@ -36,6 +36,11 @@ public class FlywheelMotor {
     public static final double TARGET_HEIGHT_MM = 1092.2;    // 43.0 inches converted to mm
     public static final double WHEEL_DIAMETER_MM = 96.0;     // Diameter of the flywheel (e.g., compliant wheel)
     public static final double GRAVITY_MM = 9800.0;          // Acceleration due to gravity in mm/s²
+
+    public static double NEAR_DIST = 2000.0;
+    public static double FAR_DIST = 4500.0;
+    public static double NEAR_EFFICIENCY = 0.327;
+    public static double FAR_EFFICIENCY = 0.36;
 
     /**
      * Constructor: Initializes the hardware and configures motor behavior.
@@ -54,33 +59,33 @@ public class FlywheelMotor {
         // FLOAT ensures the motor coasts to a stop rather than braking abruptly, protecting the motor/gears
         flywheelShooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
-        // updatePIDFCoefficients();
+        updatePIDFCoefficients();
     }
 
     /**
      * Applies the defined PIDF coefficients to the motor controller.
      */
-//    public void updatePIDFCoefficients() {
-//        PIDFCoefficients pidfNew = new PIDFCoefficients(kP, kI, kD, kF);
-//        flywheelShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
-//
-//        // Confirmation of settings via telemetry
-//        PIDFCoefficients pidfActual = flywheelShooter.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
-//        telemetry.addData("PIDF Applied", "P=%.1f, I=%.2f, D=%.1f, F=%.1f",
-//                pidfActual.p, pidfActual.i, pidfActual.d, pidfActual.f);
-//    }
+    public void updatePIDFCoefficients() {
+        PIDFCoefficients pidfNew = new PIDFCoefficients(kP, kI, kD, kF);
+        flywheelShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+
+        // Confirmation of settings via telemetry
+        PIDFCoefficients pidfActual = flywheelShooter.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("PIDF Applied", "P=%.1f, I=%.2f, D=%.1f, F=%.1f",
+                pidfActual.p, pidfActual.i, pidfActual.d, pidfActual.f);
+    }
 
     /**
      * Accounts for "Slip" or efficiency loss between the wheel and the ball.
      * Efficiency often increases slightly with distance as the motor maintains higher momentum.
      */
     public double getVelocityEfficiency(double distanceMM) {
-        if (distanceMM <= 2000) return 0.327;
-        if (distanceMM >= 4500) return 0.36;
+        if (distanceMM <= NEAR_DIST) return NEAR_EFFICIENCY;
+        if (distanceMM >= FAR_DIST) return FAR_EFFICIENCY;
 
-        // Linear interpolation for smooth efficiency scaling between 2 and 4.5 meters
-        double ratio = (distanceMM - 2000) / (4500 - 2000);
-        return 0.327 + ratio * (0.36 - 0.327);
+        // Linear interpolation using the variables
+        double ratio = (distanceMM - NEAR_DIST) / (FAR_DIST - NEAR_DIST);
+        return NEAR_EFFICIENCY + ratio * (FAR_EFFICIENCY - NEAR_EFFICIENCY);
     }
 
     /**
@@ -143,7 +148,7 @@ public class FlywheelMotor {
      * Uses the Projectile Motion Kinematic Equation to find the launch velocity.
      * This considers the 2D plane (Distance vs Height).
      */
-    private double calculateRequiredRPM(double horizontalDistanceMM) {
+    public double calculateRequiredRPM(double horizontalDistanceMM) {
         double launchAngleRad = Math.toRadians(LAUNCH_ANGLE_DEG);
         double verticalDistanceMM = TARGET_HEIGHT_MM - SHOOTER_HEIGHT_MM;
 

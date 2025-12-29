@@ -19,10 +19,10 @@ public class FlywheelPIDFTutorial extends OpMode {
     public double lowVelocity = 1400; // tip of big triangle
 
     double currTargetVelocity = highVelocity;
-    double P = 342;
-    double F = 14;
+    double P = 342; // Makes it regain velocity super fast (0.2 - 0.5 sec wait)
+    double F = 14; // Initial velocity comes from Feedforward
 
-    double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
+    double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001}; // Aids in testing
     int stepIndex = 1;
 
     @Override
@@ -33,7 +33,7 @@ public class FlywheelPIDFTutorial extends OpMode {
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-        telemetry.addLine("Is Brogan Cooking?");
+        telemetry.addLine("Is Brogan Cooking?"); // PS. he cooked
     }
 
     @Override
@@ -69,7 +69,7 @@ public class FlywheelPIDFTutorial extends OpMode {
         }
 
         // set new PIDF Coefficients
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F); // Just updating everytime
         flywheelMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         // set vel

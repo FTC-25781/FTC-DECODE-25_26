@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp
 public class FlywheelPIDFTutorialWithDynamicVelocity extends OpMode {
@@ -43,6 +43,8 @@ public class FlywheelPIDFTutorialWithDynamicVelocity extends OpMode {
         follower.update();
         double distanceMM = getDistanceToTargetMM();
         currTargetVelocity = computeFlywheelVelocityMM(distanceMM);
+
+        currTargetVelocity *= 2;
 
         // PIDF tuning via gamepad (Not needed anymore)
         if (gamepad1.bWasPressed()) { stepIndex = (stepIndex + 1) % stepSizes.length; }
@@ -87,10 +89,11 @@ public class FlywheelPIDFTutorialWithDynamicVelocity extends OpMode {
         return (Math.sqrt(dx * dx + dy * dy) * 25.4);
     }
 
+    // ChatGPT Formula
     public double computeFlywheelVelocityMM(double distanceMM) {
         double x = distanceMM; // horizontal distance in mm
-        double shooterHeight = 234.58418;  // mm
-        double targetHeight  = 1092.2;     // mm
+        double shooterHeight = 333.8;  // mm
+        double targetHeight  = 1092.2; // mm
         double y = targetHeight - shooterHeight;
 
         double theta = Math.toRadians(35); // shooter angle
@@ -101,7 +104,7 @@ public class FlywheelPIDFTutorialWithDynamicVelocity extends OpMode {
                         (2 * Math.pow(Math.cos(theta), 2) * (x * Math.tan(theta) - y))
         );
 
-        double flywheelRadius = 96.0; // mm
+        double flywheelRadius = 48.0; // mm
         double rpm = (vExit / (2 * Math.PI * flywheelRadius)) * 60.0;
 
         double ticksPerRev = 28;

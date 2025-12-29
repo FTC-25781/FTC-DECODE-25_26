@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.layered.logical2;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.layered.control3.pedroPathing.Constants;
 
 /**
  * This class calculates the straight-line distance from the robot to the goal

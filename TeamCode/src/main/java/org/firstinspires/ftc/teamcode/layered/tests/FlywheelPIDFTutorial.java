@@ -16,7 +16,7 @@ public class FlywheelPIDFTutorial extends OpMode {
     public DcMotorEx flywheelMotor;
 
     public double highVelocity = 1525; // tip of small triangle
-    public double lowVelocity = 1400; // tip of big triangle
+    public double lowVelocity = 1350; // tip of big triangle
 
     double currTargetVelocity = highVelocity;
     double P = 342; // Makes it regain velocity super fast (0.2 - 0.5 sec wait)

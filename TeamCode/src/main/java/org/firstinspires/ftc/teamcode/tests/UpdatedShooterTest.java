@@ -1,21 +1,28 @@
-package org.firstinspires.ftc.teamcode.layered.tests;
+package org.firstinspires.ftc.teamcode.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.layered.physical1.IntakeMotor;
+import org.firstinspires.ftc.teamcode.layered.physical1.ServoForSorter;
 import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
 
-@TeleOp(name="TestShooter")
-public class UpdatedShooterV2 extends LinearOpMode {
+@Disabled
+@TeleOp(name="TestShooter", group = "tests")
+public class UpdatedShooterTest extends LinearOpMode {
     private DcMotorEx shooter_motor;
     private GoBildaPinpointDriver pinpoint;
     private ServoForTransfer servo_t;
+
+    Servo angle;
 
     public double power = 0;
     public boolean lastDPadUp = false;
@@ -23,16 +30,30 @@ public class UpdatedShooterV2 extends LinearOpMode {
     public Pose startingPose = new Pose(72, 72, Math.toRadians(45)); // need to figure this out later because how to transition from auto to teleop
     private Follower follower;
     public double outputPower=0.0;
+    public double pos=0.0;
+    private ServoForSorter servo;
+    private IntakeMotor mot;
+    private boolean lastDpadRight = false;
+    private boolean lastDpadLeft = false;
 
+    private boolean lastX = false;
+
+    private boolean lastB = false;
     @Override
     public void runOpMode() {
 
         shooter_motor = hardwareMap.get(DcMotorEx.class, "dmot");
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        angle = hardwareMap.get(Servo.class, "angle_servo");
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose);
         follower.update();
         servo_t = new ServoForTransfer(hardwareMap);
+        mot = new IntakeMotor(hardwareMap);
+        servo = new ServoForSorter(hardwareMap);
+//        servo_t = new ServoForTransfer(hardwareMap);
+//        encoder = new EncoderForIntake(hardwareMap);
+//        shooter = new Shooter(hardwareMap);
 
         waitForStart();
         follower.startTeleopDrive();
@@ -47,7 +68,7 @@ public class UpdatedShooterV2 extends LinearOpMode {
                     -gamepad1.right_stick_x,
                     true
             );
-            double targetRPM = Math.sqrt(Math.pow((follower.getPose().getX()) - 132, 2) + Math.pow((follower.getPose().getY() - 132), 2));
+            double targetRPM = Math.sqrt(Math.pow((132 - follower.getPose().getX()), 2) + Math.pow((132 - follower.getPose().getY()), 2));
 
             if(gamepad1.dpad_up && !lastDPadUp){
                 outputPower += 0.01;
@@ -55,6 +76,19 @@ public class UpdatedShooterV2 extends LinearOpMode {
             else if (gamepad1.dpad_down && !lastDPadDown){
                 outputPower -= 0.01;
             }
+
+            if (gamepad1.right_bumper){
+                outputPower = 0.68;
+            }else if (gamepad1.right_trigger>0.9){
+                outputPower = 0.9;
+            }
+            else if (gamepad1.left_trigger>0.9){
+                outputPower = -0.3;
+            }
+            else if (gamepad1.left_bumper){
+                outputPower = 0;
+            }
+
 
             if(gamepad1.y) {
                 servo_t.moveUp();
@@ -64,8 +98,28 @@ public class UpdatedShooterV2 extends LinearOpMode {
                 servo_t.moveDown();
             }
 
-            shooter_motor.setPower(outputPower);
+            if (gamepad1.x && !lastX) {
+                pos -=0.05;
+            }
 
+            if (gamepad1.b && !lastB) {
+                pos +=0.05;
+            }
+
+            if (gamepad1.dpad_right && !lastDpadRight) {
+                servo.GoForwards();
+            }
+
+            if (gamepad1.dpad_left && !lastDpadLeft ) {
+                servo.GoBackwards();
+            }
+
+            shooter_motor.setPower(outputPower);
+            angle.setPosition(pos);
+            servo_t.update();
+            mot.update();
+            servo.update(telemetry);
+//            shooter.update(telemetry);
             telemetry.addData("Power", outputPower);
             telemetry.addData("Follower Pose X", follower.getPose().getX());
             telemetry.addData("Follower Pose Y", follower.getPose().getY());
@@ -74,6 +128,10 @@ public class UpdatedShooterV2 extends LinearOpMode {
             telemetry.update();
             lastDPadDown=gamepad1.dpad_down;
             lastDPadUp=gamepad1.dpad_up;
+            lastDpadRight = gamepad1.dpad_right;
+            lastDpadLeft = gamepad1.dpad_left;
+            lastX = gamepad1.x;
+            lastB = gamepad1.b;
         }
     }
     private double calculateTargetPower(double targetRPM1) { // mathematical functions

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.layered.tests;
+package org.firstinspires.ftc.teamcode.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-//@Disabled
+@Disabled
 @TeleOp(name = "TestMotors", group = "tests")
 public class MotorsTest extends OpMode {
 //    private DcMotorEx Dmot;

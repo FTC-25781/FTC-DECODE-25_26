@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode.layered.tests;
+package org.firstinspires.ftc.teamcode.tests;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.ColorResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Disabled
 @Configurable
 @TeleOp(name = "LimeLighterTest", group = "TeleOp")
 public class LimeLighterTest extends LinearOpMode {

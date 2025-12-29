@@ -1,9 +1,9 @@
 Control Hub
 Motors
-- 0: lf
-- 1: rf
-- 2: rr
-- 3: lr
+- 0: LF
+- 1: LB
+- 2: RF
+- 3: RB
 
 Servos
 - 0: transfer1

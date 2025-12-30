@@ -33,7 +33,7 @@ public class TransferServos {
 
     public void kicker3GoDown() { servos.setKick3Down(); }
 
-    public boolean checkIfSafeToGoUp() {
+    public boolean checkIfSafeToGoUp() { // Making sure no other kicker is up before we send another one gets sent up
         return !servos.checkKick1Pos() && !servos.checkKick2Pos() && !servos.checkKick3Pos();
     }
 }

@@ -10,15 +10,15 @@ public class SmartIntakeMotor {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "imot");
     }
 
-    public void startRotation() {
+    public void startRotation() { // Start rotation forward
         intakeMotor.setPower(1);
     }
 
-    public void stopRotation() {
+    public void stopRotation() { // Stop the rotation
         intakeMotor.setPower(0);
     }
 
-    public void reverseRotation() {
+    public void reverseRotation() { // Reverse in-case ball gets stuck
         intakeMotor.setPower(-1);
     }
 }

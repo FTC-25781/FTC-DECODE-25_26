@@ -26,6 +26,7 @@ public class ShootingStateMachine {
         this.transfer = transfer;
     }
 
+    // Shoots based on motif value
     public void shootInOrder() {
         if (!transfer.isShooterAlive()) {
             reset();
@@ -42,6 +43,7 @@ public class ShootingStateMachine {
         process(kicker);
     }
 
+    // If we don't want to go off the value of the motif we can shoot 1->2->3
     public void shootSequential() {
         if (!transfer.isShooterAlive()) {
             reset();
@@ -52,6 +54,7 @@ public class ShootingStateMachine {
         process(kicker);
     }
 
+    // Handles the cases of each kicker
     private void process(int kicker) {
         switch (state) {
 
@@ -88,6 +91,7 @@ public class ShootingStateMachine {
         }
     }
 
+    // Allows us to find a kicker that has not already shot yet and has the color we need
     private int findMatchingKicker(int targetColor) {
         for (int i = 1; i <= 3; i++) {
             if (!fired[i - 1] && transfer.getColor(i) == targetColor) {
@@ -97,6 +101,7 @@ public class ShootingStateMachine {
         return -1;
     }
 
+    // Reset the entire system
     private void reset() {
         state = ShootState.IDLE;
         sequenceIndex = 0;
@@ -107,6 +112,7 @@ public class ShootingStateMachine {
         transfer.lowerAllKickers();
     }
 
+    // Check that we have shot all balls
     public boolean isShootingComplete() {
         return hasStarted && state == ShootState.IDLE && sequenceIndex == 0;
     }

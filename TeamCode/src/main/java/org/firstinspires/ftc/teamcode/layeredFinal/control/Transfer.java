@@ -4,11 +4,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferColorSensor;
-import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartKickServo;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferServos;
 
 public class Transfer {
 
-    private final SmartKickServo kickers;
+    private final TransferServos kickers;
     private final Flywheel shooter;
     private final TransferColorSensor colorSensors;
 
@@ -18,7 +18,7 @@ public class Transfer {
     private static final double SHOOTER_MIN_VELOCITY = 1000;
 
     public Transfer(HardwareMap hardwareMap, int shootingOrder) {
-        kickers = new SmartKickServo(hardwareMap);
+        kickers = new TransferServos(hardwareMap);
         shooter = new Flywheel(hardwareMap);
         colorSensors = new TransferColorSensor(hardwareMap);
 
@@ -34,16 +34,16 @@ public class Transfer {
         if (!isShooterAlive()) return;
 
         switch (kicker) {
-            case 1: kickers.setKick1Up(); break;
-            case 2: kickers.setKick2Up(); break;
-            case 3: kickers.setKick3Up(); break;
+            case 1: kickers.kicker1GoUp(); break;
+            case 2: kickers.kicker2GoUp(); break;
+            case 3: kickers.kicker3GoUp(); break;
         }
     }
 
     public void lowerAllKickers() {
-        kickers.setKick1Down();
-        kickers.setKick2Down();
-        kickers.setKick3Down();
+        kickers.kicker1GoDown();
+        kickers.kicker2GoDown();
+        kickers.kicker3GoDown();
     }
 
     public void updateColors() {

@@ -4,45 +4,32 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.colorSensorDriver;
 
 public class SmartColorSensor {
-    colorSensorDriver colorSensor;
+    colorSensorDriver colorSensor1;
+    colorSensorDriver colorSensor2;
+    colorSensorDriver colorSensor3;
 
     public SmartColorSensor(HardwareMap hardwareMap) {
-        colorSensor = hardwareMap.get(colorSensorDriver.class, "sensorColor");
+        colorSensor1 = hardwareMap.get(colorSensorDriver.class, "Color1");
+        colorSensor2 = hardwareMap.get(colorSensorDriver.class, "Color2");
+        colorSensor3 = hardwareMap.get(colorSensorDriver.class, "Color3");
     }
 
-    public double getRawClear() {
-        return colorSensor.rclear;
-    }
+    public double getRawClear1() { return colorSensor1.rclear; }
+    public double getBlue1() { return colorSensor1.blue; }
+    public double getGreen1() { return colorSensor1.green; }
 
-    public double getRawRed() {
-        return colorSensor.rred;
-    }
+    public double getRawClear2() { return colorSensor2.rclear; }
+    public double getBlue2() { return colorSensor2.blue; }
+    public double getGreen2() { return colorSensor2.green; }
 
-    public double getRawBlue() {
-        return colorSensor.rblue;
-    }
+    public double getRawClear3() { return colorSensor3.rclear; }
+    public double getBlue3() { return colorSensor3.blue; }
+    public double getGreen3() { return colorSensor3.green; }
 
-    public double getRawGreen() {
-        return colorSensor.rgreen;
-    }
-
-    public double getClear() {
-        return colorSensor.clear;
-    }
-
-    public double getRed() {
-        return colorSensor.red;
-    }
-
-    public double getBlue() {
-        return colorSensor.blue;
-    }
-
-    public double getGreen() {
-        return colorSensor.green;
-    }
 
     public void update() {
-        colorSensor.update();
+        colorSensor1.update();
+        colorSensor2.update();
+        colorSensor3.update();
     }
 }

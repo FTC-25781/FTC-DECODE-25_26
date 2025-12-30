@@ -4,7 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-// TODO: Test pls
+// TODO: Test please
 
 public class TurretTracker {
 
@@ -29,7 +29,7 @@ public class TurretTracker {
         return (ticks / TICKS_PER_REV) * (2 * Math.PI);
     }
     /*
-    used for telemetry later on
+    Used for telemetry later on
      */
     public double turretAngleDegrees(){
         return Math.toDegrees(getTurretAngle());

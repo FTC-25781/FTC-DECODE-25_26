@@ -5,7 +5,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
-// TODO: Test ples
+// TODO: Test please
+
 public class Turret {
     public CRServo servo;
     public TurretTracker turretOrientation;
@@ -17,7 +18,7 @@ public class Turret {
     }
 
     /*
-    Calcultes the error of the turret to the goal.
+    Calculates the error of the turret to the goal.
     Sets servo speed originally to 0
     If the error is greater than 5 degrees then
     servo speed is set  + or - 0.3 depending on rotational movement

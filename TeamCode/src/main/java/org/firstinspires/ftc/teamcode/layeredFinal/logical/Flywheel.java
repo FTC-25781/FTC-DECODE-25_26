@@ -38,6 +38,10 @@ public class Flywheel {
         flywheel.setVelocity(vel);
     }
 
+    public double getVelocity() {
+        return flywheel.getCurVelocity();
+    }
+
     public void humanPlayer() {
         flywheel.setVelocity(-0.0); // TODO: Change with real vel
     }

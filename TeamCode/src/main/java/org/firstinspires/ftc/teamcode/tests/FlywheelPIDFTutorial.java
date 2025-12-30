@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 // Brogan M. Pratt Video: https://www.youtube.com/watch?v=aPNCpZzCTKg
 //This code works at tip of big triangle and works at tip of small triangle
 
+@Disabled
 @TeleOp
 public class FlywheelPIDFTutorial extends OpMode {
     public DcMotorEx flywheelMotor;

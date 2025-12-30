@@ -20,7 +20,7 @@ public class Transfer {
     private ShootState state = ShootState.IDLE;
     private int currentKicker = 0;
     private ElapsedTime kickTimer = new ElapsedTime();
-    private static final double KICK_UP_TIME = 0.3; // Time servo stays up (adjust as needed)
+    private static final double KICK_UP_TIME = 0.3; // Time servo stays up
     private static final double KICK_DOWN_TIME = 0.2; // Time to wait after going down
 
     public Transfer(HardwareMap hardwareMap, int shootingOrder) {
@@ -59,6 +59,42 @@ public class Transfer {
                     state = ShootState.KICKING;
                     kickTimer.reset();
                 }
+                break;
+
+            case KICKING:
+                if (kickTimer.seconds() > KICK_UP_TIME) {
+                    // Put the kicker back down
+                    lowerAllKickers();
+                    state = ShootState.WAITING;
+                    kickTimer.reset();
+                }
+                break;
+
+            case WAITING:
+                if (kickTimer.seconds() > KICK_DOWN_TIME) {
+                    currentKicker++;
+                    if (currentKicker >= 3) {
+                        resetShootingSequence();
+                    } else {
+                        state = ShootState.IDLE;
+                    }
+                }
+                break;
+        }
+    }
+
+    public void shootSequential() {
+        if (!isShooterAlive()) {
+            resetShootingSequence();
+            return;
+        }
+
+        switch (state) {
+            case IDLE:
+                // Fire kicker based on currentKicker (0=kicker1, 1=kicker2, 2=kicker3)
+                fireKicker(currentKicker + 1);
+                state = ShootState.KICKING;
+                kickTimer.reset();
                 break;
 
             case KICKING:

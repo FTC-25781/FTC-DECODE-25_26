@@ -42,16 +42,6 @@ public class SmartColorSensor {
         return colorSensor.green;
     }
 
-    // TODO: MOVE TO LOGICAL
-    public boolean isGreenBall() {
-        return getGreen() > getBlue() && getRawClear() > 160;
-    }
-
-    // TODO: MOVE TO LOGICAL
-    public boolean isPurpleBall() {
-        return getGreen() < getBlue() && getRawClear() > 160;
-    }
-
     public void update() {
         colorSensor.update();
     }

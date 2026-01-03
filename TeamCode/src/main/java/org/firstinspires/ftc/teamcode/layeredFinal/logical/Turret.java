@@ -17,12 +17,12 @@ public class Turret {
         servo = hardwareMap.get(CRServo.class, "turretServo");
     }
 
-    /*
-    Calculates the error of the turret to the goal.
-    Sets servo speed originally to 0
-    If the error is greater than 5 degrees then
-    servo speed is set  + or - 0.3 depending on rotational movement
-    if it has to move counter clockwise, -0.3 and vice versa
+    /**
+     * Calculates the error of the turret to the goal.
+     * Sets servo speed originally to 0
+     * If the error is greater than 5 degrees then
+     * servo speed is set  + or - 0.3 depending on rotational movement
+     * if it has to move counter clockwise, -0.3 and vice versa
      */
     public void trackGoal(){
         double error = turretOrientation.calculateError();

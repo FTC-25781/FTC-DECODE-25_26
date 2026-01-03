@@ -15,10 +15,12 @@ public class SmartFlywheelMotor {
     // The desired speed we want the motor to reach and maintain
     double currTargetVelocity = 0;
 
-    // PIDF Constants:
-    // P (Proportional) handles the immediate response to error.
-    // F (Feedforward) provides the base power needed to maintain a theoretical speed.
-    // These were tuned specifically for this motor/gearbox combo.
+    /**
+     * PIDF Constants:
+     * P (Proportional) handles the immediate response to error.
+     * F (Feedforward) provides the base power needed to maintain a theoretical speed.
+     * These were tuned specifically for this motor/gearbox combo.
+     */
     final double P = 342;
     final double F = 14;
 

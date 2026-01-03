@@ -26,11 +26,11 @@ public class SmartColorSensor {
         colorSensor3 = hardwareMap.get(colorSensorDriver.class, "Color3");
     }
 
-    /* * The following methods provide raw light data (Clear, Blue, Green).
-     * rclear: Total light intensity (useful for detecting if an object is present).
-     * blue/green: Filtered light levels (useful for identifying the game element's color).
+    /**
+     *The following methods provide raw light data (Clear, Blue, Green).
+     *Rclear: Total light intensity (useful for detecting if an object is present).
+     *Blue/green: Filtered light levels (useful for identifying the game element's color).
      */
-
     // --- Sensor 1 Getters ---
     public double getRawClear1() { return colorSensor1.rclear; }
     public double getBlue1() { return colorSensor1.blue; }
@@ -45,7 +45,6 @@ public class SmartColorSensor {
     public double getRawClear3() { return colorSensor3.rclear; }
     public double getBlue3() { return colorSensor3.blue; }
     public double getGreen3() { return colorSensor3.green; }
-
 
     /**
      * Refreshes the hardware registers for all sensors.

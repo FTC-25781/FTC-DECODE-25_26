@@ -20,16 +20,18 @@ public class TurretTracker {
         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         this.follower = follower;
     }
-    /*
-    This code converts the ticks that the encoder reads into
-    radians to figure out the angle of the turret relative to the robot
+
+    /**
+     * This code converts the ticks that the encoder reads into
+     * radians to figure out the angle of the turret relative to the robot
      */
     public double getTurretAngle(){
         double ticks = encoder.getCurrentPosition();
         return (ticks / TICKS_PER_REV) * (2 * Math.PI);
     }
-    /*
-    Used for telemetry later on
+
+    /**
+     * Used for telemetry later on
      */
     public double turretAngleDegrees(){
         return Math.toDegrees(getTurretAngle());
@@ -38,9 +40,10 @@ public class TurretTracker {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    /*
-    Calculates the angle to the goal (field angle to goal) and returns that angle in
-    radians
+
+    /**
+     * Calculates the angle to the goal (field angle to goal) and returns that angle in
+     * radians
      */
     public double getAngleToGoal(){
         double robotX = follower.getPose().getX();
@@ -48,31 +51,31 @@ public class TurretTracker {
         return Math.atan2(goalY - robotY, goalX - robotX);
     }
 
-    /*
-    Subtracts the field angle to goal and the robot orientation to find desired turret angle
-    Gets turret angle that the servo needs to rotate to to face the goal and
-    puts that angle in a -180 degree to 180 degree range instead of -360 to 360 degree range
+    /**
+     * Subtracts the field angle to goal and the robot orientation to find desired turret angle
+     *     Gets turret angle that the servo needs to rotate to to face the goal and
+     *     puts that angle in a -180 degree to 180 degree range instead of -360 to 360 degree range
      */
     public double calculateDesiredTurretAngle(){
         double angleToGoal = getAngleToGoal();
         double robotHeading = follower.getPose().getHeading();
         return normalizeAngle(angleToGoal - robotHeading);
     }
-    /*
-    This method is for calculating the error between the desired angle and
-    turret angle and we put the angle in a -180 to 180 range so that it takes the shortest
-    path
+
+    /**
+     *This method is for calculating the error between the desired angle and
+     *     turret angle and we put the angle in a -180 to 180 range so that it takes the shortest
+     *     path
      */
     public double calculateError() {
         double desiredAngle = calculateDesiredTurretAngle();
         double currentAngle = getTurretAngle();
         return normalizeAngle(desiredAngle - currentAngle);
     }
-    /*
-]
-    /*
-    Since 2 * pi is one full revolution of a circle, if the angle in radians is greater than
-    pi, we subtract one full rotation of the angle to put it in a -180 to 180 range
+
+    /**
+     * Since 2 * pi is one full revolution of a circle, if the angle in radians is greater than
+     * pi, we subtract one full rotation of the angle to put it in a -180 to 180 range
      */
     public double normalizeAngle(double angle) {
         while (angle > Math.PI) angle -= 2 * Math.PI;

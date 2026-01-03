@@ -1,76 +1,83 @@
 package org.firstinspires.ftc.teamcode.layeredFinal.control;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferColorSensor;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferServos;
 
 /**
- * The Transfer class coordinates the hardware components (flywheel, servos, sensors)
- * and provides a high-level API for the robot's shooting sequence.
+ * The Transfer class coordinates hardware components and orchestrates the shooting sequence.
+ * It integrates vision data from the database to determine the specific shooting order
+ * required for the current match scenario.
  */
 public class Transfer {
-
-    // Low-level hardware wrappers
+    // Hardware abstractions
     private final TransferServos kickers;
     private final Flywheel shooter;
     private final TransferColorSensor colorSensors;
+    private Limelight limelight;
 
-    // The desired color pattern ID (e.g., 21 for GPP) passed from autonomous or configuration
+    /** * The desired color pattern ID retrieved from the database.
+     * This is set once during initialization and remains constant for the OpMode.
+     */
     public final int shootingOrder;
 
-    // The state machine that manages the timing and logic of the shots
+    // Logic controller for the firing sequence
     private final ShootingStateMachine stateMachine;
 
-    // Minimum flywheel velocity (ticks per second or RPM) required to safely fire
+    // Minimum velocity (ticks/sec) required before the kickers are allowed to fire
     private static final double SHOOTER_MIN_VELOCITY = 1000;
 
     /**
-     * Constructor initializes hardware and prepares the state machine.
-     * @param hardwareMap The OpMode hardwareMap for device initialization.
-     * @param shootingOrder The sequence ID representing the color motif to follow.
+     * Initializes the transfer system and pulls configuration data from the Limelight database.
+     * @param hardwareMap The OpMode hardware map for device initialization.
      */
-    public Transfer(HardwareMap hardwareMap, int shootingOrder) {
-        kickers = new TransferServos(hardwareMap);
-        shooter = new Flywheel(hardwareMap);
-        colorSensors = new TransferColorSensor(hardwareMap);
+    public Transfer(HardwareMap hardwareMap) {
+        // Initialize hardware layers
+        this.kickers = new TransferServos(hardwareMap);
+        this.shooter = new Flywheel(hardwareMap);
+        this.colorSensors = new TransferColorSensor(hardwareMap);
+        this.limelight = new Limelight(hardwareMap);
 
-        this.shootingOrder = shootingOrder;
+        /*
+         * DATABASE INTEGRATION:
+         * We query the Limelight logical wrapper to see what the last detected AprilTag was.
+         * This allows TeleOp to "inherit" knowledge from the Autonomous phase.
+         */
+        int lastSeenTag = limelight.getLastLoggedID();
+
+        // Default to 0 (or a safe sequence) if no tag has been logged yet
+        this.shootingOrder = (lastSeenTag != -1) ? lastSeenTag : 0;
+
+        // Initialize the state machine with this transfer instance
         this.stateMachine = new ShootingStateMachine(this);
     }
 
     /**
-     * Safety check to ensure the flywheel is spinning fast enough to shoot.
-     * Prevents the kicker from jamming a game element into a slow or stationary motor.
+     * Safety check: returns true if the flywheel is spinning fast enough to shoot.
      */
     public boolean isShooterAlive() {
         return shooter.getVelocity() > SHOOTER_MIN_VELOCITY;
     }
 
     /**
-     * Actuates a specific kicker servo to the "up" (firing) position.
-     * @param kicker The index of the kicker (1, 2, or 3).
+     * Actuates a specific kicker to the firing position if the shooter is at speed.
+     * @param kicker The index (1-3) of the servo to actuate.
      */
     public void kickerUp(int kicker) {
-        // Safety: Do not actuate if the shooter isn't at speed
+        // Safety interlock to prevent jams
         if (!isShooterAlive()) return;
 
         switch (kicker) {
-            case 1:
-                kickers.kicker1GoUp();
-                break;
-            case 2:
-                kickers.kicker2GoUp();
-                break;
-            case 3:
-                kickers.kicker3GoUp();
-                break;
+            case 1: kickers.kicker1GoUp(); break;
+            case 2: kickers.kicker2GoUp(); break;
+            case 3: kickers.kicker3GoUp(); break;
         }
     }
 
     /**
-     * Resets all kicker servos to their retracted (down) positions.
+     * Resets all kicker servos to their resting (retracted) positions.
      */
     public void lowerAllKickers() {
         kickers.kicker1GoDown();
@@ -79,63 +86,50 @@ public class Transfer {
     }
 
     /**
-     * Triggers a fresh read from the I2C color sensors.
+     * Polls the I2C color sensors for new data.
      */
     public void updateColors() {
         colorSensors.update();
     }
 
     /**
-     * Gets the color detected by a specific sensor and converts it to an integer ID.
-     * 1 = GREEN, 2 = PURPLE, 0 = NONE.
-     * @param sensor The sensor index (1, 2, or 3).
+     * Gets the current color state of a specific sensor.
+     * @param sensor The index (1-3) of the sensor to check.
+     * @return 1 for GREEN, 2 for PURPLE, 0 for NONE/OTHER.
      */
     public int getColor(int sensor) {
         TransferColorSensor.DetectedColor color;
-
-        // Route the request to the specific hardware sensor
         switch (sensor) {
-            case 1:
-                color = colorSensors.colorOfSensor1();
-                break;
-            case 2:
-                color = colorSensors.colorOfSensor2();
-                break;
-            case 3:
-                color = colorSensors.colorOfSensor3();
-                break;
-            default:
-                return 0;
+            case 1: color = colorSensors.colorOfSensor1(); break;
+            case 2: color = colorSensors.colorOfSensor2(); break;
+            case 3: color = colorSensors.colorOfSensor3(); break;
+            default: return 0;
         }
 
-        // Map the Enum value to an Integer for the State Machine logic
+        // Map sensor enums to integer IDs for state machine logic
         switch (color) {
-            case GREEN:
-                return 1;
-            case PURPLE:
-                return 2;
-            case NONE:
-            default:
-                return 0;
+            case GREEN: return 1;
+            case PURPLE: return 2;
+            default: return 0;
         }
     }
 
     /**
-     * High-level command to execute a shot based on the pre-defined color motif.
+     * Starts the automated shooting sequence using the database-provided shootingOrder.
      */
     public void shootInOrder() {
         stateMachine.shootInOrder();
     }
 
     /**
-     * High-level command to execute a shot in simple 1-2-3 order.
+     * Starts a standard sequential shot (1, then 2, then 3).
      */
     public void shootSequential() {
         stateMachine.shootSequential();
     }
 
     /**
-     * Polls the state machine to see if the multi-shot sequence has finished.
+     * Checks if the state machine has finished the current shooting routine.
      */
     public boolean isShootingComplete() {
         return stateMachine.isShootingComplete();

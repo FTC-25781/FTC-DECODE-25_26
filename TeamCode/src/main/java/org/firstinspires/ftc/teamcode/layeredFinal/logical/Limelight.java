@@ -4,38 +4,38 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartLimelight;
 
 /**
- * High-level logical wrapper for Limelight operations.
- * This class abstracts the physical implementation (SmartLimelight)
- * to provide a simpler interface for the robot's main logic.
+ * The Limelight class serves as a logical coordinator between the physical camera
+ * and the SQLite database. It provides high-level methods to capture, log, and
+ * retrieve AprilTag data across different OpModes.
  */
 public class Limelight {
-    // Physical hardware interface for the Limelight sensor
+    // Reference to the physical Limelight hardware wrapper
     private final SmartLimelight limelight;
 
-    // SQLite database handler for persisting Limelight data
+    // Reference to the SQLite database helper for persistent storage
     private final LimelightDatabase db;
 
     /**
-     * Initializes the Limelight hardware and the local database.
-     * @param hardwareMap The hardware map from the OpMode to locate the sensor and app context.
+     * Constructor for the Limelight logical layer.
+     * @param hardwareMap The hardwareMap provided by the OpMode to initialize the sensor
+     * and retrieve the Android App Context for the database.
      */
     public Limelight(HardwareMap hardwareMap) {
-        // Initialize the physical sensor wrapper
-        limelight = new SmartLimelight(hardwareMap);
+        this.limelight = new SmartLimelight(hardwareMap);
 
-        // Initialize database using the Android App Context for file storage access
-        db = new LimelightDatabase(hardwareMap.appContext);
+        // We use the hardwareMap.appContext to give SQLite access to the Android filesystem
+        this.db = new LimelightDatabase(hardwareMap.appContext);
     }
 
     /**
-     * Retrieves the current AprilTag ID from the sensor and saves it to the database.
-     * Only logs to the database if a valid ID (not -1) is detected.
-     * @return The detected AprilTag ID, or -1 if no tag is in view.
+     * Captures the current AprilTag ID from the camera and automatically logs
+     * valid detections to the database for later retrieval.
+     * @return The detected AprilTag ID, or -1 if no target is currently visible.
      */
     public int getIDAndLog() {
         int id = limelight.getAprilTagID();
 
-        // If a valid tag is detected, record it in the local database
+        // Only log to the database if the sensor actually sees a valid tag (-1 is 'null')
         if (id != -1) {
             db.logID(id);
         }
@@ -43,8 +43,8 @@ public class Limelight {
     }
 
     /**
-     * Retrieves the current AprilTag ID without saving to the database.
-     * Use this for high-frequency loops where logging every cycle isn't necessary.
+     * Performs a raw read of the current AprilTag ID without saving it to storage.
+     * Use this for real-time tracking where persistent logging is not required.
      * @return The detected AprilTag ID.
      */
     public int getID() {
@@ -52,11 +52,22 @@ public class Limelight {
     }
 
     /**
-     * Safely shuts down the Limelight hardware and closes the database connection.
-     * Should be called in the 'stop' phase of the OpMode to prevent memory leaks or DB corruption.
+     * Retrieves the most recent successful AprilTag ID stored in the database.
+     * This allows the robot to "remember" what it saw during Autonomous even
+     * after the OpMode has been restarted for TeleOp.
+     * @return The last logged ID, or -1 if no data is found.
+     */
+    public int getLastLoggedID() {
+        return db.getLatestID();
+    }
+
+    /**
+     * Properly shuts down the Limelight hardware and closes the database connection.
+     * Must be called in the stop() or end of the runOpMode() to prevent database
+     * memory leaks or locked file errors.
      */
     public void stop() {
         limelight.stop();
-        db.close(); // Ensures the SQLite connection is properly terminated
+        db.close();
     }
 }

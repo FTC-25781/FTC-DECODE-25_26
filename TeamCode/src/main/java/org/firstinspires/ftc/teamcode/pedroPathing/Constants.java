@@ -17,21 +17,23 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10)
-            .forwardZeroPowerAcceleration(-47.943416721806784)
-            .lateralZeroPowerAcceleration(-77.79483040514897)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.03, 0.03))
-//            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.3, 0, 0.01, 0.015))
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.02, 0.01))
-//            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(5, 0, 0.08, 0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.05, 0, 0.00005, 0.6, 0.02))
-//            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.04, 0, 0.000005, 0.6, 0.02))
+            .forwardZeroPowerAcceleration(-41.460099280468924)
+            .lateralZeroPowerAcceleration(-59.66103350350071)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.0485, 0, 0.0015, 0.023))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.6, 0, 0.005, 0.03))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.015, 0, 0.00002, 0.6, 0.026))
             .centripetalScaling(0.002);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(
+            0.99,
+            100,
+            1.38,
+            1
+    );
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(2)
-            .strafePodX(0)
+            .strafePodX(-4.5)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -48,8 +50,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(125.40334145853839)
-            .yVelocity(96.30123973455954);
+            .xVelocity(80.98711197019563)
+            .yVelocity(69.11804006982038);
 
 
     public static Follower createFollower(HardwareMap hardwareMap) {

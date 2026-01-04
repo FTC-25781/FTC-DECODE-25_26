@@ -111,5 +111,6 @@ public class TeleOpBlue extends OpMode {
         // Debugging info
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());
+        telemetryM.update();
     }
 }

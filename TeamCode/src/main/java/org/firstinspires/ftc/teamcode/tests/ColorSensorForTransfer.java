@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.co
 public class ColorSensorForTransfer extends LinearOpMode {
 
     private colorSensorDriver color1, color2, color3;
-    private final int CLEAR_THRESHOLD = 410;
+    private final int CLEAR_THRESHOLD = 500;
 
     @Override
     public void runOpMode() {
@@ -38,7 +38,7 @@ public class ColorSensorForTransfer extends LinearOpMode {
     }
 
     private String detectColor(colorSensorDriver sensor) {
-        if (sensor.rclear < 500) {
+        if (sensor.rclear < CLEAR_THRESHOLD) {
             double greenRatio = (double) sensor.rgreen / sensor.rclear;
             double blueRatio = (double) sensor.rblue / sensor.rclear;
 

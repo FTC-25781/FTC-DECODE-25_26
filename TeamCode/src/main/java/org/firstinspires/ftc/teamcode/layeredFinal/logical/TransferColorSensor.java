@@ -4,57 +4,80 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartColorSensor;
 
 /**
- * Interprets raw data from the robot's three color sensors.
- * It abstracts the light frequency data into easy-to-use "Green", "Purple", or "None" states.
+ * LOGICAL LAYER: TransferColorSensor
+ * * This class acts as a translator between raw hardware data (RGB numbers) and
+ * game-specific logic (Green vs Purple). It uses the successful logic derived
+ * from the 'ColorSensorForTransfer' test OpMode.
  */
 public class TransferColorSensor {
 
-    // Simplified classification of what the sensors can see
+    /**
+     * Represents the discrete states a sensor position can be in.
+     */
     public enum DetectedColor {
-        NONE,   // No object present or light too dim
-        GREEN,  // Object identified as Green
-        PURPLE  // Object identified as Purple
+        NONE,   // Empty slot (High clear value)
+        GREEN,  // Green game element detected
+        PURPLE  // Purple game element detected
     }
 
-    // Minimum light intensity required to confirm an object is present.
-    // Prevents "ghost" readings when the sensor is looking at empty space.
-    private static final int CLEAR_THRESHOLD = 160;
+    /**
+     * CLEAR_THRESHOLD: The "Detection" trigger point.
+     * In the test, a value BELOW this indicates an object is blocking/near the sensor.
+     */
+    private static final int CLEAR_THRESHOLD = 500;
 
-    // Reference to the physical sensor hardware wrapper
+    /**
+     * GREEN_BIAS_MULTIPLIER: A sensitivity buffer.
+     * Requires the Green ratio to be at least 20% higher than the Blue ratio
+     * to be classified as "Green". This helps prevent "color flickering"
+     * due to ambient light or slight variations in Purple elements.
+     */
+    private static final double GREEN_BIAS_MULTIPLIER = 1.2;
+
+    // Internal reference to the hardware wrapper
     private final SmartColorSensor colorSensors;
 
+    /**
+     * Constructor: Initializes the hardware sensors via the physical layer.
+     * @param hardwareMap The OpMode's hardware map.
+     */
     public TransferColorSensor(HardwareMap hardwareMap) {
         colorSensors = new SmartColorSensor(hardwareMap);
     }
 
     /**
-     * Logic to determine the color of a game element based on RGB ratios.
-     * @param green Raw green channel value
-     * @param blue Raw blue channel value
-     * @param clear Total light intensity (used for proximity/presence)
-     * @return The classified DetectedColor
+     * Core Logic: Processes raw RGB/Clear data into a DetectedColor state.
+     * * Logic flow:
+     * 1. Check if 'clear' is below the threshold (Object present).
+     * 2. Normalize Green and Blue values against the Clear value (Ratios).
+     * 3. Apply the bias multiplier to differentiate Green from Purple.
      */
     private DetectedColor detectColor(double green, double blue, double clear) {
-        // If the sensor doesn't see enough light, assume the slot is empty
-        if (clear <= CLEAR_THRESHOLD) {
-            return DetectedColor.NONE;
+        // Step 1: Presence Detection
+        // If clear is above the threshold, the sensor sees 'open space' or 'white'
+        if (clear < CLEAR_THRESHOLD) {
+
+            // Step 2: Normalize values
+            // Dividing by 'clear' ensures that the logic works even if
+            // the overall brightness changes slightly.
+            double greenRatio = green / clear;
+            double blueRatio = blue / clear;
+
+            // Step 3: Classification
+            if (greenRatio > (blueRatio * GREEN_BIAS_MULTIPLIER)) {
+                return DetectedColor.GREEN;
+            } else {
+                // If an object is present but doesn't meet the Green criteria, it's Purple.
+                return DetectedColor.PURPLE;
+            }
         }
 
-        // Compare color channels to distinguish between game elements.
-        // Green elements will have a higher green value than blue.
-        if (green > blue) {
-            return DetectedColor.GREEN;
-        }
-        // Purple elements (often containing blue light) will have higher blue than green.
-        else if (blue > green) {
-            return DetectedColor.PURPLE;
-        }
-
+        // Default state when no object is close enough to the sensor.
         return DetectedColor.NONE;
     }
 
     /**
-     * @return The color detected at the first kicker position.
+     * @return Current color state for Sensor 1 (e.g., Kicker 1).
      */
     public DetectedColor colorOfSensor1() {
         return detectColor(
@@ -65,7 +88,7 @@ public class TransferColorSensor {
     }
 
     /**
-     * @return The color detected at the second kicker position.
+     * @return Current color state for Sensor 2 (e.g., Kicker 2).
      */
     public DetectedColor colorOfSensor2() {
         return detectColor(
@@ -76,7 +99,7 @@ public class TransferColorSensor {
     }
 
     /**
-     * @return The color detected at the third kicker position.
+     * @return Current color state for Sensor 3 (e.g., Kicker 3).
      */
     public DetectedColor colorOfSensor3() {
         return detectColor(
@@ -87,8 +110,8 @@ public class TransferColorSensor {
     }
 
     /**
-     * Refreshes the hardware readings.
-     * This should be called once per loop to ensure data is current.
+     * Hardware Refresh: Pulls the latest data from the physical sensors.
+     * This should be called once at the start of every TeleOp/Auto loop.
      */
     public void update() {
         colorSensors.update();

@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.co
  * This class handles direct hardware communication and ensures the Driver Station
  * configuration names match the code.
  */
-// TODO: Need to calibrate and test
 public class SmartColorSensor {
     // Custom driver instances for each physical sensor
     colorSensorDriver colorSensor1;

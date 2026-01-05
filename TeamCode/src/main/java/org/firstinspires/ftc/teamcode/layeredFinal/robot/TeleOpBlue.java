@@ -5,7 +5,6 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,8 +12,6 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
-import java.util.function.Supplier;
 
 @Configurable
 @TeleOp(name = "TeleOp Blue", group = "TeleOp")
@@ -57,7 +54,7 @@ public class TeleOpBlue extends OpMode {
     @Override
     public void loop() {
         // Essential periodic updates
-        transfer.updateColors(); // Check sensors for element detection
+        transfer.update(); // Check sensors for element detection
         follower.update();      // Update localizer and pathing
         telemetryM.update();    // Send data to dashboard/driver station
 

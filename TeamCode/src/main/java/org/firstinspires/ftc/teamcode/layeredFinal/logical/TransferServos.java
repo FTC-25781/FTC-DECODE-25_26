@@ -62,4 +62,8 @@ public class TransferServos {
         // Logic: (Not Kicker 1 Up) AND (Not Kicker 2 Up) AND (Not Kicker 3 Up)
         return !servos.checkKick1Pos() && !servos.checkKick2Pos() && !servos.checkKick3Pos();
     }
+
+    public void update() {
+        servos.update();
+    }
 }

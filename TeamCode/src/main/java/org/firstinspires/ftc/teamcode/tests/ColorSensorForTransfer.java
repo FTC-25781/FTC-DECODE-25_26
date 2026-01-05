@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.colorSensorDriver;
 
-@Disabled
 @TeleOp(name = "Color Sensor Test", group = "Test")
 public class ColorSensorForTransfer extends LinearOpMode {
 
@@ -14,9 +13,9 @@ public class ColorSensorForTransfer extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        color1 = hardwareMap.get(colorSensorDriver.class, "color1");
-        color2 = hardwareMap.get(colorSensorDriver.class, "color2");
-        color3 = hardwareMap.get(colorSensorDriver.class, "color3");
+        color1 = hardwareMap.get(colorSensorDriver.class, "Color1");
+        color2 = hardwareMap.get(colorSensorDriver.class, "Color2");
+        color3 = hardwareMap.get(colorSensorDriver.class, "Color3");
 
         telemetry.addLine("Initialized. Ready to start.");
         telemetry.update();
@@ -34,6 +33,8 @@ public class ColorSensorForTransfer extends LinearOpMode {
 
             telemetry.addLine("--- Raw Data (Sensor 1) ---");
             displayDebug(color1);
+            displayDebug(color2);
+            displayDebug(color3);
 
             telemetry.update();
         }

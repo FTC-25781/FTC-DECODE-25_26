@@ -20,7 +20,7 @@ public class TransferColorSensor {
         PURPLE  // Purple game element detected
     }
 
-    /**
+    /**v
      * CLEAR_THRESHOLD: The "Detection" trigger point.
      * In the test, a value BELOW this indicates an object is blocking/near the sensor.
      */
@@ -55,8 +55,7 @@ public class TransferColorSensor {
     private DetectedColor detectColor(double green, double blue, double clear) {
         // Step 1: Presence Detection
         // If clear is above the threshold, the sensor sees 'open space' or 'white'
-        if (clear < CLEAR_THRESHOLD) {
-
+        if (clear <= CLEAR_THRESHOLD) {
             // Step 2: Normalize values
             // Dividing by 'clear' ensures that the logic works even if
             // the overall brightness changes slightly.

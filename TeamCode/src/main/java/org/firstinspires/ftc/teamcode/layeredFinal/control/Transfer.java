@@ -88,8 +88,9 @@ public class Transfer {
     /**
      * Polls the I2C color sensors for new data.
      */
-    public void updateColors() {
+    public void update() {
         colorSensors.update();
+        kickers.update();
     }
 
     /**

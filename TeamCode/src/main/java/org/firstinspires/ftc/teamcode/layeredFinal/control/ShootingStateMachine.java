@@ -45,7 +45,7 @@ public class ShootingStateMachine {
             return;
         }
 
-        transfer.updateColors(); // Refresh sensor data
+        transfer.update(); // Refresh sensor data
 
         // Determine which color we need next based on the motif/pattern
         int targetColor = ShootingOrderHelper.getTargetColorForPosition(
@@ -76,7 +76,6 @@ public class ShootingStateMachine {
      */
     private void process(int kicker) {
         switch (state) {
-
             case IDLE:
                 // Only proceed if a valid kicker is found and it hasn't fired yet
                 if (kicker != -1 && kicker <= 3 && !fired[kicker - 1]) {

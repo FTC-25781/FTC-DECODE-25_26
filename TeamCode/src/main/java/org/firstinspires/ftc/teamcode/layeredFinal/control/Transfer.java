@@ -28,18 +28,26 @@ public class Transfer {
     }
 
     State currentState = State.IDLE;
-    private boolean sequenceActive = false;
+    private boolean sequenceActiveInOrder = false;
+    private boolean sequenceActiveRandom = false;
 
     public Transfer(HardwareMap hardwareMap) {
         limelight = new Limelight(hardwareMap);
         transferServos = new TransferServos(hardwareMap);
     }
 
-    public void startKickSequence() {
+    public void startKickSequenceInOrder() {
         if (currentState == State.IDLE || currentState == State.DONE) {
             currentState = State.SEARCHING;
-            sequenceActive = true;
+            sequenceActiveInOrder = true;
             id = 0;
+        }
+    }
+
+    public void startKickSequenceRandomly() {
+        if (currentState == State.IDLE || currentState == State.DONE) {
+            currentState = State.RAISE_FIRST;
+            sequenceActiveRandom = true;
         }
     }
 
@@ -50,8 +58,13 @@ public class Transfer {
         // kickerWithGreen = colorSensor.getKickerWithGreen();
 
         // Run the state machine if a sequence is active
-        if (sequenceActive) {
+        if (sequenceActiveInOrder) {
             kickWithLimelight(id);
+        }
+
+        if (sequenceActiveRandom) {
+            kick();
+            stateTimer.reset();
         }
     }
 
@@ -128,7 +141,67 @@ public class Transfer {
 
             case DONE:
                 allKickersDown();
-                sequenceActive = false;
+                sequenceActiveInOrder = false;
+                currentState = State.IDLE;
+                break;
+
+            case IDLE:
+                break;
+        }
+    }
+
+    private void kick() {
+        switch (currentState) {
+            case SEARCHING:
+                break;
+
+            case RAISE_FIRST:
+                // First kicker to fire depends on ID
+                transferServos.kicker1GoUp();  // Green first
+                stateTimer.reset();
+                currentState = State.WAIT_FIRST;
+                break;
+
+            case WAIT_FIRST:
+                if (stateTimer.seconds() >= 2.0) {
+                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.RAISE_SECOND;
+                }
+                break;
+
+            case RAISE_SECOND:
+                transferServos.kicker2GoUp();
+                stateTimer.reset();
+                currentState = State.WAIT_SECOND;
+                break;
+
+            case WAIT_SECOND:
+                if (stateTimer.seconds() >= 2.0) {
+                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.RAISE_THIRD;
+                }
+                break;
+
+            case RAISE_THIRD:
+                // Third kicker to fire depends on ID
+                transferServos.kicker3GoUp();  // Purple third
+                stateTimer.reset();
+                currentState = State.WAIT_THIRD;
+                break;
+
+            case WAIT_THIRD:
+                if (stateTimer.seconds() >= 2.0) {
+                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.DONE;
+                }
+                break;
+
+            case DONE:
+                allKickersDown();
+                sequenceActiveInOrder = false;
                 currentState = State.IDLE;
                 break;
 
@@ -144,12 +217,12 @@ public class Transfer {
     }
 
     public boolean isFiring() {
-        return sequenceActive;
+        return sequenceActiveInOrder;
     }
 
     public void reset() {
         currentState = State.IDLE;
-        sequenceActive = false;
+        sequenceActiveInOrder = false;
         allKickersDown();
     }
 }

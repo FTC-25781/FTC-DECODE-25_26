@@ -75,9 +75,15 @@ public class TeleOpBlue extends OpMode {
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
 
-        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed()) {
+        if (gamepad1.dpadLeftWasPressed()) {
             if (!transfer.isFiring()) {
-                transfer.startKickSequence();
+                transfer.startKickSequenceInOrder();
+            }
+        }
+
+        if (gamepad1.dpadRightWasPressed()) {
+            if (!transfer.isFiring()) {
+                transfer.startKickSequenceRandomly();
             }
         }
 

@@ -216,13 +216,18 @@ public class Transfer {
         transferServos.kicker3GoDown();
     }
 
-    public boolean isFiring() {
+    public boolean isFiringInOrder() {
         return sequenceActiveInOrder;
+    }
+
+    public boolean isFiringRandomly() {
+        return sequenceActiveRandom;
     }
 
     public void reset() {
         currentState = State.IDLE;
         sequenceActiveInOrder = false;
+        sequenceActiveRandom = false;
         allKickersDown();
     }
 }

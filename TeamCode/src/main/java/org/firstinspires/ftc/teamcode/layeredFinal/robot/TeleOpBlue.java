@@ -76,13 +76,13 @@ public class TeleOpBlue extends OpMode {
 
 
         if (gamepad1.dpadLeftWasPressed()) {
-            if (!transfer.isFiring()) {
+            if (!transfer.isFiringRandomly() && !transfer.isFiringInOrder()) {
                 transfer.startKickSequenceInOrder();
             }
         }
 
         if (gamepad1.dpadRightWasPressed()) {
-            if (!transfer.isFiring()) {
+            if (!transfer.isFiringRandomly() && !transfer.isFiringInOrder()) {
                 transfer.startKickSequenceRandomly();
             }
         }
@@ -105,7 +105,6 @@ public class TeleOpBlue extends OpMode {
         }
         lastLeftTrigger = currentLeftTrigger;
 
-
         boolean currentRightTrigger = gamepad1.right_trigger > 0.5;
         if (currentRightTrigger && !lastRightTrigger) {
             deposit.updateHighVelocity(10);
@@ -114,8 +113,8 @@ public class TeleOpBlue extends OpMode {
 
         deposit.update();
 
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
+        telemetryM.debug("Position", follower.getPose());
+        telemetryM.debug("Velocity", follower.getVelocity());
         telemetryM.update();
     }
 }

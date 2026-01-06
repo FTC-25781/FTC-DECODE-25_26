@@ -13,7 +13,7 @@ public class Transfer {
 
     private final ElapsedTime stateTimer = new ElapsedTime();
     private final int kickerWithGreen = 1; // TODO: Set to "0" when color sensor added
-    private int id;
+    public int id;
 
     enum State {
         IDLE,           // Not firing, waiting for command
@@ -51,15 +51,13 @@ public class Transfer {
 
         // Run the state machine if a sequence is active
         if (sequenceActive) {
-            kickWithLimelight();
+            kickWithLimelight(id);
         }
     }
 
-    private void kickWithLimelight() {
+    private void kickWithLimelight(int id) {
         switch (currentState) {
             case SEARCHING:
-                id = limelight.getID();
-
                 if (id == 21 || id == 22 || id == 23) {
                     // ID 21 = fire kicker 1 (green), then 2, then 3
                     // ID 22 = fire kicker 2, then 1 (green), then 3

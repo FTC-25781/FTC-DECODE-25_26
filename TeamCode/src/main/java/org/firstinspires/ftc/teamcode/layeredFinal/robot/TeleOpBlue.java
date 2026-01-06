@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
@@ -20,6 +21,7 @@ public class TeleOpBlue extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
+    private Limelight limelight;
 
     // Navigation and Telemetry
     private Follower follower;
@@ -44,6 +46,9 @@ public class TeleOpBlue extends OpMode {
         intake = new Intake(hardwareMap);
         transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
+        limelight = new Limelight(hardwareMap);
+
+        transfer.id = limelight.getLastLoggedID();
     }
 
     @Override
@@ -53,9 +58,11 @@ public class TeleOpBlue extends OpMode {
 
     @Override
     public void loop() {
+
         transfer.update();
         follower.update();
         telemetryM.update();
+
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,

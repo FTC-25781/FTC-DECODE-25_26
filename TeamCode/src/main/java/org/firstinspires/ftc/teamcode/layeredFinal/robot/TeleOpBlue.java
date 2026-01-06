@@ -26,7 +26,7 @@ public class TeleOpBlue extends OpMode {
     public static Pose startingPose; // Static so Auto can pass the final position to TeleOp
     private TelemetryManager telemetryM;
 
-    // State tracking for Trigger Edge Detection
+    // Debounce booleans
     private boolean lastLeftTrigger = false;
     private boolean lastRightTrigger = false;
 
@@ -53,12 +53,9 @@ public class TeleOpBlue extends OpMode {
 
     @Override
     public void loop() {
-        // Essential periodic updates
-        transfer.update(); // Check sensors for element detection
-        follower.update();      // Update localizer and pathing
-        telemetryM.update();    // Send data to dashboard/driver station
-
-        // Drivetrain control: -y is forward, -x is left, -rx is clockwise
+        transfer.update();
+        follower.update();
+        telemetryM.update();
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
@@ -66,46 +63,44 @@ public class TeleOpBlue extends OpMode {
                 true // Robot Centric Mode
         );
 
-        // --- Intake Commands ---
         if (gamepad1.aWasPressed()) { intake.forward(); }
         if (gamepad1.bWasPressed()) { intake.stopped(); }
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
-        // --- Transfer Commands (Sequencing elements) ---
-        if (gamepad1.dpadLeftWasPressed()) { transfer.shootSequential(); }
-        if (gamepad1.dpadRightWasPressed()) { transfer.shootInOrder(); }
 
-        // --- Flywheel Preset Commands ---
+        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed()) {
+            if (!transfer.isFiring()) {
+                transfer.startKickSequence();
+            }
+        }
+
+        if (gamepad1.yWasPressed()) {
+            transfer.reset();
+        }
+
         if (gamepad1.dpadUpWasPressed()) { deposit.setVelForCloseTip(); }
         if (gamepad1.dpadDownWasPressed()) { deposit.setVelForFarTip(); }
         if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
-        // --- Velocity Fine-Tuning (Bumpers) ---
         if (gamepad1.leftBumperWasPressed()) { deposit.updateHighVelocity(-10); }
         if (gamepad1.rightBumperWasPressed()) { deposit.updateHighVelocity(10); }
 
-        // --- Trigger Edge Detection (Rising Edge) ---
-        // This prevents the velocity from changing every single frame while the trigger is held.
-
-        // Handle Left Trigger (Decrease Velocity)
-        boolean currentLeftTrigger = gamepad1.left_trigger > 0.5; // Threshold used to treat analog as a button
+        boolean currentLeftTrigger = gamepad1.left_trigger > 0.5;
         if (currentLeftTrigger && !lastLeftTrigger) {
-            deposit.updateHighVelocity(-10); // Runs only once when trigger passes 0.5
+            deposit.updateHighVelocity(-10);
         }
-        lastLeftTrigger = currentLeftTrigger; // Update state for next loop
+        lastLeftTrigger = currentLeftTrigger;
 
-        // Handle Right Trigger (Increase Velocity)
+
         boolean currentRightTrigger = gamepad1.right_trigger > 0.5;
         if (currentRightTrigger && !lastRightTrigger) {
-            deposit.updateHighVelocity(10); // Runs only once when trigger passes 0.5
+            deposit.updateHighVelocity(10);
         }
         lastRightTrigger = currentRightTrigger;
 
-        // Periodic update for Flywheel PIDF/Control loop
         deposit.update();
 
-        // Debugging info
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());
         telemetryM.update();

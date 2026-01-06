@@ -1,23 +1,21 @@
-package org.firstinspires.ftc.teamcode.layeredFinal.control;
+package org.firstinspires.ftc.teamcode.tests;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferServos;
+import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartLimelight;
 
-public class Transfer {
-    // TODO: Adding color sensor after calibrated
-    Limelight limelight;
-    TransferServos transferServos;
-
+@TeleOp(name = "Kickers with color sensor", group = "Test")
+public class KickersWithLimelight extends OpMode {
+    TransferServos servos;
+    SmartLimelight limelight;
     private final ElapsedTime stateTimer = new ElapsedTime();
-    private final int kickerWithGreen = 1; // TODO: Set to "0" when color sensor added
-    private int id;
+    int id;
 
+    // Define states for the sequence
     enum State {
-        IDLE,           // Not firing, waiting for command
-        SEARCHING,      // Looking for AprilTag
+        SEARCHING,
         RAISE_FIRST,
         WAIT_FIRST,
         RAISE_SECOND,
@@ -27,40 +25,29 @@ public class Transfer {
         DONE
     }
 
-    State currentState = State.IDLE;
-    private boolean sequenceActive = false;
+    State currentState = State.SEARCHING;
+    int kickerWithGreen = 1;  // Which kicker has the green sample (always 1)
 
-    public Transfer(HardwareMap hardwareMap) {
-        limelight = new Limelight(hardwareMap);
-        transferServos = new TransferServos(hardwareMap);
+    @Override
+    public void init() {
+        servos = new TransferServos(hardwareMap);
+        limelight = new SmartLimelight(hardwareMap);
+        currentState = State.SEARCHING;
     }
 
-    public void startKickSequence() {
-        if (currentState == State.IDLE || currentState == State.DONE) {
-            currentState = State.SEARCHING;
-            sequenceActive = true;
-            id = 0;
-        }
-    }
+    @Override
+    public void loop() {
+        telemetry.addData("Current State", currentState);
+        telemetry.addData("Timer", "%.2f", stateTimer.seconds());
+        telemetry.addData("Tag ID", id);
+        telemetry.addData("Green Kicker", kickerWithGreen);
 
-    public void update() {
-        transferServos.update();
-
-        // TODO: Add color sensor when calibrated
-        // kickerWithGreen = colorSensor.getKickerWithGreen();
-
-        // Run the state machine if a sequence is active
-        if (sequenceActive) {
-            kickWithLimelight();
-        }
-    }
-
-    private void kickWithLimelight() {
         switch (currentState) {
             case SEARCHING:
-                id = limelight.getID();
+                id = limelight.getAprilTagID();
 
                 if (id == 21 || id == 22 || id == 23) {
+                    telemetry.addData("Tag Detected!", id);
                     // ID 21 = fire kicker 1 (green), then 2, then 3
                     // ID 22 = fire kicker 2, then 1 (green), then 3
                     // ID 23 = fire kicker 2, then 3, then 1 (green)
@@ -72,9 +59,9 @@ public class Transfer {
             case RAISE_FIRST:
                 // First kicker to fire depends on ID
                 if (id == 21) {
-                    transferServos.kicker1GoUp();  // Green first
+                    servos.kicker1GoUp();  // Green first
                 } else {  // id == 22 or 23
-                    transferServos.kicker2GoUp();  // Purple first
+                    servos.kicker2GoUp();  // Purple first
                 }
                 stateTimer.reset();
                 currentState = State.WAIT_FIRST;
@@ -91,11 +78,11 @@ public class Transfer {
             case RAISE_SECOND:
                 // Second kicker to fire depends on ID
                 if (id == 21) {
-                    transferServos.kicker2GoUp();  // Purple second
+                    servos.kicker2GoUp();  // Purple second
                 } else if (id == 22) {
-                    transferServos.kicker1GoUp();  // Green second
+                    servos.kicker1GoUp();  // Green second
                 } else {  // id == 23
-                    transferServos.kicker3GoUp();  // Purple second
+                    servos.kicker3GoUp();  // Purple second
                 }
                 stateTimer.reset();
                 currentState = State.WAIT_SECOND;
@@ -112,9 +99,9 @@ public class Transfer {
             case RAISE_THIRD:
                 // Third kicker to fire depends on ID
                 if (id == 21 || id == 22) {
-                    transferServos.kicker3GoUp();  // Purple third
+                    servos.kicker3GoUp();  // Purple third
                 } else {  // id == 23
-                    transferServos.kicker1GoUp();  // Green third
+                    servos.kicker1GoUp();  // Green third
                 }
                 stateTimer.reset();
                 currentState = State.WAIT_THIRD;
@@ -129,29 +116,18 @@ public class Transfer {
                 break;
 
             case DONE:
+                telemetry.addData("Status", "Sequence Complete");
                 allKickersDown();
-                sequenceActive = false;
-                currentState = State.IDLE;
-                break;
-
-            case IDLE:
                 break;
         }
+
+        servos.update();
+        telemetry.update();
     }
 
     private void allKickersDown() {
-        transferServos.kicker1GoDown();
-        transferServos.kicker2GoDown();
-        transferServos.kicker3GoDown();
-    }
-
-    public boolean isFiring() {
-        return sequenceActive;
-    }
-
-    public void reset() {
-        currentState = State.IDLE;
-        sequenceActive = false;
-        allKickersDown();
+        servos.kicker1GoDown();
+        servos.kicker2GoDown();
+        servos.kicker3GoDown();
     }
 }

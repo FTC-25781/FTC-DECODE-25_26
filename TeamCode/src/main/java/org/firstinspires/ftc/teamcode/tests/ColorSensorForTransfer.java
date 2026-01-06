@@ -5,11 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.colorSensorDriver;
 
+// TODO: Re-tune color sensor
 @TeleOp(name = "Color Sensor Test", group = "Test")
 public class ColorSensorForTransfer extends LinearOpMode {
 
     private colorSensorDriver color1, color2, color3;
-    private final int CLEAR_THRESHOLD = 500;
+    private final int CLEAR_THRESHOLD = 12;
 
     @Override
     public void runOpMode() {

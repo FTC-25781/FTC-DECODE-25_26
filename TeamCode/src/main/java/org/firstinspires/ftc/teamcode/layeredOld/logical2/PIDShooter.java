@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.layered.logical2;
+package org.firstinspires.ftc.teamcode.layeredOld.logical2;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,7 +7,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.layered.physical1.FlywheelMotor;
+import org.firstinspires.ftc.teamcode.layeredOld.physical1.FlywheelMotor;
 
 @Disabled
 @TeleOp(name="PID Shooter")

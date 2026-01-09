@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
+import org.firstinspires.ftc.teamcode.layeredOld.physical1.ServoForTransfer;
 
 @Disabled
 @TeleOp(name="TestShooter")

@@ -3,7 +3,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.layered.physical1.ServoForTransfer;
+import org.firstinspires.ftc.teamcode.layeredOld.physical1.ServoForTransfer;
 
 @Disabled
 @TeleOp(name="Transfer Subsystem Test", group = "tests")

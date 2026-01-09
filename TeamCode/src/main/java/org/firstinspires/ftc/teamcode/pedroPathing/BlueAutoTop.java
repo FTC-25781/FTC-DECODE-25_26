@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 
-@Autonomous(name = "Red Auto Top", group = "Red")
-public class RedAutoTop extends OpMode {
+@Autonomous(name = "Blue Auto Top", group = "Blue")
+public class BlueAutoTop extends OpMode {
     private Intake intake;
 
     private Follower follower;
@@ -20,7 +20,7 @@ public class RedAutoTop extends OpMode {
 
     private int pathState;
 
-   private final Pose startPose = new Pose(123.5, 123.5, Math.toRadians(45));
+    private final Pose startPose = new Pose(19.5, 123.5, Math.toRadians(135));
     public PathChain ScanAndShootPreload;
     public PathChain GoToPickup1;
     public PathChain ShootPreload1;
@@ -31,49 +31,48 @@ public class RedAutoTop extends OpMode {
     public void buildPaths() {
         ScanAndShootPreload = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Pose(123.500, 123.500),
-                        new Pose(96.000, 96.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(45))
+                        new Pose(19.500, 123.500),
+                        new Pose(48.000, 96.000)
+                )).setConstantHeadingInterpolation(Math.toRadians(45))
                 .build();
 
         GoToPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                                new Pose(96.000, 96.000),
-                                new Pose(63.000, 83.000),
-                                new Pose(126.000, 84.000)
-                        )).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
+                        new Pose(48.000, 96.000),
+                        new Pose(72.000, 83.000),
+                        new Pose(18.000, 84.000)
+                )).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         ShootPreload1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                                new Pose(126.000, 84.000),
-                                new Pose(93.000, 80.000),
-                                new Pose(96.000, 96.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
-
+                        new Pose(18.000, 84.000),
+                        new Pose(72.000, 83.000),
+                        new Pose(48.000, 96.000)
+                )).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         GoToPick2 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                                new Pose(96.000, 96.000),
-                                new Pose(57.000, 55.000),
-                                new Pose(126.000, 60.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+                        new Pose(48.000, 96.000),
+                        new Pose(87.200, 57.000),
+                        new Pose(18.000, 60.000)
+                )).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         OpenTheGate = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                                new Pose(126.000, 60.000),
-                                new Pose(115.000, 70.000),
-                                new Pose(129.000, 68.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+                        new Pose(18.000, 60.000),
+                        new Pose(20.500, 65.000),
+                        new Pose(13.400, 65.800)
+                )).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         ShootPick2 = follower.pathBuilder()
                 .addPath(new BezierLine(
-                                new Pose(129.000, 68.000),
-                                new Pose(72.000, 72.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+                        new Pose(13.000, 65.000),
+                        new Pose(48.000, 96.000)
+                )).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
     }
 

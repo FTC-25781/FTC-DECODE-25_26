@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.layered.physical1;
+package org.firstinspires.ftc.teamcode.layeredOld.physical1;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;

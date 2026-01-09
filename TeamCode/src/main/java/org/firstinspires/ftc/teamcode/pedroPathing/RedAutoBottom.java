@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 
-// Shreesh Approved Auto
 @Autonomous(name = "Red Auto Bottom", group = "Red")
 public class RedAutoBottom extends OpMode {
     private Intake intake;

@@ -6,7 +6,6 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
@@ -14,9 +13,10 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+// TODO: Check why TeleOp is so delayed
 @Configurable
-@TeleOp(name = "TeleOp Blue", group = "TeleOp")
-public class TeleOpBlue extends OpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp Blue", group = "TeleOp")
+public class TeleOp extends OpMode {
     // Subsystem instances
     private Intake intake;
     private Transfer transfer;

@@ -6,13 +6,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferServos;
 
+// TODO: I want further testing on this because I don't trust it
+// TODO: This file is too long I want max 100 lines of code per file
+
 public class Transfer {
     // TODO: Adding color sensor after calibrated
     Limelight limelight;
     TransferServos transferServos;
 
     private final ElapsedTime stateTimer = new ElapsedTime();
-    public final int kickerWithGreen = 1;
+    public int kickerWithGreen = 1;
     public int id = 21;
 
     public enum State {
@@ -69,9 +72,9 @@ public class Transfer {
         switch (currentState) {
             case SEARCHING:
                 if (id == 21 || id == 22 || id == 23) {
-                    // ID 21 = fire kicker 1 (green), then 2, then 3
-                    // ID 22 = fire kicker 2, then 1 (green), then 3
-                    // ID 23 = fire kicker 2, then 3, then 1 (green)
+                    // ID 21 = fire green kicker first, then others
+                    // ID 22 = fire purple kicker, then green, then purple
+                    // ID 23 = fire purple kicker, then purple, then green
                     stateTimer.reset();
                     currentState = State.RAISE_FIRST;
                 }
@@ -80,9 +83,9 @@ public class Transfer {
             case RAISE_FIRST:
                 // First kicker to fire depends on ID
                 if (id == 21) {
-                    transferServos.kicker1GoUp();  // Green first
+                    raiseKicker(kickerWithGreen);  // Green first
                 } else {  // id == 22 or 23
-                    transferServos.kicker2GoUp();  // Purple first
+                    raisePurpleKicker();  // Purple first
                 }
                 stateTimer.reset();
                 currentState = State.WAIT_FIRST;
@@ -99,11 +102,11 @@ public class Transfer {
             case RAISE_SECOND:
                 // Second kicker to fire depends on ID
                 if (id == 21) {
-                    transferServos.kicker2GoUp();  // Purple second
+                    raisePurpleKicker();  // Purple second
                 } else if (id == 22) {
-                    transferServos.kicker1GoUp();  // Green second
+                    raiseKicker(kickerWithGreen);  // Green second
                 } else {  // id == 23
-                    transferServos.kicker3GoUp();  // Purple second
+                    raisePurpleKicker();  // Purple second (different one)
                 }
                 stateTimer.reset();
                 currentState = State.WAIT_SECOND;
@@ -120,9 +123,9 @@ public class Transfer {
             case RAISE_THIRD:
                 // Third kicker to fire depends on ID
                 if (id == 21 || id == 22) {
-                    transferServos.kicker3GoUp();  // Purple third
+                    raisePurpleKicker();  // Purple third
                 } else {  // id == 23
-                    transferServos.kicker1GoUp();  // Green third
+                    raiseKicker(kickerWithGreen);  // Green third
                 }
                 stateTimer.reset();
                 currentState = State.WAIT_THIRD;
@@ -153,7 +156,6 @@ public class Transfer {
                 break;
 
             case RAISE_FIRST:
-                // First kicker to fire depends on ID
                 transferServos.kicker1GoUp();  // Green first
                 stateTimer.reset();
                 currentState = State.WAIT_FIRST;
@@ -182,7 +184,6 @@ public class Transfer {
                 break;
 
             case RAISE_THIRD:
-                // Third kicker to fire depends on ID
                 transferServos.kicker3GoUp();  // Purple third
                 stateTimer.reset();
                 currentState = State.WAIT_THIRD;
@@ -204,6 +205,31 @@ public class Transfer {
 
             case IDLE:
                 break;
+        }
+    }
+
+    private void raiseKicker(int kickerNumber) {
+        switch (kickerNumber) {
+            case 1:
+                transferServos.kicker1GoUp();
+                break;
+            case 2:
+                transferServos.kicker2GoUp();
+                break;
+            case 3:
+                transferServos.kicker3GoUp();
+                break;
+        }
+    }
+
+    private void raisePurpleKicker() {
+        // Raise the first available purple kicker (not the green one)
+        if (kickerWithGreen == 1) {
+            transferServos.kicker2GoUp();
+        } else if (kickerWithGreen == 2) {
+            transferServos.kicker1GoUp();
+        } else {
+            transferServos.kicker1GoUp();
         }
     }
 

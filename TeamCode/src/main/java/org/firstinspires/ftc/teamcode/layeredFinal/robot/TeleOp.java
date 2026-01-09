@@ -17,32 +17,26 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp Blue", group = "TeleOp")
 public class TeleOp extends OpMode {
-    // Subsystem instances
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
     private Limelight limelight;
 
-    // Navigation and Telemetry
     private Follower follower;
-    public static Pose startingPose; // Static so Auto can pass the final position to TeleOp
+    public static Pose startingPose;
     private TelemetryManager telemetryM;
 
-    // Debounce booleans
     private boolean lastLeftTrigger = false;
     private boolean lastRightTrigger = false;
 
     @Override
     public void init() {
-        // Initialize Pedro Pathing follower
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
 
-        // Custom Telemetry setup
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        // Initialize hardware abstractions
         intake = new Intake(hardwareMap);
         transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
@@ -60,7 +54,6 @@ public class TeleOp extends OpMode {
     public void loop() {
         transfer.update();
         follower.update();
-        telemetryM.update();
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,

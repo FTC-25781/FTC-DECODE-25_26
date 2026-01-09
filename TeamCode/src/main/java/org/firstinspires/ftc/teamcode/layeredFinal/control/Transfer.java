@@ -12,7 +12,7 @@ public class Transfer {
     TransferServos transferServos;
 
     private final ElapsedTime stateTimer = new ElapsedTime();
-    private final int kickerWithGreen = 1; // TODO: Set to "0" when color sensor added
+    public final int kickerWithGreen = 1;
     public int id = 21;
 
     public enum State {
@@ -53,9 +53,6 @@ public class Transfer {
 
     public void update() {
         transferServos.update();
-
-        // TODO: Add color sensor when calibrated
-        // kickerWithGreen = colorSensor.getKickerWithGreen();
 
         // Run the state machine if a sequence is active
         if (sequenceActiveInOrder) {

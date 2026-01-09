@@ -4,64 +4,83 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 
-// Shreesh Approved Auto
 @Autonomous(name = "Red Auto Top", group = "Red")
 public class RedAutoTop extends OpMode {
     private Intake intake;
-
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
 
-    private final Pose startPose = new Pose(94, 8, Math.toRadians(0));
-    private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
-    private final Pose pickup1EndPose = new Pose(131,37, Math.toRadians(0));
-    private final Pose pickup1ControlPose = new Pose(72, 38, Math.toRadians(0));
-    private final Pose humanPlayerPose = new Pose(135, 8, Math.toRadians(0));
-
-    private Path scanAndShoot;
-    private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2;
+   private final Pose startPose = new Pose(123.5, 123.5, Math.toRadians(45));
+    public PathChain ScanAndShootPreload;
+    public PathChain GoToPickup1;
+    public PathChain ShootPreload1;
+    public PathChain GoToPick2;
+    public PathChain OpenTheGate;
+    public PathChain ShootPick2;
 
     public void buildPaths() {
-        scanAndShoot = new Path(new BezierLine(startPose, scanAndShootPreload));
-        scanAndShoot.setConstantHeadingInterpolation(scanAndShootPreload.getHeading());
-
-        goToPickup1 = follower.pathBuilder()
-                .addPath(new BezierCurve(startPose, pickup1ControlPose, pickup1EndPose))
-                .setConstantHeadingInterpolation(pickup1EndPose.getHeading())
+        ScanAndShootPreload = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        new Pose(123.500, 123.500),
+                        new Pose(96.000, 96.000)
+                        )).setConstantHeadingInterpolation(Math.toRadians(45))
                 .build();
 
-        goToScore = follower.pathBuilder()
-                .addPath(new BezierCurve(pickup1EndPose, pickup1ControlPose, startPose))
-                .setConstantHeadingInterpolation(startPose.getHeading())
+        GoToPickup1 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                                new Pose(96.000, 96.000),
+                                new Pose(63.000, 83.000),
+                                new Pose(126.000, 84.000)
+                        )).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
                 .build();
 
-        goToHumanPlayerZone = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, humanPlayerPose))
-                .setConstantHeadingInterpolation(humanPlayerPose.getHeading())
+        ShootPreload1 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                                new Pose(126.000, 84.000),
+                                new Pose(93.000, 80.000),
+                                new Pose(96.000, 96.000)
+                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+
                 .build();
 
-        goToScore2 = follower.pathBuilder()
-                .addPath(new BezierLine(humanPlayerPose, startPose))
-                .setConstantHeadingInterpolation(startPose.getHeading())
+        GoToPick2 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                                new Pose(96.000, 96.000),
+                                new Pose(57.000, 55.000),
+                                new Pose(126.000, 60.000)
+                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        OpenTheGate = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                                new Pose(126.000, 60.000),
+                                new Pose(115.000, 70.000),
+                                new Pose(129.000, 68.000)
+                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        ShootPick2 = follower.pathBuilder()
+                .addPath(new BezierLine(
+                                new Pose(129.000, 68.000),
+                                new Pose(72.000, 72.000)
+                        )).setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scanAndShoot);
+                follower.followPath(ScanAndShootPreload);
                 setPathState(1);
                 break;
             case 1:
@@ -70,7 +89,7 @@ public class RedAutoTop extends OpMode {
                     /* Score Preload */
                     intake.forward();
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(goToPickup1, true);
+                    follower.followPath(GoToPickup1, true);
                     pathTimer.resetTimer();
                     setPathState(2);
                 }
@@ -80,45 +99,52 @@ public class RedAutoTop extends OpMode {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
                     /* Grab Sample */
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(goToScore, true);
+                    follower.followPath(ShootPreload1, true);
                     pathTimer.resetTimer();
                     setPathState(3);
                 }
                 break;
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
                     /* Score Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(goToHumanPlayerZone, true);
+                    follower.followPath(GoToPick2, true);
+                    pathTimer.resetTimer();
                     setPathState(4);
                 }
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
                     /* Grab Sample */
                     intake.stopped();
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(goToScore2, true);
+                    follower.followPath(OpenTheGate, true);
+                    pathTimer.resetTimer();
+                    setPathState(5);
+                }
+                break;
+            case 5:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
+                    /* Grab Sample */
+                    intake.stopped();
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
+                    follower.followPath(ShootPick2, true);
+                    pathTimer.resetTimer();
                     setPathState(-1);
                 }
                 break;
         }
     }
 
-    /**
-     * These change the states of the paths and actions. It will also reset the timers of the individual switches
-     **/
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
     }
 
-    /**
-     * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
-     **/
     @Override
     public void loop() {
         // These loop the movements of the robot, these must be called continuously in order to work
@@ -133,9 +159,6 @@ public class RedAutoTop extends OpMode {
         telemetry.update();
     }
 
-    /**
-     * This method is called once at the init of the OpMode.
-     **/
     @Override
     public void init() {
         intake = new Intake(hardwareMap);
@@ -149,26 +172,16 @@ public class RedAutoTop extends OpMode {
         follower.setStartingPose(startPose);
     }
 
-    /**
-     * This method is called continuously after Init while waiting for "play".
-     **/
     @Override
     public void init_loop() {
     }
 
-    /**
-     * This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system
-     **/
     @Override
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
     }
 
-    /**
-     * We do not use this because everything should automatically disable
-     **/
     @Override
     public void stop() {
     }

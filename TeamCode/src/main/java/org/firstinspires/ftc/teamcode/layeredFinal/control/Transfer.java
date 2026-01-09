@@ -13,9 +13,9 @@ public class Transfer {
 
     private final ElapsedTime stateTimer = new ElapsedTime();
     private final int kickerWithGreen = 1; // TODO: Set to "0" when color sensor added
-    public int id;
+    public int id = 21;
 
-    enum State {
+    public enum State {
         IDLE,           // Not firing, waiting for command
         SEARCHING,      // Looking for AprilTag
         RAISE_FIRST,
@@ -27,7 +27,7 @@ public class Transfer {
         DONE
     }
 
-    State currentState = State.IDLE;
+    public  State currentState = State.IDLE;
     private boolean sequenceActiveInOrder = false;
     private boolean sequenceActiveRandom = false;
 

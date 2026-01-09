@@ -58,7 +58,6 @@ public class TeleOpBlue extends OpMode {
 
     @Override
     public void loop() {
-
         transfer.update();
         follower.update();
         telemetryM.update();

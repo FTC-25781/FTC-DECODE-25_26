@@ -65,7 +65,6 @@ public class GetDistanceToGoal {
         // This gives the "as-the-crow-flies" distance in inches.
         distance  = Math.sqrt(dx * dx + dy * dy);
 
-        // The physics engine (FlywheelMotor) requires millimeters.
         // 1 inch = 25.4 millimeters.
         return distance * 25.4;
     }

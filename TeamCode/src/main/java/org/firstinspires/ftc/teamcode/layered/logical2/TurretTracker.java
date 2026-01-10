@@ -70,7 +70,6 @@ public class TurretTracker {
         return normalizeAngle(desiredAngle - currentAngle);
     }
     /*
-]
     /*
     Since 2 * pi is one full revolution of a circle, if the angle in radians is greater than
     pi, we subtract one full rotation of the angle to put it in a -180 to 180 range

@@ -2,19 +2,24 @@ package org.firstinspires.ftc.teamcode.layeredFinal.logical;
 
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-
-// TODO: Test please
+import com.qualcomm.robotcore.util.Range;
 
 public class Turret {
-    public CRServo servo;
+    public DcMotorEx turretMotor;
     public TurretTracker turretOrientation;
-    public double rotationSpeed = 0.3; // max speed for turret
-    public double angleTolerance = Math.toRadians(5); // 5 degrees of angle tolerance
+    public double rotationSpeed = 0.7; // max speed for turret
+    public double angleTolerance = Math.toRadians(3);
+    public double fastAdjustmentThreshold = Math.toRadians(20);
+    public double kP = 2.5;
     public Turret(HardwareMap hardwareMap, Follower follower) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
-        servo = hardwareMap.get(CRServo.class, "turretServo");
+        turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
+
+        turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /**
@@ -26,16 +31,16 @@ public class Turret {
      */
     public void trackGoal(){
         double error = turretOrientation.calculateError();
-        double servoSpeed = 0;
-        if(Math.abs(error) > angleTolerance){
-            servoSpeed = Math.signum(error) * rotationSpeed;
+        double output;
+        if(Math.abs(error) > fastAdjustmentThreshold){
+            output = Math.signum(error) * rotationSpeed;
         }
         else{
-            servo.setPower(0);
+            double proportional = kP * error;
+            output = Range.clip(proportional, -rotationSpeed, rotationSpeed);
         }
-        servo.setPower(servoSpeed);
+        turretMotor.setPower(output);
     }
-
     public boolean isOnTarget() {
         double error = turretOrientation.calculateError();
         return Math.abs(error) <= angleTolerance;

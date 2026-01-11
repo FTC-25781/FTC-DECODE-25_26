@@ -4,12 +4,10 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-// TODO: Test please
-
 public class TurretTracker {
 
     public DcMotor encoder;
-    public static final double TICKS_PER_REV = 8192;
+    public static final double TICKS_PER_REV = 364;
     Follower follower;
     public double goalX = 12;
     public double goalY = 132;

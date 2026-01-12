@@ -41,7 +41,9 @@ public class TurretTest extends OpMode {
         }
         if (gamepad1.bWasPressed()) {
             turret.turretOrientation.isRed = false;
-
+        }
+        if(gamepad1.xWasPressed()){
+            turret.turretOrientation.resetEncoder();
         }
 
         // Add this to your telemetry
@@ -54,11 +56,7 @@ public class TurretTest extends OpMode {
         telemetry.addData("X-Pos", follower.getPose().getX());
         telemetry.addData("Y-Pos", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.addData("Ticks for 360°", turret.turretMotor.getCurrentPosition());
         telemetry.update();
-    }
-    @Override
-    public void stop(){
-        if(gamepad1.a){
-            turret.turretMotor.setPower(0);}
     }
 }

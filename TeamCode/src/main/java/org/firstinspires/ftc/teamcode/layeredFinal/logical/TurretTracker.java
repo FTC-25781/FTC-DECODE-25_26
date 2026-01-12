@@ -32,7 +32,8 @@ public class TurretTracker {
      */
     public double getTurretAngle(){
         double ticks = encoder.getCurrentPosition();
-        return (ticks / TICKS_PER_REV) * (2 * Math.PI);
+        double angle = (ticks / TICKS_PER_REV) * (2 * Math.PI);
+        return normalizeAngle(angle);
     }
 
     /**
@@ -44,6 +45,7 @@ public class TurretTracker {
     public void resetEncoder() {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoder.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     /**

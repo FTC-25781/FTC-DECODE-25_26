@@ -52,7 +52,6 @@ public class turretRuntoPosition extends LinearOpMode {
             }
             turretMotor.setTargetPosition(POSITION);
 
-
             telemetry.addData("Proportional", P);
             telemetry.addData("Position", turretMotor.getTargetPosition());
             telemetry.addData("Current Position", turretMotor.getCurrentPosition());

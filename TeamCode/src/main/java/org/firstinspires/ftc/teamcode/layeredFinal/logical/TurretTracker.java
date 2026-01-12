@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.layeredFinal.logical;
 
 import com.pedropathing.follower.Follower;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class TurretTracker {
@@ -9,13 +11,18 @@ public class TurretTracker {
     public DcMotor encoder;
     public static final double TICKS_PER_REV = 364;
     Follower follower;
-    public double goalX = 12;
-    public double goalY = 132;
+    public GoBildaPinpointDriver pinpoint;
+    public double blueX = 12;
+    public double blueY = 132;
+    public double redX = 132;
+    public double redY = 132;
+    public boolean isRed = false;
 
     public TurretTracker(HardwareMap hardwareMap, Follower follower){
-        encoder = hardwareMap.get(DcMotor.class, "turretEncoder");
+        encoder = hardwareMap.get(DcMotor.class, "tmot");
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoder.setDirection(DcMotorSimple.Direction.REVERSE);
         this.follower = follower;
     }
 
@@ -44,9 +51,17 @@ public class TurretTracker {
      * radians
      */
     public double getAngleToGoal(){
+         follower.update();
         double robotX = follower.getPose().getX();
         double robotY = follower.getPose().getY();
-        return Math.atan2(goalY - robotY, goalX - robotX);
+        double angle;
+        if(isRed){
+            angle =  Math.atan2(redY - robotY, redX - robotX);
+        }
+        else{
+            angle =  Math.atan2(blueY - robotY, blueX - robotX);
+        }
+        return angle;
     }
 
     /**

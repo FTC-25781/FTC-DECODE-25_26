@@ -13,9 +13,9 @@ public class Turret {
     public double rotationSpeed = 0.9; // max speed for turret
     public double angleTolerance = Math.toRadians(3);
     public double fastAdjustmentThreshold = Math.toRadians(20);
-    public double kP = 0.3;
+    public double kP = 0.07;
     private double lastError = 0;
-    private double kD = 0.15;
+    private double kD = 0.03;
     public Turret(HardwareMap hardwareMap, Follower follower) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
         turretMotor = hardwareMap.get(DcMotorEx.class, "tmot");
@@ -52,6 +52,7 @@ public class Turret {
         }
         turretMotor.setPower(output);
     }
+
     public boolean isOnTarget() {
         double error = turretOrientation.calculateError();
         return Math.abs(error) <= angleTolerance;

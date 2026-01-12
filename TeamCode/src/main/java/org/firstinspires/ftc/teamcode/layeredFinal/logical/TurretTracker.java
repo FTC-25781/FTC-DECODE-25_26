@@ -9,9 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class TurretTracker {
 
     public DcMotor encoder;
-    public static final double TICKS_PER_REV = 364;
+    public static final double TICKS_PER_360 = 364;
     Follower follower;
-    public GoBildaPinpointDriver pinpoint;
     public double blueX = 12;
     public double blueY = 132;
     public double redX = 132;
@@ -32,8 +31,8 @@ public class TurretTracker {
      */
     public double getTurretAngle(){
         double ticks = encoder.getCurrentPosition();
-        double angle = (ticks / TICKS_PER_REV) * (2 * Math.PI);
-        return normalizeAngle(angle);
+        double angle = ticks / TICKS_PER_360;
+        return angle;
     }
 
     /**
@@ -74,7 +73,7 @@ public class TurretTracker {
     public double calculateDesiredTurretAngle(){
         double angleToGoal = getAngleToGoal();
         double robotHeading = follower.getPose().getHeading();
-        return normalizeAngle(angleToGoal - robotHeading);
+        return Math.toDegrees(angleToGoal - robotHeading);
     }
 
     /**
@@ -85,16 +84,6 @@ public class TurretTracker {
     public double calculateError() {
         double desiredAngle = calculateDesiredTurretAngle();
         double currentAngle = getTurretAngle();
-        return normalizeAngle(desiredAngle - currentAngle);
-    }
-
-    /**
-     * Since 2 * pi is one full revolution of a circle, if the angle in radians is greater than
-     * pi, we subtract one full rotation of the angle to put it in a -180 to 180 range
-     */
-    public double normalizeAngle(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
-        return angle;
+        return desiredAngle - currentAngle;
     }
 }

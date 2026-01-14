@@ -60,6 +60,7 @@ public class Transfer {
         // Run the state machine if a sequence is active
         if (sequenceActiveInOrder) {
             kickWithLimelight(id);
+            stateTimer.reset();
         }
 
         if (sequenceActiveRandom) {

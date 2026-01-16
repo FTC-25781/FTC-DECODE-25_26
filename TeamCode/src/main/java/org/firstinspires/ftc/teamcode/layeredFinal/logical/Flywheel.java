@@ -42,7 +42,6 @@ public class Flywheel {
     }
 
     public void humanPlayer() {
-        // TODO: Change with real vel once tested
         flywheel.setVelocity(-10);
     }
 

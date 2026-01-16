@@ -6,9 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferServos;
 
-// TODO: I want further testing on this because I don't trust it
-// TODO: This file is too long I want max 100 lines of code per file
-
 public class Transfer {
     // TODO: Adding color sensor after calibrated
     Limelight limelight;
@@ -17,6 +14,8 @@ public class Transfer {
     private final ElapsedTime stateTimer = new ElapsedTime();
     public int kickerWithGreen = 1;
     public int id = 21;
+
+    public final double TIME_VALUE = 2.0;
 
     public enum State {
         IDLE,           // Not firing, waiting for command
@@ -60,12 +59,10 @@ public class Transfer {
         // Run the state machine if a sequence is active
         if (sequenceActiveInOrder) {
             kickWithLimelight(id);
-            stateTimer.reset();
         }
 
         if (sequenceActiveRandom) {
             kick();
-            stateTimer.reset();
         }
     }
 
@@ -93,7 +90,7 @@ public class Transfer {
                 break;
 
             case WAIT_FIRST:
-                if (stateTimer.seconds() >= 2.0) {
+                if (stateTimer.seconds() >= TIME_VALUE) {
                     allKickersDown();
                     stateTimer.reset();
                     currentState = State.RAISE_SECOND;
@@ -114,7 +111,7 @@ public class Transfer {
                 break;
 
             case WAIT_SECOND:
-                if (stateTimer.seconds() >= 2.0) {
+                if (stateTimer.seconds() >= TIME_VALUE) {
                     allKickersDown();
                     stateTimer.reset();
                     currentState = State.RAISE_THIRD;
@@ -133,7 +130,7 @@ public class Transfer {
                 break;
 
             case WAIT_THIRD:
-                if (stateTimer.seconds() >= 2.0) {
+                if (stateTimer.seconds() >= TIME_VALUE) {
                     allKickersDown();
                     stateTimer.reset();
                     currentState = State.DONE;
@@ -163,7 +160,7 @@ public class Transfer {
                 break;
 
             case WAIT_FIRST:
-                if (stateTimer.seconds() >= 2.0) {
+                if (stateTimer.seconds() >= TIME_VALUE) {
                     allKickersDown();
                     stateTimer.reset();
                     currentState = State.RAISE_SECOND;
@@ -177,7 +174,7 @@ public class Transfer {
                 break;
 
             case WAIT_SECOND:
-                if (stateTimer.seconds() >= 2.0) {
+                if (stateTimer.seconds() >= TIME_VALUE) {
                     allKickersDown();
                     stateTimer.reset();
                     currentState = State.RAISE_THIRD;
@@ -191,7 +188,7 @@ public class Transfer {
                 break;
 
             case WAIT_THIRD:
-                if (stateTimer.seconds() >= 2.0) {
+                if (stateTimer.seconds() >= TIME_VALUE) {
                     allKickersDown();
                     stateTimer.reset();
                     currentState = State.DONE;
@@ -200,7 +197,7 @@ public class Transfer {
 
             case DONE:
                 allKickersDown();
-                sequenceActiveInOrder = false;
+                sequenceActiveRandom = false;
                 currentState = State.IDLE;
                 break;
 

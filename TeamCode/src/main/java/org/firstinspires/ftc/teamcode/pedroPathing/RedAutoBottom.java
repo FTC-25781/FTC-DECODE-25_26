@@ -70,8 +70,6 @@ public class RedAutoBottom extends OpMode {
                     limelight.getIDAndLog(limelight.getID());
                     transfer.id = limelight.getLastLoggedID();
 
-                    transfer.startKickSequenceInOrder();
-
                     if (transfer.currentState == Transfer.State.DONE) {
                         limelight.stop();
                         intake.forward();
@@ -83,31 +81,21 @@ public class RedAutoBottom extends OpMode {
                 }
                 break;
             case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
                 }
                 break;
             case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
                     follower.followPath(goToHumanPlayerZone, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if (!follower.isBusy()) {
-                    /* Grab Sample */
                     intake.stopped();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(goToScore2, true);
                     setPathState(-1);
                 }
@@ -115,17 +103,11 @@ public class RedAutoBottom extends OpMode {
         }
     }
 
-    /**
-     * These change the states of the paths and actions. It will also reset the timers of the individual switches
-     **/
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
     }
 
-    /**
-     * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
-     **/
     @Override
     public void loop() {
         // These loop the movements of the robot, these must be called continuously in order to work
@@ -145,9 +127,6 @@ public class RedAutoBottom extends OpMode {
         telemetry.update();
     }
 
-    /**
-     * This method is called once at the init of the OpMode.
-     **/
     @Override
     public void init() {
         intake = new Intake(hardwareMap);
@@ -163,26 +142,16 @@ public class RedAutoBottom extends OpMode {
         follower.setStartingPose(startPose);
     }
 
-    /**
-     * This method is called continuously after Init while waiting for "play".
-     **/
     @Override
     public void init_loop() {
     }
 
-    /**
-     * This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system
-     **/
     @Override
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
     }
 
-    /**
-     * We do not use this because everything should automatically disable
-     **/
     @Override
     public void stop() {
     }

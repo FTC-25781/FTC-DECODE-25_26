@@ -1,0 +1,55 @@
+package org.firstinspires.ftc.teamcode.tests;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
+import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
+
+@TeleOp(name = "Intake + Transfer + Shoot", group = "Tests")
+public class TransferAndShoot extends OpMode {
+    private Transfer t;
+    private Flywheel f;
+    private Intake i;
+
+    @Override
+    public void init() {
+        t = new Transfer(hardwareMap);
+        f = new Flywheel(hardwareMap);
+        i = new Intake(hardwareMap);
+
+        t.update();
+        f.update();
+    }
+
+    @Override
+    public void loop() {
+        if (gamepad1.aWasPressed()) {
+            i.forward();
+        }
+
+        if (gamepad1.bWasPressed()) {
+            t.startKickSequenceRandomly();
+        }
+
+        if (gamepad1.yWasPressed()) {
+            t.startKickSequenceInOrder();
+        }
+
+        if (gamepad1.dpadDownWasPressed()) {
+            f.setVelForFarTip();
+        }
+
+        if (gamepad1.dpadUpWasPressed()) {
+            f.setVelForCloseTip();
+        }
+
+        t.update();
+        f.update();
+
+        telemetry.addData("t:", t.currentState);
+        telemetry.addData("t id:", t.id);
+        telemetry.addData("f:", f.getVelocity());
+        telemetry.update();
+    }
+}

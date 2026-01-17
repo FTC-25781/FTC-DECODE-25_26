@@ -12,6 +12,7 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 
 @Autonomous(name = "Red Auto Bottom", group = "Red")
@@ -19,11 +20,13 @@ public class RedAutoBottom extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Limelight limelight;
+    private Flywheel flywheel;
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
+    private boolean timerReset = false;
 
     private final Pose startPose = new Pose(94, 8, Math.toRadians(0));
     private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
@@ -70,8 +73,20 @@ public class RedAutoBottom extends OpMode {
                     limelight.getIDAndLog(limelight.getID());
                     transfer.id = limelight.getLastLoggedID();
 
+                    flywheel.setVelForFarTip();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                        pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
                     if (transfer.currentState == Transfer.State.DONE) {
-                        limelight.stop();
+                        resetEverything();
                         intake.forward();
 
                         follower.followPath(goToPickup1, true);
@@ -89,17 +104,56 @@ public class RedAutoBottom extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    follower.followPath(goToHumanPlayerZone, true);
-                    setPathState(4);
+                    intake.stopped();
+                    flywheel.setVelForFarTip();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                        pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        resetEverything();
+                        intake.forward();
+
+                        follower.followPath(goToHumanPlayerZone, true);
+                        pathTimer.resetTimer();
+                        setPathState(4);
+                    }
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
-                    intake.stopped();
                     follower.followPath(goToScore2, true);
-                    setPathState(-1);
+                    pathTimer.resetTimer();
+                    setPathState(5);
                 }
                 break;
+            case 5:
+                if(!follower.isBusy()) {
+                    intake.stopped();
+                    flywheel.setVelForFarTip();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                        pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        resetEverything();
+                        setPathState(-1);
+                    }
+                }
         }
     }
 
@@ -110,13 +164,12 @@ public class RedAutoBottom extends OpMode {
 
     @Override
     public void loop() {
-        // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
         autonomousPathUpdate();
 
         transfer.update();
+        flywheel.update();
 
-        // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
@@ -129,6 +182,7 @@ public class RedAutoBottom extends OpMode {
 
     @Override
     public void init() {
+        flywheel = new Flywheel(hardwareMap);
         intake = new Intake(hardwareMap);
         transfer = new Transfer(hardwareMap);
         limelight = new Limelight(hardwareMap);
@@ -140,6 +194,13 @@ public class RedAutoBottom extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+    }
+
+    private void resetEverything() {
+        timerReset = false;
+        transfer.reset();
+        limelight.stop();
+        flywheel.stopFlywheel();
     }
 
     @Override

@@ -14,7 +14,9 @@ public class Limelight {
 
     public int getIDAndLog(int id) {
         if (id != -1) {
-            db.logID(id);
+            if (id == 21 || id == 22 || id == 23) {
+                db.logID(id);
+            }
         }
         return id;
     }

@@ -15,21 +15,28 @@ public class Transfer {
     public int kickerWithGreen = 1;
     public int id = 21;
 
-    public final double TIME_VALUE = 2.0;
+    public final double TIME_VALUE = 0.4;
+    public final double SERVO_LOWER_TIME = 0.2; // Time for servos to fully lower
 
     public enum State {
         IDLE,           // Not firing, waiting for command
         SEARCHING,      // Looking for AprilTag
         RAISE_FIRST,
         WAIT_FIRST,
+        LOWER_FIRST,
+        WAIT_LOWER_FIRST,
         RAISE_SECOND,
         WAIT_SECOND,
+        LOWER_SECOND,
+        WAIT_LOWER_SECOND,
         RAISE_THIRD,
         WAIT_THIRD,
+        LOWER_THIRD,
+        WAIT_LOWER_THIRD,
         DONE
     }
 
-    public  State currentState = State.IDLE;
+    public State currentState = State.IDLE;
     private boolean sequenceActiveInOrder = false;
     private boolean sequenceActiveRandom = false;
 
@@ -91,7 +98,19 @@ public class Transfer {
 
             case WAIT_FIRST:
                 if (stateTimer.seconds() >= TIME_VALUE) {
-                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.LOWER_FIRST;
+                }
+                break;
+
+            case LOWER_FIRST:
+                allKickersDown();
+                stateTimer.reset();
+                currentState = State.WAIT_LOWER_FIRST;
+                break;
+
+            case WAIT_LOWER_FIRST:
+                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
                     stateTimer.reset();
                     currentState = State.RAISE_SECOND;
                 }
@@ -112,7 +131,19 @@ public class Transfer {
 
             case WAIT_SECOND:
                 if (stateTimer.seconds() >= TIME_VALUE) {
-                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.LOWER_SECOND;
+                }
+                break;
+
+            case LOWER_SECOND:
+                allKickersDown();
+                stateTimer.reset();
+                currentState = State.WAIT_LOWER_SECOND;
+                break;
+
+            case WAIT_LOWER_SECOND:
+                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
                     stateTimer.reset();
                     currentState = State.RAISE_THIRD;
                 }
@@ -131,7 +162,19 @@ public class Transfer {
 
             case WAIT_THIRD:
                 if (stateTimer.seconds() >= TIME_VALUE) {
-                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.LOWER_THIRD;
+                }
+                break;
+
+            case LOWER_THIRD:
+                allKickersDown();
+                stateTimer.reset();
+                currentState = State.WAIT_LOWER_THIRD;
+                break;
+
+            case WAIT_LOWER_THIRD:
+                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
                     stateTimer.reset();
                     currentState = State.DONE;
                 }
@@ -140,7 +183,7 @@ public class Transfer {
             case DONE:
                 allKickersDown();
                 sequenceActiveInOrder = false;
-                currentState = State.IDLE;
+                currentState = State.DONE;
                 break;
 
             case IDLE:
@@ -161,7 +204,19 @@ public class Transfer {
 
             case WAIT_FIRST:
                 if (stateTimer.seconds() >= TIME_VALUE) {
-                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.LOWER_FIRST;
+                }
+                break;
+
+            case LOWER_FIRST:
+                allKickersDown();
+                stateTimer.reset();
+                currentState = State.WAIT_LOWER_FIRST;
+                break;
+
+            case WAIT_LOWER_FIRST:
+                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
                     stateTimer.reset();
                     currentState = State.RAISE_SECOND;
                 }
@@ -175,7 +230,19 @@ public class Transfer {
 
             case WAIT_SECOND:
                 if (stateTimer.seconds() >= TIME_VALUE) {
-                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.LOWER_SECOND;
+                }
+                break;
+
+            case LOWER_SECOND:
+                allKickersDown();
+                stateTimer.reset();
+                currentState = State.WAIT_LOWER_SECOND;
+                break;
+
+            case WAIT_LOWER_SECOND:
+                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
                     stateTimer.reset();
                     currentState = State.RAISE_THIRD;
                 }
@@ -189,7 +256,19 @@ public class Transfer {
 
             case WAIT_THIRD:
                 if (stateTimer.seconds() >= TIME_VALUE) {
-                    allKickersDown();
+                    stateTimer.reset();
+                    currentState = State.LOWER_THIRD;
+                }
+                break;
+
+            case LOWER_THIRD:
+                allKickersDown();
+                stateTimer.reset();
+                currentState = State.WAIT_LOWER_THIRD;
+                break;
+
+            case WAIT_LOWER_THIRD:
+                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
                     stateTimer.reset();
                     currentState = State.DONE;
                 }
@@ -198,7 +277,7 @@ public class Transfer {
             case DONE:
                 allKickersDown();
                 sequenceActiveRandom = false;
-                currentState = State.IDLE;
+                currentState = State.DONE;
                 break;
 
             case IDLE:

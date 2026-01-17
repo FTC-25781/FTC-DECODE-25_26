@@ -21,9 +21,11 @@ public class TurretTracker {
     public final double redX = 132;
     public final double redY = 132;
     public boolean isRed = false;
+    /*
     public double tx = 0;
     public boolean targetVisible = false;
     public Limelight3A limelight;
+     */
 
     public TurretTracker(HardwareMap hardwareMap, Follower follower){
         encoder = hardwareMap.get(DcMotorEx.class, "tmot");
@@ -32,9 +34,11 @@ public class TurretTracker {
         encoder.setDirection(DcMotorEx.Direction.REVERSE);
         this.follower = follower;
 
+        /*
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         limelight.start();
+         */
     }
     public double getTurretAngle(){
         return encoder.getCurrentPosition() * (2 * Math.PI) / TICKS_PER_REV;

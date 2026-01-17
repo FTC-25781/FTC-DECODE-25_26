@@ -23,9 +23,7 @@ public class TurretTest extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-
-        // Set starting pose (CRITICAL: place robot physically here)
-        follower.setStartingPose(new Pose(72, 72, Math.toRadians(135)));
+        follower.setStartingPose(new Pose(72, 72, Math.toRadians(45)));
 
         // Initialize turret
         turret = new Turret(follower, hardwareMap);

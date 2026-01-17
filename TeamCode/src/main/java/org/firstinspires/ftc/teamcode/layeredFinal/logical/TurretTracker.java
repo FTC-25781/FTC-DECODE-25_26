@@ -1,89 +1,85 @@
 package org.firstinspires.ftc.teamcode.layeredFinal.logical;
 
 import com.pedropathing.follower.Follower;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import java.util.List;
+
 public class TurretTracker {
 
-    public DcMotor encoder;
-    public static final double TICKS_PER_360 = 364;
-    Follower follower;
-    public double blueX = 12;
-    public double blueY = 132;
-    public double redX = 132;
-    public double redY = 132;
+    public DcMotorEx encoder;
+    public final double TICKS_PER_REV = 364;
+    public Follower follower;
+    public final double blueX = 12;
+    public final double blueY = 132;
+    public final double redX = 132;
+    public final double redY = 132;
     public boolean isRed = false;
+    public double tx = 0;
+    public boolean targetVisible = false;
+    public Limelight3A limelight;
 
     public TurretTracker(HardwareMap hardwareMap, Follower follower){
-        encoder = hardwareMap.get(DcMotor.class, "tmot");
-        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        encoder.setDirection(DcMotorSimple.Direction.REVERSE);
+        encoder = hardwareMap.get(DcMotorEx.class, "tmot");
+        encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        encoder.setDirection(DcMotorEx.Direction.REVERSE);
         this.follower = follower;
-    }
 
-    /**
-     * This code converts the ticks that the encoder reads into
-     * radians to figure out the angle of the turret relative to the robot
-     */
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.setPollRateHz(100);
+        limelight.start();
+    }
     public double getTurretAngle(){
-        double ticks = encoder.getCurrentPosition();
-        double angle = ticks / TICKS_PER_360;
-        return angle;
-    }
-
-    /**
-     * Used for telemetry later on
-     */
-    public double turretAngleDegrees(){
-        return Math.toDegrees(getTurretAngle());
+        return encoder.getCurrentPosition() * (2 * Math.PI) / TICKS_PER_REV;
     }
     public void resetEncoder() {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         encoder.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+    /*
+    public void limelightData() {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            if (!fiducials.isEmpty()) {
+                double rawTx = Math.toRadians(fiducials.get(0).getTargetXDegrees());
+                if (!targetVisible) a{
+                    tx = rawTx;
+                    targetVisible = true;
+                } else {
+                    double delta = Math.abs(rawTx - tx);
+                    double dynamicGain = (delta > Math.toRadians(0.5)) ? 0.6 : 0.15;
+                    tx = (rawTx * dynamicGain) + (tx * (1 - dynamicGain));
+                }
+            } else {targetVisible = false;}
+        } else {targetVisible = false;}
+    }
 
-    /**
-     * Calculates the angle to the goal (field angle to goal) and returns that angle in
-     * radians
      */
     public double getAngleToGoal(){
-         follower.update();
         double robotX = follower.getPose().getX();
         double robotY = follower.getPose().getY();
-        double angle;
         if(isRed){
-            angle =  Math.atan2(redY - robotY, redX - robotX);
+            return Math.atan2(redY - robotY, redX - robotX);
         }
         else{
-            angle =  Math.atan2(blueY - robotY, blueX - robotX);
+            return Math.atan2(blueY - robotY, blueX - robotX);
         }
-        return angle;
     }
-
-    /**
-     * Subtracts the field angle to goal and the robot orientation to find desired turret angle
-     *     Gets turret angle that the servo needs to rotate to to face the goal and
-     *     puts that angle in a -180 degree to 180 degree range instead of -360 to 360 degree range
-     */
     public double calculateDesiredTurretAngle(){
-        double angleToGoal = getAngleToGoal();
         double robotHeading = follower.getPose().getHeading();
-        return Math.toDegrees(angleToGoal - robotHeading);
+        return getAngleToGoal() - robotHeading;
     }
-
-    /**
-     *This method is for calculating the error between the desired angle and
-     *     turret angle and we put the angle in a -180 to 180 range so that it takes the shortest
-     *     path
-     */
     public double calculateError() {
-        double desiredAngle = calculateDesiredTurretAngle();
-        double currentAngle = getTurretAngle();
-        return desiredAngle - currentAngle;
+        double error = calculateDesiredTurretAngle() - getTurretAngle();
+        return Math.atan2(Math.sin(error), Math.cos(error));
     }
 }

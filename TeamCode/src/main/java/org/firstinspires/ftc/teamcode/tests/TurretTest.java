@@ -4,17 +4,14 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name="Turret Tester")
 public class TurretTest extends OpMode {
-    public static final double TICKS_PER_REV = 364;
     Follower follower;
-    public double goalX = 12;
-    public double goalY = 132;
+
     public Turret turret;
 
     @Override
@@ -60,3 +57,4 @@ public class TurretTest extends OpMode {
         telemetry.update();
     }
 }
+ 

@@ -21,12 +21,6 @@ public class Turret {
     public double kD = 0.003;
     public double kF = 0.0008;
 
-    // Turret target coordinates
-    private double redGoalX = 144;
-    private double redGoalY = 144;
-    private double blueGoalX = 0;
-    private double blueGoalY = 144;
-
     // Tolerances
     public double angleTolerance = 2.0; // degrees
     public double settleZone = 5.0;     // Stop moving within this range
@@ -57,6 +51,7 @@ public class Turret {
 
     public void setAlliance(boolean red) {
         this.redAlliance = red;
+        this.turretOrientation.isRed = red;
     }
 
     public void startAutoAlign() {
@@ -91,17 +86,9 @@ public class Turret {
         }
         lastUpdateTime = currentTime;
 
-        // Get robot position
-        double robotX = turretOrientation.follower.getPose().getX();
-        double robotY = turretOrientation.follower.getPose().getY();
-
-        // Select goal based on alliance
-        double targetX = redAlliance ? redGoalX : blueGoalX;
-        double targetY = redAlliance ? redGoalY : blueGoalY;
-
         // Calculate desired angle to target
-        double targetFieldAngleRad = Math.atan2(targetY - robotY, targetX - robotX);
-        double desiredTurretAngleDeg = normalizeAngle(Math.toDegrees(targetFieldAngleRad - robotHeading));
+        double targetFieldAngleRad = turretOrientation.calculateDesiredTurretAngle();
+        double desiredTurretAngleDeg = Math.toDegrees(targetFieldAngleRad);
 
         // Get current turret angle
         double currentTurretDeg = getTurretDegrees();
@@ -137,15 +124,8 @@ public class Turret {
     }
 
     public boolean isOnTarget() {
-        double robotX = turretOrientation.follower.getPose().getX();
-        double robotY = turretOrientation.follower.getPose().getY();
-        double robotHeading = turretOrientation.follower.getPose().getHeading();
-
-        double targetX = redAlliance ? redGoalX : blueGoalX;
-        double targetY = redAlliance ? redGoalY : blueGoalY;
-
-        double targetFieldAngleRad = Math.atan2(targetY - robotY, targetX - robotX);
-        double desiredTurretAngleDeg = normalizeAngle(Math.toDegrees(targetFieldAngleRad - robotHeading));
+        double desiredTurretAngleRad = turretOrientation.calculateDesiredTurretAngle();
+        double desiredTurretAngleDeg = Math.toDegrees(desiredTurretAngleRad);
 
         double currentTurretDeg = getTurretDegrees();
         double error = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);

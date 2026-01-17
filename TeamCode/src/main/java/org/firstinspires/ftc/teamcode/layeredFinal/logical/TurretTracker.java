@@ -16,11 +16,11 @@ public class TurretTracker {
     public DcMotorEx encoder;
     public final double TICKS_PER_REV = 364;
     public Follower follower;
-    public final double blueX = 12;
-    public final double blueY = 132;
-    public final double redX = 132;
-    public final double redY = 132;
-    public boolean isRed = false;
+    public final double blueX = 0;
+    public final double blueY = 144;
+    public final double redX = 144;
+    public final double redY = 144;
+    public boolean isRed = true;
     /*
     public double tx = 0;
     public boolean targetVisible = false;
@@ -83,7 +83,7 @@ public class TurretTracker {
     }
     public double calculateDesiredTurretAngle(){
         double robotHeading = follower.getPose().getHeading();
-        return getAngleToGoal() - robotHeading;
+        return robotHeading - getAngleToGoal();
     }
     public double calculateError() {
         double error = calculateDesiredTurretAngle() - getTurretAngle();

@@ -91,7 +91,7 @@ public class RedAutoBottom extends OpMode {
 
                         follower.followPath(goToPickup1, true);
                         pathTimer.resetTimer();
-                        setPathState(-1);
+                        setPathState(2);
                     }
                 }
                 break;
@@ -120,7 +120,9 @@ public class RedAutoBottom extends OpMode {
                     if (transfer.currentState == Transfer.State.DONE) {
                         resetEverything();
                         intake.forward();
+
                         follower.followPath(goToHumanPlayerZone, true);
+                        pathTimer.resetTimer();
                         setPathState(4);
                     }
                 }
@@ -128,6 +130,7 @@ public class RedAutoBottom extends OpMode {
             case 4:
                 if (!follower.isBusy()) {
                     follower.followPath(goToScore2, true);
+                    pathTimer.resetTimer();
                     setPathState(5);
                 }
                 break;
@@ -161,14 +164,12 @@ public class RedAutoBottom extends OpMode {
 
     @Override
     public void loop() {
-        // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
         autonomousPathUpdate();
 
         transfer.update();
         flywheel.update();
 
-        // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());

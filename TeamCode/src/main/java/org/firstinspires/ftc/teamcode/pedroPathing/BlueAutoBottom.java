@@ -12,6 +12,7 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 
 @Autonomous(name = "Blue Auto Bottom", group = "Blue")
@@ -19,11 +20,13 @@ public class BlueAutoBottom extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Limelight limelight;
+    private Flywheel flywheel;
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
+    private boolean timerReset = false;
 
     private final Pose startPose = new Pose(50, 8, Math.toRadians(180));
     private final Pose scanAndShootPreload = new Pose(50, 9, Math.toRadians(180));
@@ -70,10 +73,20 @@ public class BlueAutoBottom extends OpMode {
                     limelight.getIDAndLog(limelight.getID());
                     transfer.id = limelight.getLastLoggedID();
 
-                    transfer.startKickSequenceInOrder();
+                    flywheel.setVelForFarTip();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                            pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
 
                     if (transfer.currentState == Transfer.State.DONE) {
-                        limelight.stop();
+                        resetEverything();
                         intake.forward();
 
                         follower.followPath(goToPickup1, true);
@@ -83,58 +96,80 @@ public class BlueAutoBottom extends OpMode {
                 }
                 break;
             case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
                 }
                 break;
             case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy()) {
-                    /* Score Sample */
+                    intake.stopped();
+                    flywheel.setVelForFarTip();
 
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(goToHumanPlayerZone, true);
-                    setPathState(4);
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                            pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        resetEverything();
+                        intake.forward();
+
+                        follower.followPath(goToHumanPlayerZone, true);
+                        pathTimer.resetTimer();
+                        setPathState(4);
+                    }
                 }
                 break;
             case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if (!follower.isBusy()) {
-                    /* Grab Sample */
-                    intake.stopped();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(goToScore2, true);
-                    setPathState(-1);
+                    pathTimer.resetTimer();
+                    setPathState(5);
                 }
                 break;
+            case 5:
+                if(!follower.isBusy()) {
+                    intake.stopped();
+                    flywheel.setVelForFarTip();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                            pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        resetEverything();
+                        setPathState(-1);
+                    }
+                }
         }
     }
 
-    /**
-     * These change the states of the paths and actions. It will also reset the timers of the individual switches
-     **/
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
     }
 
-    /**
-     * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
-     **/
     @Override
     public void loop() {
-        // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
         autonomousPathUpdate();
 
         transfer.update();
+        flywheel.update();
 
-        // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
@@ -145,11 +180,9 @@ public class BlueAutoBottom extends OpMode {
         telemetry.update();
     }
 
-    /**
-     * This method is called once at the init of the OpMode.
-     **/
     @Override
     public void init() {
+        flywheel = new Flywheel(hardwareMap);
         intake = new Intake(hardwareMap);
         transfer = new Transfer(hardwareMap);
         limelight = new Limelight(hardwareMap);
@@ -163,26 +196,23 @@ public class BlueAutoBottom extends OpMode {
         follower.setStartingPose(startPose);
     }
 
-    /**
-     * This method is called continuously after Init while waiting for "play".
-     **/
+    private void resetEverything() {
+        timerReset = false;
+        transfer.reset();
+        limelight.stop();
+        flywheel.stopFlywheel();
+    }
+
     @Override
     public void init_loop() {
     }
 
-    /**
-     * This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system
-     **/
     @Override
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
     }
 
-    /**
-     * We do not use this because everything should automatically disable
-     **/
     @Override
     public void stop() {
     }

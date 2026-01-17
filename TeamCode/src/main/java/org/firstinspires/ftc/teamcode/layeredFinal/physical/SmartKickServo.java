@@ -18,7 +18,7 @@ public class SmartKickServo {
     private KickerState currentState = KickerState.ALL_DOWN;
 
     // Calibrated positions
-    final double UP_POS = 0.28;
+    final double UP_POS = 0.3;
     final double DOWN_POS = 0.0;
 
     public SmartKickServo(HardwareMap hardwareMap) {
@@ -26,6 +26,8 @@ public class SmartKickServo {
         kickServo2 = hardwareMap.get(Servo.class, "kick2");
         kickServo3 = hardwareMap.get(Servo.class, "kick3");
 
+        kickServo1.setDirection(Servo.Direction.REVERSE);
+        kickServo2.setDirection(Servo.Direction.REVERSE);
         kickServo3.setDirection(Servo.Direction.REVERSE);
 
         update();

@@ -13,9 +13,8 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-// TODO: Check why TeleOp is so delayed
 @Configurable
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp Blue", group = "TeleOp")
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "Main")
 public class TeleOp extends OpMode {
     private Intake intake;
     private Transfer transfer;
@@ -66,7 +65,6 @@ public class TeleOp extends OpMode {
         if (gamepad1.bWasPressed()) { intake.stopped(); }
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
-
         if (gamepad1.dpadLeftWasPressed()) {
             if (!transfer.isFiringRandomly() && !transfer.isFiringInOrder()) {
                 transfer.startKickSequenceInOrder();
@@ -107,6 +105,12 @@ public class TeleOp extends OpMode {
 
         telemetryM.debug("Position", follower.getPose());
         telemetryM.debug("Velocity", follower.getVelocity());
+        telemetryM.addLine("");
+        telemetryM.addData("Transfer State", transfer.currentState);
+        telemetryM.addData("Limelight Id", limelight.getLastLoggedID());
+        telemetryM.addData("Transfer Id", transfer.id);
+        telemetryM.addLine("");
+        telemetryM.addData("Deposit Velocity", deposit.getVelocity());
         telemetryM.update();
     }
 }

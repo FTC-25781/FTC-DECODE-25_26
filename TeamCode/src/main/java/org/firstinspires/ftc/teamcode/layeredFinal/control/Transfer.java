@@ -15,8 +15,8 @@ public class Transfer {
     public int kickerWithGreen = 1;
     public int id = 21;
 
-    public final double TIME_VALUE = 0.5;
-    public final double SERVO_LOWER_TIME = 0.5; // Time for servos to fully lower
+    public final double TIME_VALUE = 0.4;
+    public final double SERVO_LOWER_TIME = 0.2; // Time for servos to fully lower
 
     public enum State {
         IDLE,           // Not firing, waiting for command
@@ -36,7 +36,7 @@ public class Transfer {
         DONE
     }
 
-    public  State currentState = State.IDLE;
+    public State currentState = State.IDLE;
     private boolean sequenceActiveInOrder = false;
     private boolean sequenceActiveRandom = false;
 
@@ -183,7 +183,7 @@ public class Transfer {
             case DONE:
                 allKickersDown();
                 sequenceActiveInOrder = false;
-                currentState = State.IDLE;
+                currentState = State.DONE;
                 break;
 
             case IDLE:
@@ -277,7 +277,7 @@ public class Transfer {
             case DONE:
                 allKickersDown();
                 sequenceActiveRandom = false;
-                currentState = State.IDLE;
+                currentState = State.DONE;
                 break;
 
             case IDLE:

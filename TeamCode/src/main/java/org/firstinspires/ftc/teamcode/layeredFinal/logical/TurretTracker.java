@@ -27,6 +27,7 @@ public class TurretTracker {
     public Limelight3A limelight;
      */
 
+
     public TurretTracker(HardwareMap hardwareMap, Follower follower){
         encoder = hardwareMap.get(DcMotorEx.class, "tmot");
         encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -40,6 +41,7 @@ public class TurretTracker {
         limelight.start();
          */
     }
+
     public double getTurretAngle(){
         return encoder.getCurrentPosition() * (2 * Math.PI) / TICKS_PER_REV;
     }
@@ -55,7 +57,8 @@ public class TurretTracker {
             List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
             if (!fiducials.isEmpty()) {
                 double rawTx = Math.toRadians(fiducials.get(0).getTargetXDegrees());
-                if (!targetVisible) a{
+                rawTx = Math.IEEEremainder(rawTx, 2 * Math.PI);
+                if (!targetVisible) {
                     tx = rawTx;
                     targetVisible = true;
                 } else {
@@ -66,8 +69,8 @@ public class TurretTracker {
             } else {targetVisible = false;}
         } else {targetVisible = false;}
     }
-
      */
+
     public double getAngleToGoal(){
         double robotX = follower.getPose().getX();
         double robotY = follower.getPose().getY();
@@ -84,6 +87,6 @@ public class TurretTracker {
     }
     public double calculateError() {
         double error = calculateDesiredTurretAngle() - getTurretAngle();
-        return Math.atan2(Math.sin(error), Math.cos(error));
+        return Math.IEEEremainder(error, 2 * Math.PI);
     }
 }

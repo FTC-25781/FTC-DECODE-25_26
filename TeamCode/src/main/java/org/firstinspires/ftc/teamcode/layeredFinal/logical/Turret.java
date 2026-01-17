@@ -16,11 +16,10 @@ public class Turret {
     public boolean autoAlign = false;
     public boolean redAlliance = true;
 
-    // PID Constants
-    public final double kP = 1.512; // 2.78
-    public final double kI = 0.0;
-    public final double kD = 0.0003; // 0.13
-    public final double kF = 0.008;
+    public double kP = 0.012;
+    public double kI = 0.0;
+    public double kD = 0.003;
+    public double kF = 0.0008;
 
     // Turret target coordinates
     private double redGoalX = 144;
@@ -28,16 +27,27 @@ public class Turret {
     private double blueGoalX = 0;
     private double blueGoalY = 144;
 
-    // Angle tolerance (2 degrees)
-    public double angleTolerance = 2; // degrees
+    // Tolerances
+    public double angleTolerance = 2.0; // degrees
+    public double settleZone = 5.0;     // Stop moving within this range
 
     // Encoder conversion
     static final double TICKS_PER_180_DEG = 622;
     static final double DEGREES_PER_180_TICKS = 180.0;
     static final double TICKS_PER_DEGREE = TICKS_PER_180_DEG / DEGREES_PER_180_TICKS;
 
+    // Power limits
+    private double minPower = 0.1;   // Minimum power to overcome friction
+    private double maxPower = 0.6;   // maximum speed
+
+    // Update rate control
+    private long lastUpdateTime = 0;
+    private final long UPDATE_INTERVAL_MS = 30; // Update every 30ms to reduce jitter from constant pid updates
+
     public Turret(Follower follower, HardwareMap hardwareMap) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
+
+        // Initialize PID controller
         turretPID = new PIDFController(new PIDFCoefficients(kP, kI, kD, kF));
 
         turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -63,51 +73,67 @@ public class Turret {
     }
 
     private double getTurretDegrees() {
-        return turretOrientation.getTurretAngle() * (180 / Math.PI);
+        return turretOrientation.getTurretAngle() * (180.0 / Math.PI);
+    }
+
+    private double normalizeAngle(double angle) {
+        while (angle > 180) angle -= 360;
+        while (angle < -180) angle += 360;
+        return angle;
     }
 
     public void update(double robotHeading) {
         if (!autoAlign) return;
 
-        // Robot position
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastUpdateTime < UPDATE_INTERVAL_MS) {
+            return;
+        }
+        lastUpdateTime = currentTime;
+
+        // Get robot position
         double robotX = turretOrientation.follower.getPose().getX();
         double robotY = turretOrientation.follower.getPose().getY();
 
-        // Select goal
+        // Select goal based on alliance
         double targetX = redAlliance ? redGoalX : blueGoalX;
         double targetY = redAlliance ? redGoalY : blueGoalY;
 
-        // Calculate angle to target in degrees
+        // Calculate desired angle to target
         double targetFieldAngleRad = Math.atan2(targetY - robotY, targetX - robotX);
-        double desiredTurretAngleRad = targetFieldAngleRad - robotHeading;
-        double desiredTurretAngleDeg = Math.toDegrees(desiredTurretAngleRad);
+        double desiredTurretAngleDeg = normalizeAngle(Math.toDegrees(targetFieldAngleRad - robotHeading));
 
-        // Current turret angle in degrees
+        // Get current turret angle
         double currentTurretDeg = getTurretDegrees();
 
-        // Calculate shortest path difference
-        double difference = desiredTurretAngleDeg - currentTurretDeg;
-        double direction = 0;
-        if (difference > 180) direction = -360;
-        else if (difference < -180) direction = 360;
+        // Calculate error (shortest path)
+        double errorDeg = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);
 
-        // PID target in ticks
-        int targetTicks = degreesToTicks(currentTurretDeg + difference + direction);
-
-        // Update PID
-        turretPID.setCoefficients(new PIDFCoefficients(kP, kI, kD, kF));
-        turretPID.setTargetPosition(targetTicks);
-        turretPID.updatePosition(turretOrientation.encoder.getCurrentPosition());
-        double output = turretPID.run();
-
-        // Apply clipped power
-        output = Range.clip(output, -1, 1);
-
-        if (Math.abs(difference) <= angleTolerance) {
+        // Stop if within settle zone
+        if (Math.abs(errorDeg) <= settleZone) {
             turretOrientation.encoder.setPower(0);
-        } else {
-            turretOrientation.encoder.setPower(output);
+            return;
         }
+
+        // Convert to ticks for PID
+        int currentTicks = turretOrientation.encoder.getCurrentPosition();
+        int targetTicks = currentTicks + degreesToTicks(errorDeg);
+
+        // Run PID
+        turretPID.setTargetPosition(targetTicks);
+        turretPID.updatePosition(currentTicks);
+        double pidOutput = turretPID.run();
+
+        // Apply power limits
+        double power = Range.clip(pidOutput, -maxPower, maxPower);
+
+        // Apply minimum power threshold
+        if (Math.abs(power) > 0 && Math.abs(power) < minPower) {
+            power = Math.signum(power) * minPower;
+        }
+
+        // Set motor power
+        turretOrientation.encoder.setPower(power);
     }
 
     public boolean isOnTarget() {
@@ -119,14 +145,10 @@ public class Turret {
         double targetY = redAlliance ? redGoalY : blueGoalY;
 
         double targetFieldAngleRad = Math.atan2(targetY - robotY, targetX - robotX);
-        double desiredTurretAngleRad = targetFieldAngleRad - robotHeading;
-        double desiredTurretAngleDeg = Math.toDegrees(desiredTurretAngleRad);
+        double desiredTurretAngleDeg = normalizeAngle(Math.toDegrees(targetFieldAngleRad - robotHeading));
 
         double currentTurretDeg = getTurretDegrees();
-        double error = desiredTurretAngleDeg - currentTurretDeg;
-
-        if (error > 180) error -= 360;
-        else if (error < -180) error += 360;
+        double error = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);
 
         return Math.abs(error) <= angleTolerance;
     }

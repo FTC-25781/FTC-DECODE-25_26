@@ -13,14 +13,14 @@ public class Turret {
     public PIDFController turretPID;
 
     // Alliance-based auto-align
-    private boolean autoAlign = false;
-    private boolean redAlliance = true;
+    public boolean autoAlign = false;
+    public boolean redAlliance = true;
 
     // PID Constants
-    private double kP = 2.95; // 2.78
-    private double kI = 0;
-    private double kD = 0.152; // 0.13
-    private double kF = 0;
+    public final double kP = 1.512; // 2.78
+    public final double kI = 0.0;
+    public final double kD = 0.0003; // 0.13
+    public final double kF = 0.008;
 
     // Turret target coordinates
     private double redGoalX = 144;
@@ -28,7 +28,7 @@ public class Turret {
     private double blueGoalX = 0;
     private double blueGoalY = 144;
 
-    // Angle tolerance (~2 degrees)
+    // Angle tolerance (2 degrees)
     public double angleTolerance = 2; // degrees
 
     // Encoder conversion

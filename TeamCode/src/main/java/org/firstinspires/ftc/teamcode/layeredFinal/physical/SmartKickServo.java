@@ -18,7 +18,7 @@ public class SmartKickServo {
     private KickerState currentState = KickerState.ALL_DOWN;
 
     // Calibrated positions
-    final double UP_POS = 0.3;
+    final double UP_POS = 0.31;
     final double DOWN_POS = 0.0;
 
     public SmartKickServo(HardwareMap hardwareMap) {

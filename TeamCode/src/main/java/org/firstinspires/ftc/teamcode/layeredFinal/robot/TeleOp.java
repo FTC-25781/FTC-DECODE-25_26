@@ -66,15 +66,11 @@ public class TeleOp extends OpMode {
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
         if (gamepad1.dpadLeftWasPressed()) {
-            if (!transfer.isFiringRandomly() && !transfer.isFiringInOrder()) {
-                transfer.startKickSequenceInOrder();
-            }
+            transfer.startKickSequenceInOrder();
         }
 
         if (gamepad1.dpadRightWasPressed()) {
-            if (!transfer.isFiringRandomly() && !transfer.isFiringInOrder()) {
-                transfer.startKickSequenceRandomly();
-            }
+            transfer.startKickSequenceRandomly();
         }
 
         if (gamepad1.yWasPressed()) {
@@ -83,6 +79,7 @@ public class TeleOp extends OpMode {
 
         if (gamepad1.dpadUpWasPressed()) { deposit.setVelForCloseTip(); }
         if (gamepad1.dpadDownWasPressed()) { deposit.setVelForFarTip(); }
+
         if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 

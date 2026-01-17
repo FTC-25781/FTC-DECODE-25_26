@@ -25,9 +25,6 @@ public class TeleOp extends OpMode {
     public static Pose startingPose;
     private TelemetryManager telemetryM;
 
-    private boolean lastLeftTrigger = false;
-    private boolean lastRightTrigger = false;
-
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
@@ -65,38 +62,14 @@ public class TeleOp extends OpMode {
         if (gamepad1.bWasPressed()) { intake.stopped(); }
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
-        if (gamepad1.dpadLeftWasPressed()) {
-            transfer.startKickSequenceInOrder();
-        }
-
-        if (gamepad1.dpadRightWasPressed()) {
-            transfer.startKickSequenceRandomly();
-        }
-
-        if (gamepad1.yWasPressed()) {
-            transfer.reset();
-        }
+        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(); }
+        if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
+        if (gamepad1.yWasPressed()) { transfer.reset(); }
 
         if (gamepad1.dpadUpWasPressed()) { deposit.setVelForCloseTip(); }
         if (gamepad1.dpadDownWasPressed()) { deposit.setVelForFarTip(); }
-
         if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
-
-        if (gamepad1.leftBumperWasPressed()) { deposit.updateHighVelocity(-10); }
-        if (gamepad1.rightBumperWasPressed()) { deposit.updateHighVelocity(10); }
-
-        boolean currentLeftTrigger = gamepad1.left_trigger > 0.5;
-        if (currentLeftTrigger && !lastLeftTrigger) {
-            deposit.updateHighVelocity(-10);
-        }
-        lastLeftTrigger = currentLeftTrigger;
-
-        boolean currentRightTrigger = gamepad1.right_trigger > 0.5;
-        if (currentRightTrigger && !lastRightTrigger) {
-            deposit.updateHighVelocity(10);
-        }
-        lastRightTrigger = currentRightTrigger;
 
         deposit.update();
 

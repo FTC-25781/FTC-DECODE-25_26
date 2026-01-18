@@ -1,62 +1,83 @@
-//package org.firstinspires.ftc.teamcode.tests;
-//
-//import com.pedropathing.follower.Follower;
-//import com.pedropathing.geometry.Pose;
-//import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-//import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-//import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-//
-//import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
-//import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-//
-//@Disabled
-//@TeleOp(name="Turret Tester")
-//public class TurretTest extends OpMode {
-//    Follower follower;
-//
-//    public Turret turret;
-//
-//    @Override
-//    public void init(){
-//        follower = Constants.createFollower(hardwareMap);
-//        follower.setStartingPose(new Pose(72, 72, Math.toRadians(135)));
-//
-//        turret = new Turret(hardwareMap, follower);
-//    }
-//    @Override
-//    public void loop(){
-//        follower.update();
-//        turret.trackGoal();
-//
-//        if(gamepad1.dpadUpWasPressed()){
-//            turret.kP += 0.1;
-//        }
-//        if(gamepad1.dpadDownWasPressed()) {
-//            turret.kP -= 0.1;
-//        }
-//
-//        if (gamepad1.aWasPressed()) {
-//            turret.turretOrientation.isRed = true;
-//        }
-//        if (gamepad1.bWasPressed()) {
-//            turret.turretOrientation.isRed = false;
-//        }
-//        if(gamepad1.xWasPressed()){
-//            turret.turretOrientation.resetEncoder();
-//        }
-//
-//        // Add this to your telemetry
-//        telemetry.addData("Encoder Ticks", turret.turretOrientation.encoder.getCurrentPosition());
-//        telemetry.addData("Turret On Target", turret.isOnTarget() ? "On target": "Tracking");
-//        telemetry.addData("Turret Angle", turret.turretOrientation.getTurretAngle());
-//        telemetry.addData("Desired turret angle", turret.turretOrientation.calculateDesiredTurretAngle());
-//        telemetry.addData("Error", turret.turretOrientation.calculateError());
-//        telemetry.addData("kP", turret.kP);
-//        telemetry.addData("X-Pos", follower.getPose().getX());
-//        telemetry.addData("Y-Pos", follower.getPose().getY());
-//        telemetry.addData("Heading", follower.getPose().getHeading());
-//        telemetry.addData("Ticks for 360°", turret.turretMotor.getCurrentPosition());
-//        telemetry.update();
-//    }
-//}
-//
+package org.firstinspires.ftc.teamcode.tests;
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+@TeleOp(name="Turret Tester Refined")
+public class TurretTest extends OpMode {
+
+    Follower follower;
+    public Turret turret;
+
+    // Toggle logic variables
+    boolean isRed = true;
+    boolean lastInputA = false;
+
+    @Override
+    public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(72, 72, Math.toRadians(135)));
+
+        // Initialize turret
+        turret = new Turret(follower, hardwareMap);
+        turret.setAlliance(isRed);
+        turret.startAutoAlign();
+    }
+
+    @Override
+    public void start() {
+        follower.startTeleopDrive(false);
+    }
+
+    @Override
+    public void loop() {
+        follower.update();
+
+        follower.setTeleOpDrive(
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
+                true
+        );
+
+        if (gamepad1.a && !lastInputA) {
+            isRed = !isRed;
+            turret.setAlliance(isRed);
+        }
+        lastInputA = gamepad1.a;
+
+        if (gamepad1.b) {
+            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+        turret.update(); // pass current robot heading
+
+        telemetry.addLine("CONTROLS");
+        telemetry.addLine("Press [A] to Switch Alliance");
+        telemetry.addLine("Press [B] to Reset Encoders");
+        telemetry.addLine("");
+
+        telemetry.addData("TARGET", isRed ? "RED" : "BLUE");
+        telemetry.addData("On Target?", turret.isOnTarget() ? "YES" : "NO");
+
+        telemetry.addLine("DATA");
+        double currentAngle = Math.toDegrees(turret.turretOrientation.getTurretAngle());
+        telemetry.addData("Turret Angle", "%.1f deg", currentAngle);
+        telemetry.addData("Encoder Ticks", turret.turretOrientation.encoder.getCurrentPosition());
+        telemetry.addData("Motor Power", "%.2f", turret.turretOrientation.encoder.getPower());
+
+        telemetry.addLine("ODOMETRY");
+        telemetry.addData("Robot X", "%.1f", follower.getPose().getX());
+        telemetry.addData("Robot Y", "%.1f", follower.getPose().getY());
+        telemetry.addData("Heading", "%.1f deg", Math.toDegrees(follower.getPose().getHeading()));
+
+        telemetry.update();
+    }
+}

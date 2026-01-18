@@ -59,21 +59,19 @@ public class TurretTest extends OpMode {
 
         turret.update(); // pass current robot heading
 
-        telemetry.addLine("CONTROLS");
-        telemetry.addLine("Press [A] to Switch Alliance");
-        telemetry.addLine("Press [B] to Reset Encoders");
+        telemetry.addLine("Press A to Switch Alliance");
+        telemetry.addLine("Press B to Reset Encoders");
         telemetry.addLine("");
 
         telemetry.addData("TARGET", isRed ? "RED" : "BLUE");
         telemetry.addData("On Target?", turret.isOnTarget() ? "YES" : "NO");
 
-        telemetry.addLine("DATA");
         double currentAngle = Math.toDegrees(turret.turretOrientation.getTurretAngle());
         telemetry.addData("Turret Angle", "%.1f deg", currentAngle);
         telemetry.addData("Encoder Ticks", turret.turretOrientation.encoder.getCurrentPosition());
         telemetry.addData("Motor Power", "%.2f", turret.turretOrientation.encoder.getPower());
+        telemetry.addData("Error, ", turret.turretOrientation.calculateError());
 
-        telemetry.addLine("ODOMETRY");
         telemetry.addData("Robot X", "%.1f", follower.getPose().getX());
         telemetry.addData("Robot Y", "%.1f", follower.getPose().getY());
         telemetry.addData("Heading", "%.1f deg", Math.toDegrees(follower.getPose().getHeading()));

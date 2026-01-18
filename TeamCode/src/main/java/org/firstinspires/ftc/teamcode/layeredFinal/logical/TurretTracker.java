@@ -14,15 +14,15 @@ public class TurretTracker {
     public static final double DEGREES_PER_180_TICKS = 180.0;
     public static final double DEGREES_PER_TICK = DEGREES_PER_180_TICKS / TICKS_PER_180_DEG;
 
-    public static final double MOUNT_OFFSET_DEG = 0;
+    //public static final double OFFSET_DEG = 12.48;
 
     public Follower follower;
 
     public final double blueX = 0;
-    public final double blueY = 144;
+    public final double blueY = 138;
 
-    public final double redX = 144;
-    public final double redY = 144;
+    public final double redX = 138;
+    public final double redY = 138;
 
     public boolean isRed = true;
 
@@ -32,16 +32,11 @@ public class TurretTracker {
         encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        // KEEP THIS REVERSE (Since you said it moves correctly physically)
         encoder.setDirection(DcMotorEx.Direction.REVERSE);
 
         this.follower = follower;
     }
 
-    /**
-     * Returns the raw turret angle.
-     * We removed the negative sign as you requested.
-     */
     public double getTurretAngle(){
         return encoder.getCurrentPosition() * DEGREES_PER_TICK;
     }
@@ -67,6 +62,9 @@ public class TurretTracker {
         double robotHeadingRad = follower.getPose().getHeading();
         double robotHeadingDeg = Math.toDegrees(robotHeadingRad);
 
-        return (getAngleToGoal() - robotHeadingDeg) + MOUNT_OFFSET_DEG;
+        return (getAngleToGoal() - robotHeadingDeg);
+    }
+    public double calculateError(){
+        return calculateDesiredTurretAngle() - getTurretAngle();
     }
 }

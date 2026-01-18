@@ -13,17 +13,22 @@ public class Turret {
     public boolean autoAlign = false;
     public boolean redAlliance = true;
 
-    public double kP = 0.012;
+    public double kP = 0.009;
     public double kI = 0.0;
-    public double kD = 0.003;
-    public double kF = 0.0008;
+    public double kD = 0.0003;
+    public double kF = 0.000;
 
-    public double angleTolerance = 2.0;
+    public double angleTolerance = 0.7;
     public double settleZone = 1.0;
+    public double headingDisplacement;
+    public double direction = 1;
+
 
     static final double TICKS_PER_180_DEG = 171;
     static final double DEGREES_PER_180_TICKS = 180.0;
     static final double TICKS_PER_DEGREE = TICKS_PER_180_DEG / DEGREES_PER_180_TICKS;
+    static final double DEGREES_PER_TICK = DEGREES_PER_180_TICKS / TICKS_PER_180_DEG;
+
     public static final int MAX_TICKS = 85;
     public static final int MIN_TICKS = -88;
 
@@ -55,15 +60,30 @@ public class Turret {
     private int degreesToTicks(double degrees) {
         return (int) Math.round(degrees * TICKS_PER_DEGREE);
     }
-
     private double normalizeAngle(double angle) {
         return Math.IEEEremainder(angle, 360.0);
     }
+    public double getAngleOffset(double angle) {
+        if(angle > 180){
+            direction -= 360;
+        }
+        else if(angle < -180){
+            direction += 360;
+        }
+        else{
+            direction = 0;
+        }
+        return direction;
+    }
 
     public void update() {
+        double difference;
+        turretPID.setTargetPosition(0);
+        double targetAngle = turretOrientation.getAngleToGoal();
+        headingDisplacement = 0 - Math.toDegrees(turretOrientation.follower.getHeading());
+        difference = targetAngle + headingDisplacement;
+        direction = getAngleOffset(difference);
         if (!autoAlign) return;
-
-
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastUpdateTime < UPDATE_INTERVAL_MS) {
             return;
@@ -73,11 +93,10 @@ public class Turret {
         int currentTicks = turretOrientation.encoder.getCurrentPosition();
         if(currentTicks <= MIN_TICKS || currentTicks >= MAX_TICKS){
             turretOrientation.encoder.setPower(0);
-            return;
         }
 
 
-        double desiredTurretAngleDeg = turretOrientation.calculateDesiredTurretAngle();
+        double desiredTurretAngleDeg = turretOrientation.calculateDesiredTurretAngle() + 12.8;
         double currentTurretDeg = turretOrientation.getTurretAngle();
         double errorDeg = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);
 
@@ -87,7 +106,7 @@ public class Turret {
         }
 
         int targetTicks;
-        targetTicks = currentTicks + degreesToTicks(errorDeg);
+        targetTicks = degreesToTicks(direction + (targetAngle + headingDisplacement));
 
         turretPID.setTargetPosition(targetTicks);
         turretPID.updatePosition(currentTicks);

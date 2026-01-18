@@ -68,6 +68,7 @@ public class TeleOp extends OpMode {
 
         if (gamepad1.dpadUpWasPressed()) { deposit.setVelForCloseTip(); }
         if (gamepad1.dpadDownWasPressed()) { deposit.setVelForFarTip(); }
+
         if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
@@ -76,7 +77,6 @@ public class TeleOp extends OpMode {
         telemetryM.debug("Position", follower.getPose());
         telemetryM.debug("Velocity", follower.getVelocity());
         telemetryM.addLine("");
-        telemetryM.addData("Transfer State", transfer.currentState);
         telemetryM.addData("Limelight Id", limelight.getLastLoggedID());
         telemetryM.addData("Transfer Id", transfer.id);
         telemetryM.addLine("");

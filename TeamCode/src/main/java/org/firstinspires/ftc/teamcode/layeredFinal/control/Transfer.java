@@ -15,8 +15,12 @@ public class Transfer {
     public int kickerWithGreen = 1;
     public int id = 21;
 
-    public final double TIME_VALUE = 0.4;
-    public final double SERVO_LOWER_TIME = 0.2; // Time for servos to fully lower
+    public double kicker1_time_value = 0.35;
+    public double kicker1_servo_lower_time = 0.05;
+    public double kicker2_time_value = 0.35;
+    public double kicker2_servo_lower_time = 0.08;
+    public double kicker3_time_value = 0.35;
+    public double kicker3_servo_lower_time = 0.05;
 
     public enum State {
         IDLE,           // Not firing, waiting for command
@@ -97,7 +101,7 @@ public class Transfer {
                 break;
 
             case WAIT_FIRST:
-                if (stateTimer.seconds() >= TIME_VALUE) {
+                if (stateTimer.seconds() >= kicker1_time_value) {
                     stateTimer.reset();
                     currentState = State.LOWER_FIRST;
                 }
@@ -110,7 +114,7 @@ public class Transfer {
                 break;
 
             case WAIT_LOWER_FIRST:
-                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
+                if (stateTimer.seconds() >= kicker1_servo_lower_time) {
                     stateTimer.reset();
                     currentState = State.RAISE_SECOND;
                 }
@@ -130,7 +134,7 @@ public class Transfer {
                 break;
 
             case WAIT_SECOND:
-                if (stateTimer.seconds() >= TIME_VALUE) {
+                if (stateTimer.seconds() >= kicker2_time_value) {
                     stateTimer.reset();
                     currentState = State.LOWER_SECOND;
                 }
@@ -143,7 +147,7 @@ public class Transfer {
                 break;
 
             case WAIT_LOWER_SECOND:
-                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
+                if (stateTimer.seconds() >= kicker2_servo_lower_time) {
                     stateTimer.reset();
                     currentState = State.RAISE_THIRD;
                 }
@@ -161,7 +165,7 @@ public class Transfer {
                 break;
 
             case WAIT_THIRD:
-                if (stateTimer.seconds() >= TIME_VALUE) {
+                if (stateTimer.seconds() >= kicker3_time_value) {
                     stateTimer.reset();
                     currentState = State.LOWER_THIRD;
                 }
@@ -174,7 +178,7 @@ public class Transfer {
                 break;
 
             case WAIT_LOWER_THIRD:
-                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
+                if (stateTimer.seconds() >= kicker3_servo_lower_time) {
                     stateTimer.reset();
                     currentState = State.DONE;
                 }
@@ -203,7 +207,7 @@ public class Transfer {
                 break;
 
             case WAIT_FIRST:
-                if (stateTimer.seconds() >= TIME_VALUE) {
+                if (stateTimer.seconds() >= kicker1_time_value) {
                     stateTimer.reset();
                     currentState = State.LOWER_FIRST;
                 }
@@ -216,7 +220,7 @@ public class Transfer {
                 break;
 
             case WAIT_LOWER_FIRST:
-                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
+                if (stateTimer.seconds() >= kicker1_servo_lower_time) {
                     stateTimer.reset();
                     currentState = State.RAISE_SECOND;
                 }
@@ -229,7 +233,7 @@ public class Transfer {
                 break;
 
             case WAIT_SECOND:
-                if (stateTimer.seconds() >= TIME_VALUE) {
+                if (stateTimer.seconds() >= kicker2_time_value) {
                     stateTimer.reset();
                     currentState = State.LOWER_SECOND;
                 }
@@ -242,7 +246,7 @@ public class Transfer {
                 break;
 
             case WAIT_LOWER_SECOND:
-                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
+                if (stateTimer.seconds() >= kicker2_servo_lower_time) {
                     stateTimer.reset();
                     currentState = State.RAISE_THIRD;
                 }
@@ -255,7 +259,7 @@ public class Transfer {
                 break;
 
             case WAIT_THIRD:
-                if (stateTimer.seconds() >= TIME_VALUE) {
+                if (stateTimer.seconds() >= kicker3_time_value) {
                     stateTimer.reset();
                     currentState = State.LOWER_THIRD;
                 }
@@ -268,7 +272,7 @@ public class Transfer {
                 break;
 
             case WAIT_LOWER_THIRD:
-                if (stateTimer.seconds() >= SERVO_LOWER_TIME) {
+                if (stateTimer.seconds() >= kicker3_servo_lower_time) {
                     stateTimer.reset();
                     currentState = State.DONE;
                 }

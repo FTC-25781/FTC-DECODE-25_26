@@ -8,7 +8,7 @@ public class SmartFlywheelMotor {
     private DcMotorEx flywheelMotor;
     double currTargetVelocity = 0;
 
-    final double P = 342;
+    final double P = 344;
     final double F = 14;
 
     public SmartFlywheelMotor(HardwareMap hardwareMap) {

@@ -27,12 +27,14 @@ public class RedAutoBottom extends OpMode {
 
     private int pathState;
     private boolean timerReset = false;
+    private boolean reset = false;
 
     private final Pose startPose = new Pose(94, 8, Math.toRadians(0));
     private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
     private final Pose pickup1EndPose = new Pose(131,37, Math.toRadians(0));
     private final Pose pickup1ControlPose = new Pose(72, 38, Math.toRadians(0));
     private final Pose humanPlayerPose = new Pose(135, 8, Math.toRadians(0));
+//    Pose john = humanPlayerPose.mirror();
 
     private Path scanAndShoot;
     private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2;
@@ -81,15 +83,18 @@ public class RedAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        pathTimer.getElapsedTimeSeconds() > 4) {
                         transfer.startKickSequenceRandomly();
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
-                        resetEverything();
+                        if (!reset) {
+                            resetEverything();
+                        }
+
                         intake.forward();
 
-                        follower.followPath(goToPickup1, true);
+                        follower.followPath(goToPickup1,0.5, true);
                         pathTimer.resetTimer();
                         setPathState(2);
                     }
@@ -97,6 +102,7 @@ public class RedAutoBottom extends OpMode {
                 break;
             case 2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
+                    reset = false;
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
@@ -201,6 +207,7 @@ public class RedAutoBottom extends OpMode {
         transfer.reset();
         limelight.stop();
         flywheel.stopFlywheel();
+        reset = true;
     }
 
     @Override

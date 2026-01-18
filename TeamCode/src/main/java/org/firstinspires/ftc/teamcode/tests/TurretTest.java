@@ -5,7 +5,6 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -17,13 +16,13 @@ public class TurretTest extends OpMode {
     public Turret turret;
 
     // Toggle logic variables
-    boolean isRed = false;
+    boolean isRed = true;
     boolean lastInputA = false;
 
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(72, 72, Math.toRadians(45)));
+        follower.setStartingPose(new Pose(72, 72, Math.toRadians(135)));
 
         // Initialize turret
         turret = new Turret(follower, hardwareMap);
@@ -58,7 +57,7 @@ public class TurretTest extends OpMode {
             turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
 
-        turret.update(follower.getPose().getHeading()); // pass current robot heading
+        turret.update(); // pass current robot heading
 
         telemetry.addLine("CONTROLS");
         telemetry.addLine("Press [A] to Switch Alliance");

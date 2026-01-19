@@ -74,13 +74,13 @@ public class TeleOp extends OpMode {
 
         deposit.update();
 
-        telemetryM.debug("Position", follower.getPose());
-        telemetryM.debug("Velocity", follower.getVelocity());
-        telemetryM.addLine("");
-        telemetryM.addData("Limelight Id", limelight.getLastLoggedID());
-        telemetryM.addData("Transfer Id", transfer.id);
-        telemetryM.addLine("");
-        telemetryM.addData("Deposit Velocity", deposit.getVelocity());
-        telemetryM.update();
+        telemetry.addData("Position", follower.getPose());
+        telemetry.addData("Velocity", follower.getVelocity());
+        telemetry.addLine("");
+        telemetry.addData("Limelight Id", limelight.getLastLoggedID());
+        telemetry.addData("Transfer Id", transfer.id);
+        telemetry.addLine("");
+        telemetry.addData("Deposit Velocity", deposit.getVelocity());
+        telemetry.update();
     }
 }

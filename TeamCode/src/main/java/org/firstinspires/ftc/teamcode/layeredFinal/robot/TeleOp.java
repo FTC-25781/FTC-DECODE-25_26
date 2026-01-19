@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
@@ -20,6 +21,7 @@ public class TeleOp extends OpMode {
     private Transfer transfer;
     private Flywheel deposit;
     private Limelight limelight;
+    private Turret turret;
 
     private Follower follower;
     public static Pose startingPose;
@@ -37,6 +39,7 @@ public class TeleOp extends OpMode {
         transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
         limelight = new Limelight(hardwareMap);
+        turret = new Turret(follower, hardwareMap);
 
         transfer.id = limelight.getLastLoggedID();
     }
@@ -50,6 +53,7 @@ public class TeleOp extends OpMode {
     public void loop() {
         transfer.update();
         follower.update();
+        turret.update();
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,

@@ -6,45 +6,45 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+// Get Turret Angle from Encoder and Calculate Error for Turret
 public class TurretTracker {
 
+    // Turrent motor encoder
     public DcMotorEx encoder;
-
-    public static final double TICKS_PER_180_DEG = 171;
-    public static final double DEGREES_PER_180_TICKS = 180.0;
-    public static final double DEGREES_PER_TICK = DEGREES_PER_180_TICKS / TICKS_PER_180_DEG;
-
-    //public static final double OFFSET_DEG = 12.48;
+    // Using goBilda 6000 RPM motor with 28 Ticks at output shaft.
+    // 10 to 130, Tick at turret will 28*13
+    public static final double TICKS_PER_180_DEG = 182;
+    public static final double DEGREES_PER_TICK = 180.0 / TICKS_PER_180_DEG;
 
     public Follower follower;
 
-    public final double blueX = 0;
-    public final double blueY = 138;
+    public final double blueX = 12;
+    public final double blueY = 132;
 
-    public final double redX = 138;
-    public final double redY = 138;
+    public final double redX = 132;
+    public final double redY = 132;
 
     public boolean isRed = true;
 
-    public TurretTracker(HardwareMap hardwareMap, Follower follower){
+    public TurretTracker(HardwareMap hardwareMap, Follower follower)
+    {
         encoder = hardwareMap.get(DcMotorEx.class, "tmot");
-
         encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-
         encoder.setDirection(DcMotorEx.Direction.REVERSE);
-
         this.follower = follower;
     }
 
-    public double getTurretAngle(){
+    // Angle of Turret with respect to the robot
+    public double turretLocalAngle()
+    {
         return encoder.getCurrentPosition() * DEGREES_PER_TICK;
     }
 
-    public void resetEncoder() {
-        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        encoder.setDirection(DcMotorSimple.Direction.REVERSE);
+    // Angle of Turret with respect to the feild
+    public double turretGolbalAngle()
+    {
+        return Math.toDegrees(follower.getPose().getHeading()) + turretLocalAngle();
     }
 
     public double getAngleToGoal(){
@@ -59,12 +59,17 @@ public class TurretTracker {
     }
 
     public double calculateDesiredTurretAngle(){
-        double robotHeadingRad = follower.getPose().getHeading();
-        double robotHeadingDeg = Math.toDegrees(robotHeadingRad);
+        return (getAngleToGoal() - turretGolbalAngle());
+    }
+    public double calculateError()
+    {
+        return calculateDesiredTurretAngle() - turretLocalAngle();
+    }
 
-        return (getAngleToGoal() - robotHeadingDeg);
+    public void resetEncoder() {
+        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoder.setDirection(DcMotorSimple.Direction.REVERSE);
     }
-    public double calculateError(){
-        return calculateDesiredTurretAngle() - getTurretAngle();
-    }
+
 }

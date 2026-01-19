@@ -3,8 +3,13 @@ package org.firstinspires.ftc.teamcode.layeredFinal.logical;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.follower.Follower;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+
+import java.util.List;
 
 public class Turret {
 
@@ -12,31 +17,28 @@ public class Turret {
     public PIDFController turretPID;
     public boolean autoAlign = false;
     public boolean redAlliance = true;
+    public static double RED_OFFSET = 15.4948;
+    public static double BLUE_OFFSET = -14.5106;
 
-    public double kP = 0.009;
+    public static final int MAX_TICKS = 182;
+    public static final int MIN_TICKS = -182;
+
+    public double kP = 0.04;
     public double kI = 0.0;
-    public double kD = 0.0003;
+    public double kD = 0.0009;
     public double kF = 0.000;
 
     public double angleTolerance = 0.7;
-    public double settleZone = 1.0;
-    public double headingDisplacement;
     public double direction = 1;
 
-
-    static final double TICKS_PER_180_DEG = 171;
+    /*
+    static final double TICKS_PER_180_DEG = 182;
     static final double DEGREES_PER_180_TICKS = 180.0;
-    static final double TICKS_PER_DEGREE = TICKS_PER_180_DEG / DEGREES_PER_180_TICKS;
-    static final double DEGREES_PER_TICK = DEGREES_PER_180_TICKS / TICKS_PER_180_DEG;
-
-    public static final int MAX_TICKS = 85;
-    public static final int MIN_TICKS = -88;
+     */
+    static final double TICKS_PER_DEGREE = 182 / 180.0;
 
     private double minPower = 0.1;
     private double maxPower = 0.6;
-
-    private long lastUpdateTime = 0;
-    private final long UPDATE_INTERVAL_MS = 30;
 
     public Turret(Follower follower, HardwareMap hardwareMap) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
@@ -47,84 +49,55 @@ public class Turret {
         this.redAlliance = red;
         this.turretOrientation.isRed = red;
     }
-
     public void startAutoAlign() {
         autoAlign = true;
-    }
-
-    public void stopAutoAlign() {
-        autoAlign = false;
-        turretOrientation.encoder.setPower(0);
-    }
-
-    private int degreesToTicks(double degrees) {
-        return (int) Math.round(degrees * TICKS_PER_DEGREE);
     }
     private double normalizeAngle(double angle) {
         return Math.IEEEremainder(angle, 360.0);
     }
-    public double getAngleOffset(double angle) {
-        if(angle > 180){
-            direction -= 360;
-        }
-        else if(angle < -180){
-            direction += 360;
-        }
-        else{
-            direction = 0;
-        }
-        return direction;
-    }
 
     public void update() {
-        double difference;
-        turretPID.setTargetPosition(0);
-        double targetAngle = turretOrientation.getAngleToGoal();
-        headingDisplacement = 0 - Math.toDegrees(turretOrientation.follower.getHeading());
-        difference = targetAngle + headingDisplacement;
-        direction = getAngleOffset(difference);
         if (!autoAlign) return;
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastUpdateTime < UPDATE_INTERVAL_MS) {
-            return;
-        }
-        lastUpdateTime = currentTime;
+
+        double worldTarget = turretOrientation.getAngleToGoal();
+        double robotHeading = Math.toDegrees(turretOrientation.follower.getPose().getHeading());
+
+
+
+        double relativeTarget = worldTarget - robotHeading;
+
+        relativeTarget += (redAlliance ? RED_OFFSET : BLUE_OFFSET);
+
+        while (relativeTarget > 180) relativeTarget -= 360;
+        while (relativeTarget <= -180) relativeTarget += 360;
+
+        double clampedTargetDeg = Range.clip(relativeTarget,
+                MIN_TICKS * TurretTracker.DEGREES_PER_TICK,
+                MAX_TICKS * TurretTracker.DEGREES_PER_TICK);
+
+        int targetTicks = (int) Math.round(clampedTargetDeg / TurretTracker.DEGREES_PER_TICK);
 
         int currentTicks = turretOrientation.encoder.getCurrentPosition();
-        if(currentTicks <= MIN_TICKS || currentTicks >= MAX_TICKS){
-            turretOrientation.encoder.setPower(0);
-        }
-
-
-        double desiredTurretAngleDeg = turretOrientation.calculateDesiredTurretAngle() + 12.8;
-        double currentTurretDeg = turretOrientation.getTurretAngle();
-        double errorDeg = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);
-
-        if (Math.abs(errorDeg) <= settleZone) {
-            turretOrientation.encoder.setPower(0);
-            return;
-        }
-
-        int targetTicks;
-        targetTicks = degreesToTicks(direction + (targetAngle + headingDisplacement));
-
         turretPID.setTargetPosition(targetTicks);
         turretPID.updatePosition(currentTicks);
-        double pidOutput = turretPID.run();
 
-        double power = Range.clip(pidOutput, -maxPower, maxPower);
+        double power = turretPID.run();
+
+        if ((currentTicks >= MAX_TICKS && power > 0) || (currentTicks <= MIN_TICKS && power < 0)) {
+            power = 0;
+        }
 
         if (Math.abs(power) > 0 && Math.abs(power) < minPower) {
             power = Math.signum(power) * minPower;
         }
 
-        turretOrientation.encoder.setPower(power);
+        turretOrientation.encoder.setPower(Range.clip(power, -maxPower, maxPower));
     }
-
     public boolean isOnTarget() {
         double desiredTurretAngleDeg = turretOrientation.calculateDesiredTurretAngle();
-        double currentTurretDeg = turretOrientation.getTurretAngle();
+        double currentTurretDeg = turretOrientation.turretLocalAngle();
         double error = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);
         return Math.abs(error) <= angleTolerance;
     }
+
 }

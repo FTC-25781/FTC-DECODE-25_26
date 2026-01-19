@@ -26,6 +26,8 @@ public class TeleOp extends OpMode {
     private Follower follower;
     public static Pose startingPose;
     private TelemetryManager telemetryM;
+    boolean isRed = true;
+
 
     @Override
     public void init() {
@@ -42,6 +44,7 @@ public class TeleOp extends OpMode {
         turret = new Turret(follower, hardwareMap);
 
         transfer.id = limelight.getLastLoggedID();
+        turret.setAlliance(isRed);
     }
 
     @Override
@@ -70,10 +73,19 @@ public class TeleOp extends OpMode {
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 
-        if (gamepad1.left_trigger > 0.1) { deposit.setVelForCloseTip(); }
-        if (gamepad1.right_trigger > 0.1) { deposit.setVelForFarTip(); }
+        if (gamepad1.left_trigger > 0.1) {
+            deposit.setVelForCloseTip();
+            turret.startAutoAlign();
+        }
+        if (gamepad1.right_trigger > 0.1) {
+            deposit.setVelForFarTip();
+            turret.startAutoAlign();
+        }
 
-        if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
+        if (gamepad1.leftStickButtonWasPressed()) {
+            deposit.stopFlywheel();
+            turret.stopAutoAlign();
+        }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
         deposit.update();

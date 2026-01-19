@@ -66,8 +66,8 @@ public class TeleOp extends OpMode {
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 
-        if (gamepad1.dpadUpWasPressed()) { deposit.setVelForCloseTip(); }
-        if (gamepad1.dpadDownWasPressed()) { deposit.setVelForFarTip(); }
+        if (gamepad1.left_trigger > 0.1) { deposit.setVelForCloseTip(); }
+        if (gamepad1.right_trigger > 0.1) { deposit.setVelForFarTip(); }
 
         if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }

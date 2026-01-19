@@ -7,7 +7,7 @@ public class Flywheel {
     SmartFlywheelMotor flywheel;
 
     public double highVelocity = 1540;
-    public double lowVelocity = 1350;
+    public double lowVelocity = 1330;
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = new SmartFlywheelMotor(hardwareMap);
@@ -22,7 +22,7 @@ public class Flywheel {
     }
 
     public void stopFlywheel() {
-        flywheel.setVelocity(0.0);
+        flywheel.setVelocity(0);
     }
 
     public void setVelocity(double vel) {

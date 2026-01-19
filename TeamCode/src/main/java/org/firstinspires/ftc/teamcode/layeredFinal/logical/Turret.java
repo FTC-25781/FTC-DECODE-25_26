@@ -44,6 +44,9 @@ public class Turret {
     public void startAutoAlign() {
         autoAlign = true;
     }
+    public void stopAutoAlign(){
+        autoAlign = false;
+    }
     private double normalizeAngle(double angle) {
         return Math.IEEEremainder(angle, 360.0);
     }

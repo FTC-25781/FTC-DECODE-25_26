@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.layeredFinal.logical;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -19,10 +20,10 @@ public class TurretTracker {
     public Follower follower;
 
     public final double blueX = 0;
-    public final double blueY = 144;
+    public final double blueY = 138;
 
-    public final double redX = 144;
-    public final double redY = 144;
+    public final double redX = 138;
+    public final double redY = 138;
 
     public boolean isRed = true;
 

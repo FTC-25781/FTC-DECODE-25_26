@@ -64,6 +64,18 @@ public class TurretTest extends OpMode {
             turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
+        if(gamepad1.dpadUpWasPressed()){
+            turret.kP += 0.01;
+        }
+        if(gamepad1.dpadDownWasPressed()){
+            turret.kP -= 0.01;
+        }
+        if(gamepad1.dpadRightWasPressed()){
+            turret.kD += 0.0001;
+        }
+        if(gamepad1.dpadLeftWasPressed()){
+            turret.kD -= 0.0001;
+        }
 
 
         telemetry.addData("TARGET", isRed ? "RED" : "BLUE");
@@ -73,7 +85,8 @@ public class TurretTest extends OpMode {
         telemetry.addData("Angle to Goal", turret.turretOrientation.getAngleToGoal());
         telemetry.addData("Desired turret angle", turret.turretOrientation.calculateDesiredTurretAngle());
         telemetry.addData("PID Error", turret.turretPID.getError());
-
+        telemetry.addData("Proportional", turret.kP);
+        telemetry.addData("Derivative", turret.kD);
         telemetry.update();
     }
 }

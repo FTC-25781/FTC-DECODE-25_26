@@ -14,12 +14,9 @@ public class Turret {
     //public static double RED_OFFSET = 15.4948;
     //public static double BLUE_OFFSET = -14.5106;
 
-    public static final int MAX_TICKS = 182;
-    public static final int MIN_TICKS = -182;
-
-    public double kP = 0.091;
+    public double kP = 0.081;
     public double kI = 0.0;
-    public double kD = 0.004;
+    public double kD = 0.0009;
     public double kF = 0.000;
 
     public double angleTolerance = 0.7;
@@ -37,6 +34,7 @@ public class Turret {
     public Turret(Follower follower, HardwareMap hardwareMap) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
         turretPID = new PIDFController(new PIDFCoefficients(kP, kI, kD, kF));
+        turretPID.setTargetPosition(0);
     }
 
     public void setAlliance(boolean red) {
@@ -55,6 +53,10 @@ public class Turret {
             turretOrientation.encoder.setPower(0);
             return;
         }
+        turretPID.setP(kP);
+        turretPID.setI(kI);
+        turretPID.setD(kD);
+        turretPID.setF(kF);
         double worldTarget = turretOrientation.getAngleToGoal();
         double robotHeading = Math.toDegrees(turretOrientation.follower.getHeading());
         //double initialAngle = turretOrientation.turretGolbalAngle();

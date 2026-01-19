@@ -31,7 +31,7 @@ public class Turret {
     public double direction = 1;
 
 
-    static final double TICKS_PER_180_DEG = 171;
+    static final double TICKS_PER_180_DEG = 182;
     static final double DEGREES_PER_180_TICKS = 180.0;
     static final double TICKS_PER_DEGREE = TICKS_PER_180_DEG / DEGREES_PER_180_TICKS;
     static final double DEGREES_PER_TICK = DEGREES_PER_180_TICKS / TICKS_PER_180_DEG;

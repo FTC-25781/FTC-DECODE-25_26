@@ -33,8 +33,6 @@ public class TurretTest extends OpMode {
         turret.setAlliance(isRed);
         turret.startAutoAlign();
 
-        limelight = new SmartLimelight(hardwareMap);
-
     }
 
     @Override

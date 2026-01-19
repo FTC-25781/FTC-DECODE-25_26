@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.tests;
 import com.pedropathing.follower.Follower;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TurretTracker;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+@Disabled
 @TeleOp(name = "Turret Calibration 90deg")
 public class TemporaryTurretTest extends OpMode {
 
@@ -50,7 +52,6 @@ public class TemporaryTurretTest extends OpMode {
 
         // Display data
         telemetry.addData("Raw Ticks", currentTicks);
-        telemetry.addData("Calculated Angle", "%.1f°", tracker.getTurretAngle());
         telemetry.addLine();
         telemetry.addData("Max Ticks Seen", maxTicksRecorded);
         telemetry.addData("Min Ticks Seen", minTicksRecorded);

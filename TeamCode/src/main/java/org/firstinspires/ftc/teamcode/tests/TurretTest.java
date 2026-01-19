@@ -45,9 +45,6 @@ public class TurretTest extends OpMode {
     @Override
     public void loop() {
         follower.update();
-
-        LLResult result = limelight.limelight.getLatestResult();
-        turret.turretOrientation.limelightData(result);
         turret.update();
 
         follower.setTeleOpDrive(
@@ -70,8 +67,7 @@ public class TurretTest extends OpMode {
 
 
         telemetry.addData("TARGET", isRed ? "RED" : "BLUE");
-        telemetry.addData("Vision Target Visible", turret.turretOrientation.targetVisible);
-        telemetry.addData("Turret Angle", "%.1f deg", turret.turretOrientation.getTurretAngle());
+        telemetry.addData("Turret Angle", "%.1f deg", turret.turretOrientation.turretGolbalAngle());
         telemetry.addData("Encoder Ticks", turret.turretOrientation.encoder.getCurrentPosition());
         telemetry.addData("Robot Heading", "%.1f deg", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Angle to Goal", turret.turretOrientation.getAngleToGoal());

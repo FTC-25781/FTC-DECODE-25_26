@@ -18,11 +18,11 @@ public class TurretTracker {
 
     public Follower follower;
 
-    public final double blueX = 0;
-    public final double blueY = 144;
+    public final double blueX = 12;
+    public final double blueY = 132;
 
-    public final double redX = 144;
-    public final double redY = 144;
+    public final double redX = 132;
+    public final double redY = 132;
 
     public boolean isRed = true;
 
@@ -59,10 +59,7 @@ public class TurretTracker {
     }
 
     public double calculateDesiredTurretAngle(){
-        double robotHeadingRad = follower.getPose().getHeading();
-        double robotHeadingDeg = Math.toDegrees(robotHeadingRad);
-
-        return (getAngleToGoal() - robotHeadingDeg);
+        return (getAngleToGoal() - turretGolbalAngle());
     }
     public double calculateError()
     {

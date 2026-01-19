@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.opencv.core.Mat;
 
 @Autonomous(name = "Red Auto Bottom", group = "Red")
 public class RedAutoBottom extends OpMode {
@@ -31,13 +32,16 @@ public class RedAutoBottom extends OpMode {
 
     private final Pose startPose = new Pose(94, 8, Math.toRadians(0));
     private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
-    private final Pose pickup1EndPose = new Pose(131,37, Math.toRadians(0));
-    private final Pose pickup1ControlPose = new Pose(72, 38, Math.toRadians(0));
+    private final Pose pickup1EndPose = new Pose(131,40.5, Math.toRadians(0));
+    private final Pose pickup1ControlPose = new Pose(72, 42, Math.toRadians(0));
     private final Pose humanPlayerPose = new Pose(135, 8, Math.toRadians(0));
-//    Pose john = humanPlayerPose.mirror();
+    private final Pose openTheGate = new Pose(133, 70, Math.toRadians(0));
+    private final Pose openTheGateControlPose = new Pose(58, 72.5, Math.toRadians(0));
+    private final Pose getBallsFromGate = new Pose(133, 49, Math.toRadians(0));
+    private final Pose getBallsFromGateControlPose = new Pose(115, 36, Math.toRadians(25));
 
     private Path scanAndShoot;
-    private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2;
+    private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2, goToOpenTheGate;
 
     public void buildPaths() {
         scanAndShoot = new Path(new BezierLine(startPose, scanAndShootPreload));
@@ -62,6 +66,12 @@ public class RedAutoBottom extends OpMode {
                 .addPath(new BezierLine(humanPlayerPose, startPose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+
+        goToOpenTheGate = follower.pathBuilder()
+                .addPath(new BezierCurve(startPose, openTheGateControlPose, openTheGate))
+                .setConstantHeadingInterpolation(openTheGate.getHeading())
+                .build();
+
     }
 
     public void autonomousPathUpdate() {
@@ -71,7 +81,7 @@ public class RedAutoBottom extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 1) {
                     limelight.getIDAndLog(limelight.getID());
                     transfer.id = limelight.getLastLoggedID();
 
@@ -83,18 +93,17 @@ public class RedAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() > 4) {
+                        pathTimer.getElapsedTimeSeconds() > 2.0) {
                         transfer.startKickSequenceRandomly();
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
                         if (!reset) {
                             resetEverything();
+                            intake.forward();
                         }
 
-                        intake.forward();
-
-                        follower.followPath(goToPickup1,0.5, true);
+                        follower.followPath(goToPickup1,0.65, true);
                         pathTimer.resetTimer();
                         setPathState(2);
                     }
@@ -110,31 +119,33 @@ public class RedAutoBottom extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    intake.stopped();
-                    flywheel.setVelForFarTip();
+                    intake.reverse();
 
                     if(!timerReset) {
                         timerReset = true;
                         pathTimer.resetTimer();
                     }
 
-                    if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    if (transfer.currentState == Transfer.State.IDLE
+                        && pathTimer.getElapsedTimeSeconds() >= 0.5) {
                         transfer.startKickSequenceRandomly();
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
-                        resetEverything();
-                        intake.forward();
+                        if (!reset) {
+                            resetEverything();
+                        }
 
-                        follower.followPath(goToHumanPlayerZone, true);
+                        follower.followPath(goToHumanPlayerZone, 0.65, true);
                         pathTimer.resetTimer();
                         setPathState(4);
                     }
                 }
                 break;
             case 4:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() &&
+                    pathTimer.getElapsedTimeSeconds() >= 2.0) {
+                    reset = false;
                     follower.followPath(goToScore2, true);
                     pathTimer.resetTimer();
                     setPathState(5);
@@ -142,8 +153,7 @@ public class RedAutoBottom extends OpMode {
                 break;
             case 5:
                 if(!follower.isBusy()) {
-                    intake.stopped();
-                    flywheel.setVelForFarTip();
+                    intake.reverse();
 
                     if(!timerReset) {
                         timerReset = true;
@@ -151,12 +161,14 @@ public class RedAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        pathTimer.getElapsedTimeSeconds() >= 0.5) {
                         transfer.startKickSequenceRandomly();
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
                         resetEverything();
+                        flywheel.stopFlywheel();
+                        intake.stopped();
                         setPathState(-1);
                     }
                 }
@@ -206,7 +218,6 @@ public class RedAutoBottom extends OpMode {
         timerReset = false;
         transfer.reset();
         limelight.stop();
-        flywheel.stopFlywheel();
         reset = true;
     }
 

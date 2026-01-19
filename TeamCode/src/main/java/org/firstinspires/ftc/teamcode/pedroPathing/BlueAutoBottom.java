@@ -27,12 +27,13 @@ public class BlueAutoBottom extends OpMode {
 
     private int pathState;
     private boolean timerReset = false;
+    private boolean reset = false;
 
-    private final Pose startPose = new Pose(50, 8, Math.toRadians(180));
-    private final Pose scanAndShootPreload = new Pose(50, 9, Math.toRadians(180));
-    private final Pose pickup1EndPose = new Pose(18,35.5, Math.toRadians(180));
-    private final Pose pickup1ControlPose = new Pose(113, 38, Math.toRadians(180));
-    private final Pose humanPlayerPose = new Pose(9, 8, Math.toRadians(180));
+    private Pose startPose = new Pose(94, 8, Math.toRadians(0));
+    private Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
+    private Pose pickup1EndPose = new Pose(131,38.5, Math.toRadians(0));
+    private Pose pickup1ControlPose = new Pose(72, 38, Math.toRadians(0));
+    private Pose humanPlayerPose = new Pose(135, 8, Math.toRadians(0));
 
     private Path scanAndShoot;
     private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2;
@@ -69,7 +70,7 @@ public class BlueAutoBottom extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 1) {
                     limelight.getIDAndLog(limelight.getID());
                     transfer.id = limelight.getLastLoggedID();
 
@@ -81,15 +82,18 @@ public class BlueAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                            pathTimer.getElapsedTimeSeconds() > 0.5) {
+                            pathTimer.getElapsedTimeSeconds() > 2.8) {
                         transfer.startKickSequenceRandomly();
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
-                        resetEverything();
+                        if (!reset) {
+                            resetEverything();
+                        }
+
                         intake.forward();
 
-                        follower.followPath(goToPickup1, true);
+                        follower.followPath(goToPickup1,0.65, true);
                         pathTimer.resetTimer();
                         setPathState(2);
                     }
@@ -97,6 +101,7 @@ public class BlueAutoBottom extends OpMode {
                 break;
             case 2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
+                    reset = false;
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
@@ -104,7 +109,7 @@ public class BlueAutoBottom extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    intake.stopped();
+                    intake.reverse();
                     flywheel.setVelForFarTip();
 
                     if(!timerReset) {
@@ -113,22 +118,28 @@ public class BlueAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                            pathTimer.getElapsedTimeSeconds() > 0.5) {
+                            pathTimer.getElapsedTimeSeconds() > 2.8) {
+                        intake.stopped();
                         transfer.startKickSequenceRandomly();
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
-                        resetEverything();
+                        if (!reset) {
+                            resetEverything();
+                        }
+
                         intake.forward();
 
-                        follower.followPath(goToHumanPlayerZone, true);
+                        follower.followPath(goToHumanPlayerZone, 0.65, true);
                         pathTimer.resetTimer();
                         setPathState(4);
                     }
                 }
                 break;
             case 4:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() &&
+                    pathTimer.getElapsedTimeSeconds() >= 2.0) {
+                    reset = false;
                     follower.followPath(goToScore2, true);
                     pathTimer.resetTimer();
                     setPathState(5);
@@ -136,7 +147,7 @@ public class BlueAutoBottom extends OpMode {
                 break;
             case 5:
                 if(!follower.isBusy()) {
-                    intake.stopped();
+                    intake.reverse();
                     flywheel.setVelForFarTip();
 
                     if(!timerReset) {
@@ -145,7 +156,8 @@ public class BlueAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                            pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        pathTimer.getElapsedTimeSeconds() > 2.8) {
+                        intake.stopped();
                         transfer.startKickSequenceRandomly();
                     }
 
@@ -187,6 +199,12 @@ public class BlueAutoBottom extends OpMode {
         transfer = new Transfer(hardwareMap);
         limelight = new Limelight(hardwareMap);
 
+        startPose = startPose.mirror();
+        scanAndShootPreload = scanAndShootPreload.mirror();
+        pickup1EndPose = pickup1EndPose.mirror();
+        pickup1ControlPose = pickup1ControlPose.mirror();
+        humanPlayerPose = humanPlayerPose.mirror();
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -201,6 +219,7 @@ public class BlueAutoBottom extends OpMode {
         transfer.reset();
         limelight.stop();
         flywheel.stopFlywheel();
+        reset = true;
     }
 
     @Override

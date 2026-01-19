@@ -18,9 +18,9 @@ public class Transfer {
     public double kicker1_time_value = 0.35;
     public double kicker1_servo_lower_time = 0.05;
     public double kicker2_time_value = 0.35;
-    public double kicker2_servo_lower_time = 0.08;
+    public double kicker2_servo_lower_time = 0.1;
     public double kicker3_time_value = 0.35;
-    public double kicker3_servo_lower_time = 0.05;
+    public double kicker3_servo_lower_time = 0;
 
     public enum State {
         IDLE,           // Not firing, waiting for command

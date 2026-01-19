@@ -66,21 +66,21 @@ public class TeleOp extends OpMode {
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 
-        if (gamepad1.dpadUpWasPressed()) { deposit.setVelForCloseTip(); }
-        if (gamepad1.dpadDownWasPressed()) { deposit.setVelForFarTip(); }
+        if (gamepad1.left_trigger > 0.1) { deposit.setVelForCloseTip(); }
+        if (gamepad1.right_trigger > 0.1) { deposit.setVelForFarTip(); }
 
         if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
         deposit.update();
 
-        telemetryM.debug("Position", follower.getPose());
-        telemetryM.debug("Velocity", follower.getVelocity());
-        telemetryM.addLine("");
-        telemetryM.addData("Limelight Id", limelight.getLastLoggedID());
-        telemetryM.addData("Transfer Id", transfer.id);
-        telemetryM.addLine("");
-        telemetryM.addData("Deposit Velocity", deposit.getVelocity());
-        telemetryM.update();
+        telemetry.addData("Position", follower.getPose());
+        telemetry.addData("Velocity", follower.getVelocity());
+        telemetry.addLine("");
+        telemetry.addData("Limelight Id", limelight.getLastLoggedID());
+        telemetry.addData("Transfer Id", transfer.id);
+        telemetry.addLine("");
+        telemetry.addData("Deposit Velocity", deposit.getVelocity());
+        telemetry.update();
     }
 }

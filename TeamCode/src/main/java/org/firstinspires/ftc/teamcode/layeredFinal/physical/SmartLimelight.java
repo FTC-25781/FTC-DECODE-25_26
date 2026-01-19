@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.List;
 
 public class SmartLimelight {
-    private Limelight3A limelight;
+    public Limelight3A limelight;
 
     public SmartLimelight(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");

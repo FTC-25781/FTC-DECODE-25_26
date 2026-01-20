@@ -8,10 +8,10 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
-import org.firstinspires.ftc.teamcode.layeredFinal.control.ShreeshTurretForDriverPractice;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
@@ -20,22 +20,19 @@ public class TeleOpRed extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
-    private ShreeshTurretForDriverPractice turret;
     private Limelight limelight;
+    private Turret turret;
 
     private Follower follower;
     public static Pose startingPose;
     private TelemetryManager telemetryM;
-    double offset = 0;
+    boolean isRed = true;
 
     @Override
     public void init() {
-        startingPose = new Pose(72, 72, Math.toRadians(90));
-
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
-        turret = new ShreeshTurretForDriverPractice(hardwareMap, telemetry);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -43,7 +40,9 @@ public class TeleOpRed extends OpMode {
         transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
         limelight = new Limelight(hardwareMap);
-        turret.reset_Init();
+        turret = new Turret(follower, hardwareMap);
+
+        turret.setAlliance(isRed);
     }
 
     @Override
@@ -55,6 +54,7 @@ public class TeleOpRed extends OpMode {
     public void loop() {
         transfer.update();
         follower.update();
+        turret.update();
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -71,17 +71,23 @@ public class TeleOpRed extends OpMode {
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 
-        if (gamepad1.left_trigger > 0.1) { deposit.setVelForCloseTip(); turret.startAutoAlign(); }
-        if (gamepad1.right_trigger > 0.1) { deposit.setVelForFarTip(); turret.startAutoAlign();}
+        if (gamepad1.left_trigger > 0.1) {
+            deposit.setVelForCloseTip();
+            turret.startAutoAlign();
+        }
+        if (gamepad1.right_trigger > 0.1) {
+            deposit.setVelForFarTip();
+            turret.startAutoAlign();
+        }
 
-        if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); turret.stopAutoAlign(); }
+        if (gamepad1.leftStickButtonWasPressed()) {
+            deposit.stopFlywheel();
+            turret.stopAutoAlign();
+        }
+
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
-        if(gamepad1.dpadUpWasPressed()){offset -= 3;}
-        else if (gamepad1.dpadDownWasPressed()){offset +=3;}
-
         deposit.update();
-        turret.update(follower.getPose().getX(), follower.getPose().getY(), follower.getPose().getHeading(), true,0, telemetry, offset);
 
         telemetry.addData("Position", follower.getPose());
         telemetry.addData("Velocity", follower.getVelocity());

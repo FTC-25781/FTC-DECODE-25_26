@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "Main")
-public class TeleOp extends OpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp Blue", group = "Main")
+public class TeleOpBlue extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
@@ -26,7 +26,7 @@ public class TeleOp extends OpMode {
     private Follower follower;
     public static Pose startingPose;
     private TelemetryManager telemetryM;
-    boolean isRed = true;
+    boolean isRed = false;
 
     @Override
     public void init() {

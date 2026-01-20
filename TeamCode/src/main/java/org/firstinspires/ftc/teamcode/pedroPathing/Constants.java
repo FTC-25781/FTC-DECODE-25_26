@@ -53,7 +53,6 @@ public class Constants {
             .xVelocity(80.98711197019563)
             .yVelocity(69.11804006982038);
 
-
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)

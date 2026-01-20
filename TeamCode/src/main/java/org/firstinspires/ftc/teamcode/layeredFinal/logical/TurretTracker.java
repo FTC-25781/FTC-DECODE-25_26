@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.layeredFinal.logical;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -18,11 +19,11 @@ public class TurretTracker {
 
     public Follower follower;
 
-    public final double blueX = 12;
-    public final double blueY = 132;
+    public final double blueX = 0;
+    public final double blueY = 138;
 
-    public final double redX = 132;
-    public final double redY = 132;
+    public final double redX = 138;
+    public final double redY = 138;
 
     public boolean isRed = true;
 
@@ -57,19 +58,12 @@ public class TurretTracker {
         double angleRad = Math.atan2(targetY - robotY, targetX - robotX);
         return Math.toDegrees(angleRad);
     }
-
     public double calculateDesiredTurretAngle(){
         return (getAngleToGoal() - turretGolbalAngle());
     }
-    public double calculateError()
-    {
-        return calculateDesiredTurretAngle() - turretLocalAngle();
-    }
-
     public void resetEncoder() {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         encoder.setDirection(DcMotorSimple.Direction.REVERSE);
     }
-
 }

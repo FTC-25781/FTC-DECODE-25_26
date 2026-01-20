@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
@@ -20,10 +21,13 @@ public class TeleOp extends OpMode {
     private Transfer transfer;
     private Flywheel deposit;
     private Limelight limelight;
+    private Turret turret;
 
     private Follower follower;
     public static Pose startingPose;
     private TelemetryManager telemetryM;
+    boolean isRed = true;
+
 
     @Override
     public void init() {
@@ -37,8 +41,10 @@ public class TeleOp extends OpMode {
         transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
         limelight = new Limelight(hardwareMap);
+        turret = new Turret(follower, hardwareMap);
 
         transfer.id = limelight.getLastLoggedID();
+        turret.setAlliance(isRed);
     }
 
     @Override
@@ -50,6 +56,7 @@ public class TeleOp extends OpMode {
     public void loop() {
         transfer.update();
         follower.update();
+        turret.update();
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -66,10 +73,19 @@ public class TeleOp extends OpMode {
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 
-        if (gamepad1.left_trigger > 0.1) { deposit.setVelForCloseTip(); }
-        if (gamepad1.right_trigger > 0.1) { deposit.setVelForFarTip(); }
+        if (gamepad1.left_trigger > 0.1) {
+            deposit.setVelForCloseTip();
+            turret.startAutoAlign();
+        }
+        if (gamepad1.right_trigger > 0.1) {
+            deposit.setVelForFarTip();
+            turret.startAutoAlign();
+        }
 
-        if (gamepad1.leftStickButtonWasPressed()) { deposit.stopFlywheel(); }
+        if (gamepad1.leftStickButtonWasPressed()) {
+            deposit.stopFlywheel();
+            turret.stopAutoAlign();
+        }
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
         deposit.update();

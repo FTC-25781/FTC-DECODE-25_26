@@ -28,7 +28,6 @@ public class TeleOp extends OpMode {
     private TelemetryManager telemetryM;
     boolean isRed = true;
 
-
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
@@ -86,6 +85,7 @@ public class TeleOp extends OpMode {
             deposit.stopFlywheel();
             turret.stopAutoAlign();
         }
+
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
 
         deposit.update();

@@ -34,7 +34,7 @@ public class Flywheel {
     }
 
     public void humanPlayer() {
-        flywheel.setVelocity(-10);
+        flywheel.setVelocity(-100);
     }
 
     public void update() {

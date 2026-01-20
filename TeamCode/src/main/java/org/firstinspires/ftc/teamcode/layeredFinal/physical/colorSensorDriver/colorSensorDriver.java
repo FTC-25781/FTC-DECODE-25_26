@@ -49,13 +49,14 @@ public class colorSensorDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimple
     public int rgreen = 0;
     public int rblue = 0;
 
-    public int redCalBlackValue = 124;
-    public int greenCalBlackValue = 165;
-    public int blueCalBlackValue = 143;
+    // sensor 3 values
+    public int redCalBlackValue;
+    public int greenCalBlackValue;
+    public int blueCalBlackValue;
 
-    public int redCalWhiteValue = 3553;
-    public int greenCalWhiteValue = 3274;
-    public int blueCalWhiteValue = 1681;
+    public int redCalWhiteValue;
+    public int greenCalWhiteValue;
+    public int blueCalWhiteValue;
 
     // Register addresses
     private enum Register {
@@ -87,6 +88,19 @@ public class colorSensorDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimple
         super(deviceClient, deviceClientIsOwned);
         this.deviceClient.setI2cAddress(I2cAddr.create7bit(DEFAULT_ADDRESS));
         super.registerArmingStateCallback(false);
+    }
+
+    public void tuneVals(
+            int redCalBlackValue, int greenCalBlackValue,
+            int blueCalBlackValue, int redCalWhiteValue,
+            int greenCalWhiteValue, int blueCalWhiteValue
+    ) {
+        this.redCalBlackValue = redCalBlackValue;
+        this.greenCalBlackValue = greenCalBlackValue;
+        this.blueCalBlackValue = blueCalBlackValue;
+        this.redCalWhiteValue = redCalWhiteValue;
+        this.greenCalWhiteValue = greenCalWhiteValue;
+        this.blueCalWhiteValue = blueCalWhiteValue;
     }
 
     @Override

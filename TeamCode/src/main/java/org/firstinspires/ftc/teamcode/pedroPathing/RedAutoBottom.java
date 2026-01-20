@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
-import org.opencv.core.Mat;
 
 @Autonomous(name = "Red Auto Bottom", group = "Red")
 public class RedAutoBottom extends OpMode {
@@ -41,7 +40,7 @@ public class RedAutoBottom extends OpMode {
     private final Pose getBallsFromGateControlPose = new Pose(115, 36, Math.toRadians(25));
 
     private Path scanAndShoot;
-    private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2, goToOpenTheGate;
+    private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2, goToOpenTheGate, goToGetBalls, goToScoreGate;
 
     public void buildPaths() {
         scanAndShoot = new Path(new BezierLine(startPose, scanAndShootPreload));
@@ -72,6 +71,15 @@ public class RedAutoBottom extends OpMode {
                 .setConstantHeadingInterpolation(openTheGate.getHeading())
                 .build();
 
+        goToGetBalls = follower.pathBuilder()
+                .addPath(new BezierCurve(openTheGate, getBallsFromGateControlPose, getBallsFromGate))
+                .setLinearHeadingInterpolation(openTheGate.getHeading(), getBallsFromGate.getHeading())
+                .build();
+
+        goToScoreGate = follower.pathBuilder()
+                .addPath(new BezierLine(getBallsFromGate, startPose))
+                .setConstantHeadingInterpolation(getBallsFromGate.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -110,8 +118,10 @@ public class RedAutoBottom extends OpMode {
                 }
                 break;
             case 2:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
+                if (!follower.isBusy() &&
+                    pathTimer.getElapsedTimeSeconds() >= 2) {
                     reset = false;
+
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
@@ -139,18 +149,22 @@ public class RedAutoBottom extends OpMode {
                         follower.followPath(goToHumanPlayerZone, 0.65, true);
                         pathTimer.resetTimer();
                         setPathState(4);
-                    }
+
+                      }
                 }
                 break;
+
             case 4:
                 if (!follower.isBusy() &&
                     pathTimer.getElapsedTimeSeconds() >= 2.0) {
                     reset = false;
+
                     follower.followPath(goToScore2, true);
                     pathTimer.resetTimer();
                     setPathState(5);
                 }
                 break;
+
             case 5:
                 if(!follower.isBusy()) {
                     intake.reverse();
@@ -166,11 +180,38 @@ public class RedAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.DONE) {
-                        resetEverything();
-                        flywheel.stopFlywheel();
-                        intake.stopped();
-                        setPathState(-1);
+                        if (!reset) {
+                            resetEverything();
+                        }
+
+                        follower.followPath(goToOpenTheGate, true);
+                        pathTimer.resetTimer();
+                        setPathState(6);
                     }
+                }
+
+            case 6:
+                if (!follower.isBusy() &&
+                    pathTimer.getElapsedTimeSeconds() >= 1.0) {
+                    reset = false;
+
+                    follower.followPath(goToGetBalls, true);
+                    pathTimer.resetTimer();
+                    setPathState(7);
+                }
+
+            case 7:
+                if (!follower.isBusy()) {
+                    follower.followPath(goToScoreGate, true);
+                    pathTimer.resetTimer();
+                    setPathState(8);
+                }
+
+            case 8:
+                if (!follower.isBusy()) {
+                    follower.followPath(goToScoreGate, true);
+                    pathTimer.resetTimer();
+                    setPathState(-1);
                 }
         }
     }

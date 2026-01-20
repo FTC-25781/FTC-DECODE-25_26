@@ -244,6 +244,11 @@ public class colorSensorDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimple
     }
 
     public double RGBmap(double x, int inlow, int inhigh){
+        if (inhigh <= inlow) {
+            // Log error or handle invalid calibration
+            return 0; // or clamp x to 0-255 range
+        }
+
         return ((x - inlow)/(inhigh-inlow)) * 255;
     }
 }

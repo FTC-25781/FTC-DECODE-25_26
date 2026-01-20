@@ -18,6 +18,7 @@ public class ColorSensorForTransfer extends LinearOpMode {
         color3 = hardwareMap.get(colorSensorDriver.class, "Color3");
 
         color1.tuneVals(475, 500, 280, 560, 570, 332);
+        color2.tuneVals(2245,2653,1577,6200,6900, 4415);
         color3.tuneVals(231, 277, 155, 500, 560, 325);
 
         telemetry.addLine("Initialized. Ready to start.");
@@ -31,8 +32,8 @@ public class ColorSensorForTransfer extends LinearOpMode {
             color3.update();
 
             telemetry.addData("Kicker 1", detectColor1(color1));
-//            telemetry.addData("Kicker 2", detectColor3(color2));
-            telemetry.addData("Kicker 3", detectColor3(color3));
+            telemetry.addData("Kicker 2", detectColor2And3(color2));
+            telemetry.addData("Kicker 3", detectColor2And3(color3));
 
             telemetry.addLine("--- Data (Sensor 1) ---");
             displayDebug(color1);
@@ -48,43 +49,19 @@ public class ColorSensorForTransfer extends LinearOpMode {
     private String detectColor1(colorSensorDriver sensor) {
         if ((sensor.green - sensor.red) >= 40) {
             return "green";
-        }
-
-        else if ((sensor.green - sensor.red) <= 20) {
+        } else if ((sensor.green - sensor.red) <= 20) {
             return "purple";
+        } else {
+            return "not detected";
         }
-
-        else if (sensor.red >= 20) {
-            return "no ball";
-        }
-
-        return "not detected";
     }
-
-    private String detectColor3(colorSensorDriver sensor) {
-//        if (sensor.rclear < CLEAR_THRESHOLD) {
-//            double greenRatio = (double) sensor.rgreen / sensor.rclear;
-//            double blueRatio = (double) sensor.rblue / sensor.rclear;
-//
-//            if (greenRatio > (blueRatio * 1.2)) {
-//                return "GREEN Ball";
-//            } else {
-//                return "PURPLE Ball";
-//            }
-//        } else {
-//            return "No Ball";
-//        }
-
+    private String detectColor2And3(colorSensorDriver sensor) {
         if ((sensor.red - sensor.green) >= 2) {
             return "purple";
-        }
-
-        else if ((sensor.red - sensor.green) <= -2) {
+        } else if ((sensor.red - sensor.green) <= -2) {
             return "green";
-        }
-
-        else {
-            return "no ball";
+        } else {
+            return "not detected";
         }
     }
 

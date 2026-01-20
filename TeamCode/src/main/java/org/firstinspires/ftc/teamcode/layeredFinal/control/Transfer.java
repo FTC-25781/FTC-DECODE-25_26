@@ -4,16 +4,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferColorSensor;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.TransferServos;
 
 public class Transfer {
-    // TODO: Adding color sensor after calibrated
-    Limelight limelight;
     TransferServos transferServos;
+    TransferColorSensor transferColors;
 
     private final ElapsedTime stateTimer = new ElapsedTime();
     public int kickerWithGreen = 1;
     public int id = 21;
+    private int purpleKickerCount = 0;
 
     public double kicker1_time_value = 0.35;
     public double kicker1_servo_lower_time = 0.05;
@@ -45,15 +46,16 @@ public class Transfer {
     private boolean sequenceActiveRandom = false;
 
     public Transfer(HardwareMap hardwareMap) {
-        limelight = new Limelight(hardwareMap);
         transferServos = new TransferServos(hardwareMap);
+        transferColors = new TransferColorSensor(hardwareMap);
     }
 
-    public void startKickSequenceInOrder() {
+    public void startKickSequenceInOrder(int aprilTagId) {
         if (currentState == State.IDLE || currentState == State.DONE) {
             currentState = State.SEARCHING;
             sequenceActiveInOrder = true;
-            id = 0;
+            id = aprilTagId;
+            purpleKickerCount = 0;
         }
     }
 
@@ -65,7 +67,16 @@ public class Transfer {
     }
 
     public void update() {
+        if (transferColors.colorOfSensor1() == TransferColorSensor.DetectedColor.GREEN) {
+            kickerWithGreen = 1;
+        } else if (transferColors.colorOfSensor2() == TransferColorSensor.DetectedColor.GREEN) {
+            kickerWithGreen = 2;
+        } else if (transferColors.colorOfSensor3() == TransferColorSensor.DetectedColor.GREEN) {
+            kickerWithGreen = 3;
+        }
+
         transferServos.update();
+        transferColors.update();
 
         // Run the state machine if a sequence is active
         if (sequenceActiveInOrder) {
@@ -201,7 +212,7 @@ public class Transfer {
                 break;
 
             case RAISE_FIRST:
-                transferServos.kicker1GoUp();  // Green first
+                transferServos.kicker1GoUp();
                 stateTimer.reset();
                 currentState = State.WAIT_FIRST;
                 break;
@@ -253,7 +264,7 @@ public class Transfer {
                 break;
 
             case RAISE_THIRD:
-                transferServos.kicker3GoUp();  // Purple third
+                transferServos.kicker3GoUp();
                 stateTimer.reset();
                 currentState = State.WAIT_THIRD;
                 break;
@@ -304,13 +315,29 @@ public class Transfer {
     }
 
     private void raisePurpleKicker() {
-        // Raise the first available purple kicker (not the green one)
+        // Raise a purple kicker (not the green one)
+        // Tracks count to raise different purple kickers on subsequent calls
         if (kickerWithGreen == 1) {
-            transferServos.kicker2GoUp();
+            if (purpleKickerCount == 0) {
+                transferServos.kicker2GoUp();
+                purpleKickerCount++;
+            } else {
+                transferServos.kicker3GoUp();
+            }
         } else if (kickerWithGreen == 2) {
-            transferServos.kicker1GoUp();
-        } else {
-            transferServos.kicker1GoUp();
+            if (purpleKickerCount == 0) {
+                transferServos.kicker1GoUp();
+                purpleKickerCount++;
+            } else {
+                transferServos.kicker3GoUp();
+            }
+        } else {  // kickerWithGreen == 3
+            if (purpleKickerCount == 0) {
+                transferServos.kicker1GoUp();
+                purpleKickerCount++;
+            } else {
+                transferServos.kicker2GoUp();
+            }
         }
     }
 
@@ -320,18 +347,11 @@ public class Transfer {
         transferServos.kicker3GoDown();
     }
 
-    public boolean isFiringInOrder() {
-        return sequenceActiveInOrder;
-    }
-
-    public boolean isFiringRandomly() {
-        return sequenceActiveRandom;
-    }
-
     public void reset() {
         currentState = State.IDLE;
         sequenceActiveInOrder = false;
         sequenceActiveRandom = false;
+        purpleKickerCount = 0;
         allKickersDown();
     }
 }

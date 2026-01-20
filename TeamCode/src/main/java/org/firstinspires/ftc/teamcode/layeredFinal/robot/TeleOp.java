@@ -42,7 +42,6 @@ public class TeleOp extends OpMode {
         limelight = new Limelight(hardwareMap);
         turret = new Turret(follower, hardwareMap);
 
-        transfer.id = limelight.getLastLoggedID();
         turret.setAlliance(isRed);
     }
 
@@ -68,7 +67,7 @@ public class TeleOp extends OpMode {
         if (gamepad1.bWasPressed()) { intake.stopped(); }
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
-        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(); }
+        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(limelight.getLastLoggedID()); }
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 

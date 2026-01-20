@@ -44,8 +44,6 @@ public class TeleOpRed extends OpMode {
         deposit = new Flywheel(hardwareMap);
         limelight = new Limelight(hardwareMap);
         turret.reset_Init();
-
-        transfer.id = limelight.getLastLoggedID();
     }
 
     @Override
@@ -69,7 +67,7 @@ public class TeleOpRed extends OpMode {
         if (gamepad1.bWasPressed()) { intake.stopped(); }
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
-        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(); }
+        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(limelight.getLastLoggedID()); }
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 

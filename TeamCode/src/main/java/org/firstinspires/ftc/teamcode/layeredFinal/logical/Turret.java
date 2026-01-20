@@ -28,9 +28,6 @@ public class Turret {
      */
     static final double TICKS_PER_DEGREE = 182 / 180.0;
 
-    private double minPower = 0.1;
-    private double maxPower = 0.6;
-
     public Turret(Follower follower, HardwareMap hardwareMap) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
         turretPID = new PIDFController(new PIDFCoefficients(kP, kI, kD, kF));
@@ -73,7 +70,7 @@ public class Turret {
 
         necessaryRotation *= TICKS_PER_DEGREE;
         turretPID.updatePosition(turretOrientation.encoder.getCurrentPosition());
-        turretPID.setTargetPosition((int)(Math.round(necessaryRotation)));
+        turretPID.setTargetPosition(necessaryRotation);
 
         double currentTicks = turretOrientation.encoder.getCurrentPosition();
         turretPID.updateError(necessaryRotation - currentTicks);

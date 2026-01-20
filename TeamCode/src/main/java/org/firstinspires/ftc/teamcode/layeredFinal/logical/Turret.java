@@ -19,9 +19,6 @@ public class Turret {
     public double kD = 0.0009;
     public double kF = 0.000;
 
-    public double angleTolerance = 0.7;
-    public double direction = 1;
-
     /*
     static final double TICKS_PER_180_DEG = 182;
     static final double DEGREES_PER_180_TICKS = 180.0;
@@ -44,43 +41,26 @@ public class Turret {
     public void stopAutoAlign(){
         autoAlign = false;
     }
-    private double normalizeAngle(double angle) {
-        return Math.IEEEremainder(angle, 360.0);
-    }
 
     public void update() {
         if (!autoAlign){
             turretOrientation.encoder.setPower(0);
             return;
         }
-        turretPID.setP(kP);
-        turretPID.setI(kI);
-        turretPID.setD(kD);
-        turretPID.setF(kF);
-        double worldTarget = turretOrientation.getAngleToGoal();
-        double robotHeading = Math.toDegrees(turretOrientation.follower.getHeading());
         //double initialAngle = turretOrientation.turretGolbalAngle();
         // eqn: for red at (72, 72) 45 - 90 = -45 deg of turret rotation ( -45 deg -> ticks = -45 * TICKS_PER_DEGREE)
         // eqn: for blue at (72, 72) 135 - 90 = 45 deg of turret rotation (45 deg -> ticks = 45 * TICKS_PER_DEGREE)
 
-        double necessaryRotation = worldTarget - robotHeading;
+        double necessaryRotation = turretOrientation.getAngleToGoal() -
+                Math.toDegrees(turretOrientation.follower.getHeading());
 
         while (necessaryRotation > 180) necessaryRotation -= 360;
         while (necessaryRotation <= -180) necessaryRotation += 360;
 
-        necessaryRotation *= TICKS_PER_DEGREE;
         turretPID.updatePosition(turretOrientation.encoder.getCurrentPosition());
-        turretPID.setTargetPosition(necessaryRotation);
-
-        double currentTicks = turretOrientation.encoder.getCurrentPosition();
-        turretPID.updateError(necessaryRotation - currentTicks);
+        turretPID.setTargetPosition(necessaryRotation* TICKS_PER_DEGREE);
+        // turretPID.updateError(necessaryRotation* TICKS_PER_DEGREE - turretOrientation.encoder.getCurrentPosition());
 
         turretOrientation.encoder.setPower(turretPID.run());
-    }
-    public boolean isOnTarget() {
-        double desiredTurretAngleDeg = turretOrientation.calculateDesiredTurretAngle();
-        double currentTurretDeg = turretOrientation.turretLocalAngle();
-        double error = normalizeAngle(desiredTurretAngleDeg - currentTurretDeg);
-        return Math.abs(error) <= angleTolerance;
     }
 }

@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.colorSensorDriver;
 
-@Disabled
 @TeleOp(name="TCS3472 Test-1", group="Sensor")
 public class SmartColorSensorTest extends LinearOpMode {
     colorSensorDriver colorSensor;

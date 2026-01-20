@@ -13,7 +13,6 @@ public class Intake {
     public void forward() { // Really not needed but allows us to go forward
         intake.startRotation();
     }
-
     public void stopped() { // Really not needed but allows us to stop
         intake.stopRotation();
     }

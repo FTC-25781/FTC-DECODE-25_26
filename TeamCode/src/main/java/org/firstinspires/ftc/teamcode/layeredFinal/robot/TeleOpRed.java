@@ -52,6 +52,8 @@ public class TeleOpRed extends OpMode {
 
     @Override
     public void loop() {
+        limelight.getIDAndLog(limelight.getID());
+
         transfer.update();
         follower.update();
         turret.update();
@@ -73,16 +75,16 @@ public class TeleOpRed extends OpMode {
 
         if (gamepad1.left_trigger > 0.1) {
             deposit.setVelForCloseTip();
-            turret.startAutoAlign();
+//            turret.startAutoAlign();
         }
         if (gamepad1.right_trigger > 0.1) {
             deposit.setVelForFarTip();
-            turret.startAutoAlign();
+//            turret.startAutoAlign();
         }
 
         if (gamepad1.leftStickButtonWasPressed()) {
             deposit.stopFlywheel();
-            turret.stopAutoAlign();
+//            turret.stopAutoAlign();
         }
 
         if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
@@ -94,6 +96,7 @@ public class TeleOpRed extends OpMode {
         telemetry.addLine("");
         telemetry.addData("Limelight Id", limelight.getLastLoggedID());
         telemetry.addData("Transfer Id", transfer.id);
+        telemetry.addData("Kicker With Green", transfer.kickerWithGreen);
         telemetry.addLine("");
         telemetry.addData("Deposit Velocity", deposit.getVelocity());
         telemetry.update();

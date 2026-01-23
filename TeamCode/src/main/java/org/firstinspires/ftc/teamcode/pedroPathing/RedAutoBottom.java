@@ -149,7 +149,6 @@ public class RedAutoBottom extends OpMode {
                         follower.followPath(goToHumanPlayerZone, 0.65, true);
                         pathTimer.resetTimer();
                         setPathState(4);
-
                       }
                 }
                 break;

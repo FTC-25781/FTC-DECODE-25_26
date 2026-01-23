@@ -47,7 +47,7 @@ public class RedAutoBottom extends OpMode {
         scanAndShoot.setConstantHeadingInterpolation(scanAndShootPreload.getHeading());
 
         goToPickup1 = follower.pathBuilder()
-                .addPath(new BezierCurve(startPose, pickup1ControlPose, pickup1EndPose))
+                .addPath(new BezierCurve(scanAndShootPreload, pickup1ControlPose, pickup1EndPose))
                 .setConstantHeadingInterpolation(pickup1EndPose.getHeading())
                 .build();
 
@@ -101,7 +101,7 @@ public class RedAutoBottom extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() > 2.0) {
+                        pathTimer.getElapsedTimeSeconds() > 2.2) {
                         transfer.startKickSequenceRandomly();
                     }
 
@@ -149,7 +149,6 @@ public class RedAutoBottom extends OpMode {
                         follower.followPath(goToHumanPlayerZone, 0.65, true);
                         pathTimer.resetTimer();
                         setPathState(4);
-
                       }
                 }
                 break;
@@ -182,6 +181,7 @@ public class RedAutoBottom extends OpMode {
                     if (transfer.currentState == Transfer.State.DONE) {
                         if (!reset) {
                             resetEverything();
+                            intake.forward();
                         }
 
                         follower.followPath(goToOpenTheGate, true);
@@ -201,13 +201,6 @@ public class RedAutoBottom extends OpMode {
                 }
 
             case 7:
-                if (!follower.isBusy()) {
-                    follower.followPath(goToScoreGate, true);
-                    pathTimer.resetTimer();
-                    setPathState(8);
-                }
-
-            case 8:
                 if (!follower.isBusy()) {
                     follower.followPath(goToScoreGate, true);
                     pathTimer.resetTimer();

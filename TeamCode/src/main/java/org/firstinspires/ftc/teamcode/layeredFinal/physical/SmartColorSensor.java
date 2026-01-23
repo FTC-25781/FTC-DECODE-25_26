@@ -4,31 +4,31 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.layeredFinal.physical.colorSensorDriver.colorSensorDriver;
 
 public class SmartColorSensor {
-    // Custom driver instances for each physical sensor
     colorSensorDriver colorSensor1;
     colorSensorDriver colorSensor2;
     colorSensorDriver colorSensor3;
 
     public SmartColorSensor(HardwareMap hardwareMap) {
-        // These strings ("Color1", etc.) must match the names saved on the Expansion/Control Hub config
         colorSensor1 = hardwareMap.get(colorSensorDriver.class, "Color1");
         colorSensor2 = hardwareMap.get(colorSensorDriver.class, "Color2");
         colorSensor3 = hardwareMap.get(colorSensorDriver.class, "Color3");
+
+        colorSensor1.tuneVals(475, 500, 280, 560, 570, 332);
+        colorSensor2.tuneVals(2245,2653,1577,6200,6900, 4415);
+        colorSensor3.tuneVals(231, 277, 155, 500, 560, 325);
+
     }
 
     // --- Sensor 1 Getters ---
-    public double getRawClear1() { return colorSensor1.rclear; }
-    public double getBlue1() { return colorSensor1.blue; }
+    public double getRed1() { return colorSensor1.red; }
     public double getGreen1() { return colorSensor1.green; }
 
     // --- Sensor 2 Getters ---
-    public double getRawClear2() { return colorSensor2.rclear; }
-    public double getBlue2() { return colorSensor2.blue; }
+    public double getRed2() { return colorSensor2.red; }
     public double getGreen2() { return colorSensor2.green; }
 
     // --- Sensor 3 Getters ---
-    public double getRawClear3() { return colorSensor3.rclear; }
-    public double getBlue3() { return colorSensor3.blue; }
+    public double getRed3() { return colorSensor3.red; }
     public double getGreen3() { return colorSensor3.green; }
 
     public void update() {

@@ -12,15 +12,12 @@ public class Flywheel {
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = new SmartFlywheelMotor(hardwareMap);
     }
-
     public void setVelForCloseTip() {
         flywheel.setVelocity(lowVelocity);
     }
-
     public void setVelForFarTip() {
         flywheel.setVelocity(highVelocity);
     }
-
     public void stopFlywheel() {
         flywheel.setVelocity(0);
     }
@@ -32,10 +29,7 @@ public class Flywheel {
     public double getVelocity() {
         return flywheel.getCurVelocity();
     }
-
-    public void humanPlayer() {
-        flywheel.setVelocity(-10);
-    }
+    public void humanPlayer() { flywheel.setVelocity(-100); }
 
     public void update() {
         flywheel.update();

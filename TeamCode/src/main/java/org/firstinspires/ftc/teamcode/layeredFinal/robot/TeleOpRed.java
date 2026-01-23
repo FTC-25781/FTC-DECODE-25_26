@@ -53,8 +53,6 @@ public class TeleOpRed extends OpMode {
 
     @Override
     public void loop() {
-//        limelight.getIDAndLog(limelight.getID());
-
         transfer.update();
         follower.update();
         turret.update();

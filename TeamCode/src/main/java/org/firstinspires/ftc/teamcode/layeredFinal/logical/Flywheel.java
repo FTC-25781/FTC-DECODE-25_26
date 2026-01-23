@@ -22,9 +22,9 @@ public class Flywheel {
         flywheel.setVelocity(0);
     }
 
-    public void setVelocity(double vel) {
-        flywheel.setVelocity(vel);
-    }
+    //public void setVelocity(double vel) {
+        //flywheel.setVelocity(vel);
+    //}
 
     public double getVelocity() {
         return flywheel.getCurVelocity();

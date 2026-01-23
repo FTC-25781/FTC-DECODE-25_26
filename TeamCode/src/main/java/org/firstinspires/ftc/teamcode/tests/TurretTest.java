@@ -2,15 +2,11 @@ package org.firstinspires.ftc.teamcode.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
-import org.firstinspires.ftc.teamcode.layeredFinal.logical.TurretTracker;
-import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartLimelight;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name="Turret Tester Refined")
@@ -18,7 +14,6 @@ public class TurretTest extends OpMode {
 
     Follower follower;
     public Turret turret;
-    public SmartLimelight limelight;
     // Toggle logic variables
     boolean isRed = true;
     boolean lastInputA = false;

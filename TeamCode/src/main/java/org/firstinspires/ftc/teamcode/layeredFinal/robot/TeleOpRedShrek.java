@@ -48,7 +48,7 @@ public class TeleOpRedShrek extends OpMode {
 
     @Override
     public void start() {
-        follower.startTeleopDrive(false);
+        follower.startTeleopDrive();
     }
 
     @Override

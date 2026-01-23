@@ -12,21 +12,22 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
-import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
+import org.firstinspires.ftc.teamcode.layeredFinal.control.ShreeshTurretForDriverPractice;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
-@TeleOp(name = "TeleOp Red", group = "Main")
-public class TeleOpRed extends OpMode {
+@TeleOp(name = "TeleOp Red Shrek", group = "Main")
+public class TeleOpRedShrek extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
     private Limelight limelight;
-    private Turret turret;
+    private ShreeshTurretForDriverPractice turret;
 
     private Follower follower;
-    public static Pose startingPose = new Pose(72, 72, Math.toRadians(90));
+//    public static Pose startingPose;
     private TelemetryManager telemetryM;
+    public static Pose startingPose = new Pose(72, 72, Math.toRadians(90));
     boolean isRed = true;
 
     @Override
@@ -41,9 +42,9 @@ public class TeleOpRed extends OpMode {
         transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
         limelight = new Limelight(hardwareMap);
-        turret = new Turret(follower, hardwareMap);
+        turret = new ShreeshTurretForDriverPractice(hardwareMap,telemetry);
 
-        turret.setAlliance(isRed);
+//        turret.setAlliance(isRed);
     }
 
     @Override
@@ -53,11 +54,11 @@ public class TeleOpRed extends OpMode {
 
     @Override
     public void loop() {
-//        limelight.getIDAndLog(limelight.getID());
+        limelight.getIDAndLog(limelight.getID());
 
         transfer.update();
         follower.update();
-        turret.update();
+        turret.update(follower.getPose().getX(),follower.getPose().getY(),follower.getPose().getHeading(), true, 0, telemetry, 0);
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,

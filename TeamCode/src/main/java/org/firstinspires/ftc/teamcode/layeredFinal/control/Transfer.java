@@ -198,7 +198,7 @@ public class Transfer {
             case DONE:
                 allKickersDown();
                 sequenceActiveInOrder = false;
-                currentState = State.DONE;
+                currentState = State.IDLE;
                 break;
 
             case IDLE:
@@ -292,7 +292,7 @@ public class Transfer {
             case DONE:
                 allKickersDown();
                 sequenceActiveRandom = false;
-                currentState = State.DONE;
+                currentState = State.IDLE;
                 break;
 
             case IDLE:

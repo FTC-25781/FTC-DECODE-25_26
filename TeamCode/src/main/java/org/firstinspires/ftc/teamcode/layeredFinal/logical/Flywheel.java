@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartFlywheelMotor;
 public class Flywheel {
     SmartFlywheelMotor flywheel;
 
-    public double highVelocity = 1540;
+    public double highVelocity = 1500;
     public double lowVelocity = 1330;
 
     public Flywheel(HardwareMap hardwareMap) {

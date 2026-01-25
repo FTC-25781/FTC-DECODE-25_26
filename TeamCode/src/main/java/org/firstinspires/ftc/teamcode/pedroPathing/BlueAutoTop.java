@@ -21,6 +21,7 @@ public class BlueAutoTop extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(19.5, 123.5, Math.toRadians(135));
+
     public PathChain ScanAndShootPreload;
     public PathChain GoToPickup1;
     public PathChain ShootPreload1;
@@ -83,54 +84,38 @@ public class BlueAutoTop extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Score Preload */
-                    intake.forward();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
+
                     follower.followPath(GoToPickup1, true);
                     pathTimer.resetTimer();
                     setPathState(2);
                 }
                 break;
             case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(ShootPreload1, true);
                     pathTimer.resetTimer();
                     setPathState(3);
                 }
                 break;
             case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
                     follower.followPath(GoToPick2, true);
                     pathTimer.resetTimer();
                     setPathState(4);
                 }
                 break;
             case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
                     intake.stopped();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(OpenTheGate, true);
                     pathTimer.resetTimer();
                     setPathState(5);
                 }
                 break;
             case 5:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
                     intake.stopped();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(ShootPick2, true);
                     pathTimer.resetTimer();
                     setPathState(-1);

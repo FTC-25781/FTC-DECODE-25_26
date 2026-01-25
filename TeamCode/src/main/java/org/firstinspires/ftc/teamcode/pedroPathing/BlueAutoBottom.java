@@ -212,6 +212,7 @@ public class BlueAutoBottom extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
     }
 
     private void resetEverything() {

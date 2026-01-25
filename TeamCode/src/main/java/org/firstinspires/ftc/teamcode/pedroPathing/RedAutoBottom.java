@@ -33,11 +33,12 @@ public class RedAutoBottom extends OpMode {
 
     private boolean isRed = true;
 
-    private final Pose startPose = new Pose(94, 8, Math.toRadians(0));
-    private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
+    private final Pose startPose = new Pose(95.8, 8, Math.toRadians(90));
+    private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(90));
+    private final Pose homePose = new Pose(92, 12, Math.toRadians(0));
     private final Pose pickup1EndPose = new Pose(131,40.5, Math.toRadians(0));
-    private final Pose pickup1ControlPose = new Pose(72, 42, Math.toRadians(0));
-    private final Pose humanPlayerPose = new Pose(135, 8, Math.toRadians(0));
+    private final Pose pickup1ControlPose = new Pose(64, 42, Math.toRadians(0));
+    private final Pose humanPlayerPose = new Pose(127, 8, Math.toRadians(0));
     private final Pose openTheGate = new Pose(129, 70, Math.toRadians(90));
     private final Pose openTheGateControlPose = new Pose(80, 75, Math.toRadians(0));
     private final Pose getBallsFromGate = new Pose(131, 56, Math.toRadians(50));
@@ -52,27 +53,27 @@ public class RedAutoBottom extends OpMode {
 
         goToPickup1 = follower.pathBuilder()
                 .addPath(new BezierCurve(scanAndShootPreload, pickup1ControlPose, pickup1EndPose))
-                .setConstantHeadingInterpolation(pickup1EndPose.getHeading())
+                .setLinearHeadingInterpolation(scanAndShootPreload.getHeading(), pickup1EndPose.getHeading())
                 .build();
 
         goToScore = follower.pathBuilder()
-                .addPath(new BezierCurve(pickup1EndPose, pickup1ControlPose, startPose))
-                .setConstantHeadingInterpolation(startPose.getHeading())
+                .addPath(new BezierCurve(pickup1EndPose, pickup1ControlPose, homePose))
+                .setConstantHeadingInterpolation(homePose.getHeading())
                 .build();
 
         goToHumanPlayerZone = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, humanPlayerPose))
+                .addPath(new BezierLine(homePose, humanPlayerPose))
                 .setConstantHeadingInterpolation(humanPlayerPose.getHeading())
                 .build();
 
         goToScore2 = follower.pathBuilder()
-                .addPath(new BezierLine(humanPlayerPose, startPose))
-                .setConstantHeadingInterpolation(startPose.getHeading())
+                .addPath(new BezierLine(humanPlayerPose, homePose))
+                .setConstantHeadingInterpolation(homePose.getHeading())
                 .build();
 
         goToOpenTheGate = follower.pathBuilder()
-                .addPath(new BezierCurve(startPose, openTheGateControlPose, openTheGate))
-                .setLinearHeadingInterpolation(startPose.getHeading(), openTheGate.getHeading())
+                .addPath(new BezierCurve(homePose, openTheGateControlPose, openTheGate))
+                .setLinearHeadingInterpolation(homePose.getHeading(), openTheGate.getHeading())
                 .build();
 
         goToGetBalls = follower.pathBuilder()
@@ -81,7 +82,7 @@ public class RedAutoBottom extends OpMode {
                 .build();
 
         goToScoreGate = follower.pathBuilder()
-                .addPath(new BezierCurve(getBallsFromGate, openTheGateControlPose, startPose))
+                .addPath(new BezierCurve(getBallsFromGate, openTheGateControlPose, homePose))
                 .setConstantHeadingInterpolation(getBallsFromGate.getHeading())
                 .build();
     }
@@ -89,14 +90,12 @@ public class RedAutoBottom extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                limelight.stop();
                 follower.followPath(scanAndShoot);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 1) {
-                    limelight.getIDAndLog(limelight.getID());
-                    transfer.id = limelight.getLastLoggedID();
-
                     flywheel.setVelForFarTip();
 
                     if(!timerReset) {
@@ -119,6 +118,10 @@ public class RedAutoBottom extends OpMode {
                         pathTimer.resetTimer();
                         setPathState(2);
                     }
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(2);
+                    }
                 }
                 break;
             case 2:
@@ -129,6 +132,10 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(3);
+                    }
                 }
                 break;
             case 3:
@@ -155,6 +162,10 @@ public class RedAutoBottom extends OpMode {
                         pathTimer.resetTimer();
                         setPathState(4);
                       }
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(4);
+                    }
                 }
                 break;
 
@@ -166,11 +177,16 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToScore2, 0.8, true);
                     pathTimer.resetTimer();
                     setPathState(5);
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(5);
+                    }
                 }
                 break;
 
             case 5:
-                if(!follower.isBusy()) {
+                if(!follower.isBusy() &&
+                    pathTimer.getElapsedTimeSeconds() >= 1.5) {
                     intake.reverse();
 
                     if(!timerReset) {
@@ -191,7 +207,11 @@ public class RedAutoBottom extends OpMode {
 
                         follower.followPath(goToOpenTheGate,0.65, true);
                         pathTimer.resetTimer();
-                        setPathState(6);
+                        setPathState(-1);
+                    }
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(-1);
                     }
                 }
                 break;
@@ -204,6 +224,10 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToGetBalls, true);
                     pathTimer.resetTimer();
                     setPathState(7);
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(7);
+                    }
                 }
                 break;
 
@@ -213,6 +237,10 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToScoreGate, true);
                     pathTimer.resetTimer();
                     setPathState(8);
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
+                        setPathState(8);
+                    }
                 }
                 break;
             case 8:
@@ -236,6 +264,10 @@ public class RedAutoBottom extends OpMode {
                             flywheel.stopFlywheel();
                         }
 
+                        setPathState(-1);
+                    }
+                } else {
+                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
                         setPathState(-1);
                     }
                 }
@@ -268,7 +300,13 @@ public class RedAutoBottom extends OpMode {
         turret.setAlliance(isRed);
         turret.startAutoAlign();
 
+        limelight.getIDAndLog(limelight.getID());
+        transfer.id = limelight.getLastLoggedID();
+
         follower.setStartingPose(startPose);
+
+        telemetry.addData("Limelight id: ", transfer.id);
+        telemetry.update();
     }
 
     @Override

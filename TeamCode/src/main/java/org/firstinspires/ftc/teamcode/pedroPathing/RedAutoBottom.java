@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 
 @Autonomous(name = "Red Auto Bottom", group = "Red")
 public class RedAutoBottom extends OpMode {
@@ -21,23 +22,26 @@ public class RedAutoBottom extends OpMode {
     private Transfer transfer;
     private Limelight limelight;
     private Flywheel flywheel;
+    private Turret turret;
 
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    private Timer pathTimer, opmodeTimer;
 
     private int pathState;
     private boolean timerReset = false;
     private boolean reset = false;
+
+    private boolean isRed = true;
 
     private final Pose startPose = new Pose(94, 8, Math.toRadians(0));
     private final Pose scanAndShootPreload = new Pose(94, 9, Math.toRadians(0));
     private final Pose pickup1EndPose = new Pose(131,40.5, Math.toRadians(0));
     private final Pose pickup1ControlPose = new Pose(72, 42, Math.toRadians(0));
     private final Pose humanPlayerPose = new Pose(135, 8, Math.toRadians(0));
-    private final Pose openTheGate = new Pose(133, 70, Math.toRadians(0));
-    private final Pose openTheGateControlPose = new Pose(58, 72.5, Math.toRadians(0));
-    private final Pose getBallsFromGate = new Pose(133, 49, Math.toRadians(0));
-    private final Pose getBallsFromGateControlPose = new Pose(115, 36, Math.toRadians(25));
+    private final Pose openTheGate = new Pose(129, 70, Math.toRadians(90));
+    private final Pose openTheGateControlPose = new Pose(80, 75, Math.toRadians(0));
+    private final Pose getBallsFromGate = new Pose(131, 56, Math.toRadians(50));
+    private final Pose getBallsFromGateControlPose = new Pose(128, 35, Math.toRadians(0));
 
     private Path scanAndShoot;
     private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2, goToOpenTheGate, goToGetBalls, goToScoreGate;
@@ -68,7 +72,7 @@ public class RedAutoBottom extends OpMode {
 
         goToOpenTheGate = follower.pathBuilder()
                 .addPath(new BezierCurve(startPose, openTheGateControlPose, openTheGate))
-                .setConstantHeadingInterpolation(openTheGate.getHeading())
+                .setLinearHeadingInterpolation(startPose.getHeading(), openTheGate.getHeading())
                 .build();
 
         goToGetBalls = follower.pathBuilder()
@@ -77,7 +81,7 @@ public class RedAutoBottom extends OpMode {
                 .build();
 
         goToScoreGate = follower.pathBuilder()
-                .addPath(new BezierLine(getBallsFromGate, startPose))
+                .addPath(new BezierCurve(getBallsFromGate, openTheGateControlPose, startPose))
                 .setConstantHeadingInterpolation(getBallsFromGate.getHeading())
                 .build();
     }
@@ -111,7 +115,7 @@ public class RedAutoBottom extends OpMode {
                             intake.forward();
                         }
 
-                        follower.followPath(goToPickup1,0.65, true);
+                        follower.followPath(goToPickup1,0.8, true);
                         pathTimer.resetTimer();
                         setPathState(2);
                     }
@@ -144,9 +148,10 @@ public class RedAutoBottom extends OpMode {
                     if (transfer.currentState == Transfer.State.DONE) {
                         if (!reset) {
                             resetEverything();
+                            intake.forward();
                         }
 
-                        follower.followPath(goToHumanPlayerZone, 0.65, true);
+                        follower.followPath(goToHumanPlayerZone, 0.8, true);
                         pathTimer.resetTimer();
                         setPathState(4);
                       }
@@ -158,7 +163,7 @@ public class RedAutoBottom extends OpMode {
                     pathTimer.getElapsedTimeSeconds() >= 2.0) {
                     reset = false;
 
-                    follower.followPath(goToScore2, true);
+                    follower.followPath(goToScore2, 0.8, true);
                     pathTimer.resetTimer();
                     setPathState(5);
                 }
@@ -184,28 +189,57 @@ public class RedAutoBottom extends OpMode {
                             intake.forward();
                         }
 
-                        follower.followPath(goToOpenTheGate, true);
+                        follower.followPath(goToOpenTheGate,0.65, true);
                         pathTimer.resetTimer();
                         setPathState(6);
                     }
                 }
+                break;
 
             case 6:
                 if (!follower.isBusy() &&
-                    pathTimer.getElapsedTimeSeconds() >= 1.0) {
+                    pathTimer.getElapsedTimeSeconds() >= 2.5) {
                     reset = false;
 
                     follower.followPath(goToGetBalls, true);
                     pathTimer.resetTimer();
                     setPathState(7);
                 }
+                break;
 
             case 7:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() &&
+                    pathTimer.getElapsedTimeSeconds() >= 2.0) {
                     follower.followPath(goToScoreGate, true);
                     pathTimer.resetTimer();
-                    setPathState(-1);
+                    setPathState(8);
                 }
+                break;
+            case 8:
+                if (!follower.isBusy()) {
+                    intake.reverse();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                        pathTimer.getElapsedTimeSeconds() >= 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        if (!reset) {
+                            resetEverything();
+                            intake.stopped();
+                            flywheel.stopFlywheel();
+                        }
+
+                        setPathState(-1);
+                    }
+                }
+                break;
         }
     }
 
@@ -215,12 +249,36 @@ public class RedAutoBottom extends OpMode {
     }
 
     @Override
+    public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        buildPaths();
+
+        follower.update();
+
+        flywheel = new Flywheel(hardwareMap);
+        intake = new Intake(hardwareMap);
+        transfer = new Transfer(hardwareMap);
+        limelight = new Limelight(hardwareMap);
+        turret = new Turret(follower, hardwareMap);
+
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
+
+        turret.setAlliance(isRed);
+        turret.startAutoAlign();
+
+        follower.setStartingPose(startPose);
+    }
+
+    @Override
     public void loop() {
         follower.update();
         autonomousPathUpdate();
 
         transfer.update();
         flywheel.update();
+        turret.update();
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -230,22 +288,6 @@ public class RedAutoBottom extends OpMode {
 
         telemetry.addData("Limelight id: ", transfer.id);
         telemetry.update();
-    }
-
-    @Override
-    public void init() {
-        flywheel = new Flywheel(hardwareMap);
-        intake = new Intake(hardwareMap);
-        transfer = new Transfer(hardwareMap);
-        limelight = new Limelight(hardwareMap);
-
-        pathTimer = new Timer();
-        opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
-
-        follower = Constants.createFollower(hardwareMap);
-        buildPaths();
-        follower.setStartingPose(startPose);
     }
 
     private void resetEverything() {

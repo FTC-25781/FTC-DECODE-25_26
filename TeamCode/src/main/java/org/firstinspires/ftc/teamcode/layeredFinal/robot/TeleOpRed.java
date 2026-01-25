@@ -32,8 +32,6 @@ public class TeleOpRed extends OpMode {
     private static Pose startingPose;
     private TelemetryManager telemetryM;
     private boolean isRed = true;
-    Timer loopTimer = new Timer();
-
 
     @Override
     public void init() {
@@ -62,7 +60,6 @@ public class TeleOpRed extends OpMode {
 
     @Override
     public void loop() {
-        loopTimer.resetTimer();
         follower.update();
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,

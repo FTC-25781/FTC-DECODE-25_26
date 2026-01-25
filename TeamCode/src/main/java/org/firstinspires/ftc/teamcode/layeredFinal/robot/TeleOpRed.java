@@ -58,13 +58,11 @@ public class TeleOpRed extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive();
-
     }
 
     @Override
     public void loop() {
         loopTimer.resetTimer();
-//      limelight.getIDAndLog(limelight.getID());
         follower.update();
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -73,7 +71,6 @@ public class TeleOpRed extends OpMode {
                 true // Robot Centric Mode
         );
 
-        // Intake Commands
         if (gamepad1.aWasPressed()) {
             intake.forward();
         }
@@ -86,7 +83,6 @@ public class TeleOpRed extends OpMode {
             intake.reverse();
         }
 
-        // Transfer commands
         if (gamepad1.dpadLeftWasPressed()) {
             transfer.updateColorSensor();
             transfer.startKickSequenceInOrder(limelight.getLastLoggedID());
@@ -100,7 +96,6 @@ public class TeleOpRed extends OpMode {
             transfer.reset();
         }
 
-        // Deposit commands
         if (gamepad1.left_trigger > 0.1) {
             deposit.setVelForCloseTip();
             if (!turret.autoAlign) {

@@ -114,7 +114,7 @@ public class colorSensorDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimple
         write8(Register.REG_ENABLE.bVal, (byte)(ENABLE_PON | ENABLE_AEN));
         // Set integration time (e.g., 0xEB ~ 100 ms; lower value = longer integration)
         // Check Adafruit docs for mapping
-        write8(Register.REG_ATIME.bVal, (byte)0xFF);
+        write8(Register.REG_ATIME.bVal, (byte)0xEB);
         // Set gain (0x00=1x, 0x01=4x, 0x02=16x, 0x03=60x)
         write8(Register.REG_CONTROL.bVal, (byte)0x01); // 4x gain
         // Wait for first integration cycle to complete

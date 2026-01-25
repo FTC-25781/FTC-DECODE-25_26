@@ -28,9 +28,9 @@ public class RedAutoBottom extends OpMode {
     private Timer pathTimer, opmodeTimer;
 
     private int pathState;
+
     private boolean timerReset = false;
     private boolean reset = false;
-
     private boolean isRed = true;
 
     private final Pose startPose = new Pose(95.8, 8, Math.toRadians(90));
@@ -118,11 +118,8 @@ public class RedAutoBottom extends OpMode {
                         pathTimer.resetTimer();
                         setPathState(2);
                     }
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(2);
-                    }
                 }
+
                 break;
             case 2:
                 if (!follower.isBusy() &&
@@ -132,10 +129,6 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToScore, true);
                     pathTimer.resetTimer();
                     setPathState(3);
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(3);
-                    }
                 }
                 break;
             case 3:
@@ -162,10 +155,6 @@ public class RedAutoBottom extends OpMode {
                         pathTimer.resetTimer();
                         setPathState(4);
                       }
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(4);
-                    }
                 }
                 break;
 
@@ -177,10 +166,6 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToScore2, 0.8, true);
                     pathTimer.resetTimer();
                     setPathState(5);
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(5);
-                    }
                 }
                 break;
 
@@ -209,10 +194,6 @@ public class RedAutoBottom extends OpMode {
                         pathTimer.resetTimer();
                         setPathState(-1);
                     }
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(-1);
-                    }
                 }
                 break;
 
@@ -224,10 +205,6 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToGetBalls, true);
                     pathTimer.resetTimer();
                     setPathState(7);
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(7);
-                    }
                 }
                 break;
 
@@ -237,10 +214,6 @@ public class RedAutoBottom extends OpMode {
                     follower.followPath(goToScoreGate, true);
                     pathTimer.resetTimer();
                     setPathState(8);
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
-                        setPathState(8);
-                    }
                 }
                 break;
             case 8:
@@ -264,10 +237,6 @@ public class RedAutoBottom extends OpMode {
                             flywheel.stopFlywheel();
                         }
 
-                        setPathState(-1);
-                    }
-                } else {
-                    if (pathTimer.getElapsedTimeSeconds() >= 5) {
                         setPathState(-1);
                     }
                 }

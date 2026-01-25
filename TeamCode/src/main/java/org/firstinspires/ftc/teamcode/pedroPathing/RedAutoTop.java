@@ -10,71 +10,87 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
+import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
+import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 
 @Autonomous(name = "Red Auto Top", group = "Red")
 public class RedAutoTop extends OpMode {
     private Intake intake;
+    private Transfer transfer;
+    private Limelight limelight;
+    private Flywheel flywheel;
+    private Turret turret;
 
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    private Timer pathTimer, opmodeTimer;
 
     private int pathState;
 
-   private final Pose startPose = new Pose(123.5, 123.5, Math.toRadians(45));
+    private boolean timerReset = false;
+    private boolean reset = false;
+    private boolean isRed = true;
+
+    private final Pose startPose = new Pose(21.000, 122.000, Math.toRadians(135)).mirror();
+    private final Pose scanPose = new Pose(48.000, 94.000, Math.toRadians(135)).mirror();
+    private final Pose pick1Pose = new Pose(18.000, 84.000, Math.toRadians(180)).mirror();
+    private final Pose pick1ControlPose = new Pose(72.000, 83.000, Math.toRadians(0)).mirror();
+    private final Pose pick2Pose = new Pose(16.000, 60.000, Math.toRadians(180)).mirror();
+    private final Pose pick2ControlPose = new Pose(86.000, 57.000, Math.toRadians(0)).mirror();
+    private final Pose shoot2Pose = new Pose(62.000, 82.000, Math.toRadians(180)).mirror();
+    private final Pose shoot2ControlPose = new Pose(59.000, 58.000, Math.toRadians(0)).mirror();
+
     public PathChain ScanAndShootPreload;
     public PathChain GoToPickup1;
-    public PathChain ShootPreload1;
+    public PathChain ShootPick1;
     public PathChain GoToPick2;
-    public PathChain OpenTheGate;
     public PathChain ShootPick2;
 
     public void buildPaths() {
-        ScanAndShootPreload = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        new Pose(123.500, 123.500),
-                        new Pose(96.000, 96.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(45))
-                .build();
+        ScanAndShootPreload = follower.pathBuilder().addPath(
+            new BezierLine(
+                    startPose,
+                    scanPose
+            )
+        ).setConstantHeadingInterpolation(startPose.getHeading())
+        .build();
 
-        GoToPickup1 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                                new Pose(96.000, 96.000),
-                                new Pose(63.000, 83.000),
-                                new Pose(126.000, 84.000)
-                        )).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
-                .build();
+        GoToPickup1 = follower.pathBuilder().addPath(
+            new BezierCurve(
+                    scanPose,
+                    pick1ControlPose,
+                    pick1Pose
+            )
+        ).setLinearHeadingInterpolation(scanPose.getHeading(), pick1Pose.getHeading())
+        .build();
 
-        ShootPreload1 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                                new Pose(126.000, 84.000),
-                                new Pose(93.000, 80.000),
-                                new Pose(96.000, 96.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
+        ShootPick1 = follower.pathBuilder().addPath(
+            new BezierCurve(
+                    pick1Pose,
+                    pick1ControlPose,
+                    scanPose
+            )
+        ).setConstantHeadingInterpolation(pick1Pose.getHeading())
+        .build();
 
-                .build();
+        GoToPick2 = follower.pathBuilder().addPath(
+            new BezierCurve(
+                    scanPose,
+                    pick2ControlPose,
+                    pick2Pose
+            )
+        ).setConstantHeadingInterpolation(pick2Pose.getHeading())
+        .build();
 
-        GoToPick2 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                                new Pose(96.000, 96.000),
-                                new Pose(57.000, 55.000),
-                                new Pose(126.000, 60.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-
-        OpenTheGate = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                                new Pose(126.000, 60.000),
-                                new Pose(115.000, 70.000),
-                                new Pose(129.000, 68.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
-
-        ShootPick2 = follower.pathBuilder()
-                .addPath(new BezierLine(
-                                new Pose(129.000, 68.000),
-                                new Pose(72.000, 72.000)
-                        )).setConstantHeadingInterpolation(Math.toRadians(0))
-                .build();
+        ShootPick2 = follower.pathBuilder().addPath(
+            new BezierCurve(
+                    pick2Pose,
+                    shoot2ControlPose,
+                    shoot2Pose
+            )
+        ).setConstantHeadingInterpolation(shoot2Pose.getHeading())
+        .build();
     }
 
     public void autonomousPathUpdate() {
@@ -84,57 +100,100 @@ public class RedAutoTop extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Score Preload */
-                    intake.forward();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(GoToPickup1, true);
-                    pathTimer.resetTimer();
-                    setPathState(2);
+                    flywheel.setVelForCloseTip();
+
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                            pathTimer.getElapsedTimeSeconds() > 2.2) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        if (!reset) {
+                            resetEverything();
+                            intake.forward();
+                        }
+
+                        follower.followPath(GoToPickup1, true);
+                        pathTimer.resetTimer();
+                        setPathState(2);
+                    }
                 }
                 break;
             case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(ShootPreload1, true);
+                if (!follower.isBusy() &&
+                        pathTimer.getElapsedTimeSeconds() >= 2) {
+                    reset = false;
+
+                    follower.followPath(ShootPick1, true);
                     pathTimer.resetTimer();
                     setPathState(3);
                 }
                 break;
             case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Score Sample */
+                if (!follower.isBusy()) {
+                    intake.reverse();
 
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(GoToPick2, true);
-                    pathTimer.resetTimer();
-                    setPathState(4);
+                    if(!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE
+                            && pathTimer.getElapsedTimeSeconds() >= 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        if (!reset) {
+                            resetEverything();
+                            intake.forward();
+                        }
+
+                        follower.followPath(GoToPick2, true);
+                        pathTimer.resetTimer();
+                        setPathState(4);
+                    }
                 }
                 break;
             case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
-                    intake.stopped();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(OpenTheGate, true);
+                if (!follower.isBusy() &&
+                        pathTimer.getElapsedTimeSeconds() >= 2) {
+                    reset = false;
+
+                    follower.followPath(ShootPick2, true);
                     pathTimer.resetTimer();
                     setPathState(5);
                 }
                 break;
             case 5:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 2) {
-                    /* Grab Sample */
-                    intake.stopped();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(ShootPick2, true);
-                    pathTimer.resetTimer();
-                    setPathState(-1);
+                if (!follower.isBusy()) {
+                    intake.reverse();
+
+                    if (!timerReset) {
+                        timerReset = true;
+                        pathTimer.resetTimer();
+                    }
+
+                    if (transfer.currentState == Transfer.State.IDLE &&
+                            pathTimer.getElapsedTimeSeconds() >= 0.5) {
+                        transfer.startKickSequenceRandomly();
+                    }
+
+                    if (transfer.currentState == Transfer.State.DONE) {
+                        if (!reset) {
+                            resetEverything();
+                            intake.stopped();
+                            flywheel.stopFlywheel();
+                        }
+
+                        setPathState(-1);
+                    }
                 }
                 break;
         }
@@ -146,30 +205,52 @@ public class RedAutoTop extends OpMode {
     }
 
     @Override
-    public void loop() {
-        // These loop the movements of the robot, these must be called continuously in order to work
-        follower.update();
-        autonomousPathUpdate();
-
-        // Feedback to Driver Hub for debugging
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
-    }
-
-    @Override
     public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        buildPaths();
+
+        follower.update();
+
+        flywheel = new Flywheel(hardwareMap);
         intake = new Intake(hardwareMap);
+        transfer = new Transfer(hardwareMap);
+        limelight = new Limelight(hardwareMap);
+        turret = new Turret(follower, hardwareMap);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
-        follower = Constants.createFollower(hardwareMap);
-        buildPaths();
+        turret.setAlliance(isRed);
+        turret.startAutoAlign();
+
         follower.setStartingPose(startPose);
+    }
+
+    @Override
+    public void loop() {
+        follower.update();
+        autonomousPathUpdate();
+
+        transfer.update();
+        flywheel.update();
+        turret.update();
+
+        telemetry.addData("path state", pathState);
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addLine();
+
+        telemetry.addData("Limelight id: ", transfer.id);
+        telemetry.update();
+    }
+
+    private void resetEverything() {
+        timerReset = false;
+        transfer.reset();
+        limelight.stop();
+        reset = true;
     }
 
     @Override

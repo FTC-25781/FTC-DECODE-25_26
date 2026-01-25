@@ -23,6 +23,8 @@ public class Turret {
      */
     static final double TICKS_PER_DEGREE = 181 / 180.0;
 
+    public static int lastAutoPosition = 0;
+
     public Turret(Follower follower, HardwareMap hardwareMap) {
         this.turretOrientation = new TurretTracker(hardwareMap, follower);
         turretPID = new PIDFController(new PIDFCoefficients(kP, kI, kD, kF));
@@ -55,7 +57,9 @@ public class Turret {
         if (necessaryRotation > 180) necessaryRotation -= 360;
         if (necessaryRotation <= -180) necessaryRotation += 360;
 
-        turretPID.updatePosition(turretOrientation.encoder.getCurrentPosition());
+        int currentVirtualPosition = turretOrientation.encoder.getCurrentPosition() - lastAutoPosition;
+
+        turretPID.updatePosition(currentVirtualPosition);
         turretPID.setTargetPosition(necessaryRotation * TICKS_PER_DEGREE);
         //turretPID.updateError((necessaryRotation * TICKS_PER_DEGREE) - turretOrientation.encoder.getCurrentPosition());
         turretOrientation.encoder.setPower(turretPID.run());

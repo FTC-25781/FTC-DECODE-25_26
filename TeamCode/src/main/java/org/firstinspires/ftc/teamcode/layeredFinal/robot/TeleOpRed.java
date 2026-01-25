@@ -9,7 +9,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
@@ -17,8 +16,6 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
-@Config
 @Configurable
 @TeleOp(name = "TeleOp Red", group = "Main")
 public class TeleOpRed extends OpMode {
@@ -27,7 +24,6 @@ public class TeleOpRed extends OpMode {
     private Flywheel deposit;
     private Limelight limelight;
     private Turret turret;
-
     private Follower follower;
     private static Pose startingPose = new Pose(72, 72, Math.toRadians(90));
     private TelemetryManager telemetryM;

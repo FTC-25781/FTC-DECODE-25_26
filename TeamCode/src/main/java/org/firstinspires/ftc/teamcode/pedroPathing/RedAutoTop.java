@@ -132,7 +132,7 @@ public class RedAutoTop extends OpMode {
 
                     follower.followPath(ShootPick1, true);
                     pathTimer.resetTimer();
-                    setPathState(3);
+                    setPathState(5);
                 }
                 break;
             case 3:
@@ -157,7 +157,7 @@ public class RedAutoTop extends OpMode {
 
                         follower.followPath(GoToPick2, true);
                         pathTimer.resetTimer();
-                        setPathState(4);
+                        setPathState(3);
                     }
                 }
                 break;

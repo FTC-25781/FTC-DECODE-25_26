@@ -25,6 +25,7 @@ public class TurretTracker {
     public final double redX = 137;
     public final double redY = 138;
     public boolean isRed = false;
+    public double turretLocalAngle = 0;
 
     public TurretTracker(HardwareMap hardwareMap, Follower follower)
     {
@@ -39,6 +40,9 @@ public class TurretTracker {
     public double turretLocalAngle()
     {
         return encoder.getCurrentPosition() * DEGREES_PER_TICK;
+    }
+    public void setLocalAngle(double set){
+        turretLocalAngle = set;
     }
 
     // Angle of Turret with respect to the feild

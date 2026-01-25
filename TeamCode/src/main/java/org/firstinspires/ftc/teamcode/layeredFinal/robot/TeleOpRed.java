@@ -31,7 +31,7 @@ public class TeleOpRed extends OpMode {
     private Follower follower;
     private static Pose startingPose = new Pose(72, 72, Math.toRadians(90));
     private TelemetryManager telemetryM;
-    private boolean isRed = false;
+    private boolean isRed = true;
     Timer loopTimer = new Timer();
 
 
@@ -50,6 +50,8 @@ public class TeleOpRed extends OpMode {
         turret = new Turret(follower, hardwareMap);
         turret.setAlliance(isRed);
         turret.startAutoAlign();
+
+        limelight.stop();
 
     }
 
@@ -121,7 +123,7 @@ public class TeleOpRed extends OpMode {
         }
 
         deposit.update();
-        transfer.update();
+        //transfer.update();
         turret.update();
 
 
@@ -130,7 +132,6 @@ public class TeleOpRed extends OpMode {
         telemetry.addData("Limelight Id", limelight.getLastLoggedID());
         telemetry.addData("Transfer Id", transfer.id);
         telemetry.addData("Kicker With Green", transfer.kickerWithGreen);
-        telemetry.addLine("");
         telemetry.addData("Deposit Velocity", deposit.getVelocity());
         telemetry.addData("Turret Error", turret.turretPID.getError());
         telemetry.addData("Turret Angle to Goal", turret.turretOrientation.getAngleToGoal());

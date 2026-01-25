@@ -52,12 +52,12 @@ public class Turret {
 
         double necessaryRotation = turretOrientation.getAngleToGoal();
 
-        if (necessaryRotation > 180) necessaryRotation -= 360;
-        if (necessaryRotation <= -180) necessaryRotation += 360;
+        while (necessaryRotation > 180) necessaryRotation -= 360;
+        while (necessaryRotation <= -180) necessaryRotation += 360;
 
         turretPID.updatePosition(turretOrientation.encoder.getCurrentPosition());
         turretPID.setTargetPosition(necessaryRotation * TICKS_PER_DEGREE);
-        turretPID.updateError((necessaryRotation * TICKS_PER_DEGREE) - turretOrientation.encoder.getCurrentPosition());
+        //turretPID.updateError((necessaryRotation * TICKS_PER_DEGREE) - turretOrientation.encoder.getCurrentPosition());
         turretOrientation.encoder.setPower(turretPID.run());
     }
 }

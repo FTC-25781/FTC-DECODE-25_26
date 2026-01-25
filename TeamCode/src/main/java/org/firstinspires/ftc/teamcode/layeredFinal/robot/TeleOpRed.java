@@ -92,15 +92,26 @@ public class TeleOpRed extends OpMode {
         if (gamepad1.yWasPressed()) {
             transfer.reset();
         }
-
+        if(gamepad1.dpadDownWasPressed()){
+            turret.stopAutoAlign();
+            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            turret.turretPID.setTargetPosition(0);
+        }
         if (gamepad1.left_trigger > 0.1) {
             deposit.setVelForCloseTip();
+            if(turret.autoAlign){
+                turret.stopAutoAlign();
+            }
             if (!turret.autoAlign) {
                 turret.startAutoAlign();
             }
         }
         if (gamepad1.right_trigger > 0.1) {
             deposit.setVelForFarTip();
+            if(turret.autoAlign){
+                turret.stopAutoAlign();
+            }
             if (!turret.autoAlign) {
                 turret.startAutoAlign();
             }

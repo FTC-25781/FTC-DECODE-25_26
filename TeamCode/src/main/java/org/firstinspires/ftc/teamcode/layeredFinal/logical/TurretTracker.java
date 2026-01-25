@@ -20,7 +20,7 @@ public class TurretTracker {
     public Follower follower;
 
     public final double blueX = 9;
-    public final double blueY = 137;
+    public final double blueY = 138;
 
     public final double redX = 137;
     public final double redY = 138;

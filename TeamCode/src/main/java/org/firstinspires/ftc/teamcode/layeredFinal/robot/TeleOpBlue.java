@@ -21,9 +21,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp(name = "TeleOp Blue", group = "Main")
 public class TeleOpBlue extends OpMode {
     private Intake intake;
-
-    public static int lastAutoPosition = 0;
-
     private Transfer transfer;
     private Flywheel deposit;
     private Limelight limelight;
@@ -47,7 +44,7 @@ public class TeleOpBlue extends OpMode {
         limelight = new Limelight(hardwareMap);
         turret = new Turret(follower, hardwareMap);
         turret.setAlliance(isRed);
-        turret.startAutoAlign();
+        turret.stopAutoAlign();
 
         limelight.stop();
 
@@ -92,24 +89,36 @@ public class TeleOpBlue extends OpMode {
         if (gamepad1.yWasPressed()) {
             transfer.reset();
         }
-
+        /*
+        if(gamepad1.dpadDownWasPressed()){
+            turret.stopAutoAlign();
+            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            turret.turretPID.setTargetPosition(0);
+        }
+         */
         if (gamepad1.left_trigger > 0.1) {
             deposit.setVelForCloseTip();
             if(turret.autoAlign){
                 turret.stopAutoAlign();
             }
+            /*
             if (!turret.autoAlign) {
                 turret.startAutoAlign();
             }
+             */
         }
         if (gamepad1.right_trigger > 0.1) {
             deposit.setVelForFarTip();
             if(turret.autoAlign){
                 turret.stopAutoAlign();
             }
+            /*
             if (!turret.autoAlign) {
                 turret.startAutoAlign();
             }
+             */
+
         }
 
         if (gamepad1.leftStickButtonWasPressed()) {
@@ -125,12 +134,6 @@ public class TeleOpBlue extends OpMode {
             turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
             turret.turretPID.setTargetPosition(0);
             //turret.turretOrientation.setLocalAngle(0);
-        }
-        if(gamepad1.dpadDownWasPressed()){
-            turret.stopAutoAlign();
-            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-            turret.turretPID.setTargetPosition(0);
         }
         deposit.update();
         transfer.update();

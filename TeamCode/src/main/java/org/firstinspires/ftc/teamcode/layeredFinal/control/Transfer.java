@@ -16,7 +16,7 @@ public class Transfer {
     public int id = 21;
     private int purpleKickerCount = 0;
 
-    public double kicker1_time_value = 0.3;
+    public double kicker1_time_value = 0.31;
     public double kicker1_servo_lower_time = 0.02;
     public double kicker2_time_value = 0.3;
     public double kicker2_servo_lower_time = 0.1;

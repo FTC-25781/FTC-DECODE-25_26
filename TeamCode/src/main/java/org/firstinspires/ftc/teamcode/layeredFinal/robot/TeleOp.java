@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp Shreesh", group = "Main")
-public class TeleOpRedShrek extends OpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "Main")
+public class TeleOp extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
@@ -26,11 +26,12 @@ public class TeleOpRedShrek extends OpMode {
     private Follower follower;
     public static Pose startingPose;
     private TelemetryManager telemetryM;
+    boolean isRed = false;
 
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.setStartingPose(new Pose(72, 72, 90));
         follower.update();
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -42,13 +43,13 @@ public class TeleOpRedShrek extends OpMode {
 
         transfer.id = limelight.getLastLoggedID();
         turret = new Turret(follower, hardwareMap);
-        turret.setAlliance(turret.redAlliance);
+        turret.setAlliance(isRed);
         turret.startAutoAlign();
     }
 
     @Override
     public void start() {
-        follower.startTeleopDrive();
+        follower.startTeleopDrive(false);
     }
 
     @Override

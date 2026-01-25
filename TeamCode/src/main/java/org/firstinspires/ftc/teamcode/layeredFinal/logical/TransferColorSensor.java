@@ -13,10 +13,20 @@ public class TransferColorSensor {
 
     private final SmartColorSensor colorSensors;
 
+    /***
+     *  Constructor for color sensor
+      * @param hardwareMap
+     */
     public TransferColorSensor(HardwareMap hardwareMap) {
         colorSensors = new SmartColorSensor(hardwareMap);
     }
 
+    /***
+     * Detect color for the first sensor
+     * @param red
+     * @param green
+     * @return color of the ball
+     */
     private DetectedColor detectColor1(double red, double green) {
         if ((green - red) >= 40) {
             return DetectedColor.GREEN;
@@ -27,6 +37,12 @@ public class TransferColorSensor {
         }
     }
 
+    /***
+     * Detect color for second and third sensor
+     * @param red
+     * @param green
+     * @return
+     */
     private DetectedColor detectColor2And3(double red, double green) {
         if ((red - green) >= 2) {
             return DetectedColor.PURPLE;
@@ -37,6 +53,10 @@ public class TransferColorSensor {
         }
     }
 
+    /***
+     *
+     * @return
+     */
     public DetectedColor colorOfSensor1() {
         return detectColor1(
                 colorSensors.getRed1(),

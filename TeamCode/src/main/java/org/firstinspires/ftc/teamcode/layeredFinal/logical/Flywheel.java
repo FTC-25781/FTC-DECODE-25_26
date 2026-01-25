@@ -25,7 +25,9 @@ public class Flywheel {
     public double getVelocity() {
         return flywheel.getCurVelocity();
     }
-    public void humanPlayer() { flywheel.setVelocity(-100); }
+    public void humanPlayer() {
+        flywheel.setVelocity(-100);
+    }
 
     public void update() {
         flywheel.update();

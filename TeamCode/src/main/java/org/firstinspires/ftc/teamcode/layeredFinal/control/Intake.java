@@ -10,14 +10,23 @@ public class Intake {
         intake = new SmartIntakeMotor(hardwareMap);
     }
 
-    public void forward() { // Really not needed but allows us to go forward
+    /***
+     * Start intake motor
+     */
+    public void forward() {
         intake.startRotation();
     }
+    /***
+     * Stop intake motor
+     */
     public void stopped() { // Really not needed but allows us to stop
         intake.stopRotation();
     }
-
+    /***
+     * Reverse intake motor
+     */
     public void reverse() { // Really not needed but allows us to go reverse
         intake.reverseRotation();
+
     }
 }

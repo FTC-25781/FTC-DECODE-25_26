@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 
-@Autonomous(name = "Blue Auto Top", group = "Blue")
+@Autonomous(name = "Blue Auto Top", group = "Red")
 public class BlueAutoTop extends OpMode {
     private Intake intake;
     private Transfer transfer;
@@ -30,7 +30,7 @@ public class BlueAutoTop extends OpMode {
 
     private boolean timerReset = false;
     private boolean reset = false;
-    private boolean isRed = true;
+    private boolean isRed = false;
 
     private final Pose startPose = new Pose(21.000, 122.000, Math.toRadians(135));
     private final Pose scanPose = new Pose(48.000, 94.000, Math.toRadians(135));
@@ -49,48 +49,48 @@ public class BlueAutoTop extends OpMode {
 
     public void buildPaths() {
         ScanAndShootPreload = follower.pathBuilder().addPath(
-            new BezierLine(
-                    startPose,
-                    scanPose
-            )
-        ).setConstantHeadingInterpolation(startPose.getHeading())
-        .build();
+                        new BezierLine(
+                                startPose,
+                                scanPose
+                        )
+                ).setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
 
         GoToPickup1 = follower.pathBuilder().addPath(
-            new BezierCurve(
-                    scanPose,
-                    pick1ControlPose,
-                    pick1Pose
-            )
-        ).setLinearHeadingInterpolation(scanPose.getHeading(), pick1Pose.getHeading())
-        .build();
+                        new BezierCurve(
+                                scanPose,
+                                pick1ControlPose,
+                                pick1Pose
+                        )
+                ).setLinearHeadingInterpolation(scanPose.getHeading(), pick1Pose.getHeading())
+                .build();
 
         ShootPick1 = follower.pathBuilder().addPath(
-            new BezierCurve(
-                    pick1Pose,
-                    pick1ControlPose,
-                    scanPose
-            )
-        ).setConstantHeadingInterpolation(pick1Pose.getHeading())
-        .build();
+                        new BezierCurve(
+                                pick1Pose,
+                                pick1ControlPose,
+                                scanPose
+                        )
+                ).setConstantHeadingInterpolation(pick1Pose.getHeading())
+                .build();
 
         GoToPick2 = follower.pathBuilder().addPath(
-            new BezierCurve(
-                    scanPose,
-                    pick2ControlPose,
-                    pick2Pose
-            )
-        ).setConstantHeadingInterpolation(pick2Pose.getHeading())
-        .build();
+                        new BezierCurve(
+                                scanPose,
+                                pick2ControlPose,
+                                pick2Pose
+                        )
+                ).setConstantHeadingInterpolation(pick2Pose.getHeading())
+                .build();
 
         ShootPick2 = follower.pathBuilder().addPath(
-            new BezierCurve(
-                    pick2Pose,
-                    shoot2ControlPose,
-                    shoot2Pose
-            )
-        ).setConstantHeadingInterpolation(shoot2Pose.getHeading())
-        .build();
+                        new BezierCurve(
+                                pick2Pose,
+                                shoot2ControlPose,
+                                shoot2Pose
+                        )
+                ).setConstantHeadingInterpolation(shoot2Pose.getHeading())
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -127,7 +127,7 @@ public class BlueAutoTop extends OpMode {
                 break;
             case 2:
                 if (!follower.isBusy() &&
-                    pathTimer.getElapsedTimeSeconds() >= 2) {
+                        pathTimer.getElapsedTimeSeconds() >= 2) {
                     reset = false;
 
                     follower.followPath(ShootPick1, true);
@@ -145,7 +145,7 @@ public class BlueAutoTop extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE
-                        && pathTimer.getElapsedTimeSeconds() >= 0.5) {
+                            && pathTimer.getElapsedTimeSeconds() >= 0.5) {
                         transfer.startKickSequenceRandomly();
                     }
 
@@ -163,7 +163,7 @@ public class BlueAutoTop extends OpMode {
                 break;
             case 4:
                 if (!follower.isBusy() &&
-                    pathTimer.getElapsedTimeSeconds() >= 2) {
+                        pathTimer.getElapsedTimeSeconds() >= 2) {
                     reset = false;
 
                     follower.followPath(ShootPick2, true);
@@ -181,7 +181,7 @@ public class BlueAutoTop extends OpMode {
                     }
 
                     if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() >= 0.5) {
+                            pathTimer.getElapsedTimeSeconds() >= 0.5) {
                         transfer.startKickSequenceRandomly();
                     }
 
@@ -192,6 +192,7 @@ public class BlueAutoTop extends OpMode {
                             flywheel.stopFlywheel();
                         }
 
+                        stop();
                         setPathState(-1);
                     }
                 }
@@ -227,6 +228,7 @@ public class BlueAutoTop extends OpMode {
         follower.setStartingPose(startPose);
 
         Turret.lastAutoPosition = 0;
+
     }
 
     @Override

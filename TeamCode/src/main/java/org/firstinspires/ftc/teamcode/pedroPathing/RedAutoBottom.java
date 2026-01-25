@@ -39,10 +39,6 @@ public class RedAutoBottom extends OpMode {
     private final Pose pickup1EndPose = new Pose(131,40.5, Math.toRadians(0));
     private final Pose pickup1ControlPose = new Pose(64, 42, Math.toRadians(0));
     private final Pose humanPlayerPose = new Pose(127, 8, Math.toRadians(0));
-    private final Pose openTheGate = new Pose(129, 70, Math.toRadians(90));
-    private final Pose openTheGateControlPose = new Pose(80, 75, Math.toRadians(0));
-    private final Pose getBallsFromGate = new Pose(131, 56, Math.toRadians(50));
-    private final Pose getBallsFromGateControlPose = new Pose(128, 35, Math.toRadians(0));
 
     private Path scanAndShoot;
     private PathChain goToPickup1, goToScore, goToHumanPlayerZone, goToScore2, goToOpenTheGate, goToGetBalls, goToScoreGate;
@@ -69,21 +65,6 @@ public class RedAutoBottom extends OpMode {
         goToScore2 = follower.pathBuilder()
                 .addPath(new BezierLine(humanPlayerPose, homePose))
                 .setConstantHeadingInterpolation(homePose.getHeading())
-                .build();
-
-        goToOpenTheGate = follower.pathBuilder()
-                .addPath(new BezierCurve(homePose, openTheGateControlPose, openTheGate))
-                .setLinearHeadingInterpolation(homePose.getHeading(), openTheGate.getHeading())
-                .build();
-
-        goToGetBalls = follower.pathBuilder()
-                .addPath(new BezierCurve(openTheGate, getBallsFromGateControlPose, getBallsFromGate))
-                .setLinearHeadingInterpolation(openTheGate.getHeading(), getBallsFromGate.getHeading())
-                .build();
-
-        goToScoreGate = follower.pathBuilder()
-                .addPath(new BezierCurve(getBallsFromGate, openTheGateControlPose, homePose))
-                .setConstantHeadingInterpolation(getBallsFromGate.getHeading())
                 .build();
     }
 
@@ -168,55 +149,7 @@ public class RedAutoBottom extends OpMode {
                     setPathState(5);
                 }
                 break;
-
             case 5:
-                if(!follower.isBusy() &&
-                    pathTimer.getElapsedTimeSeconds() >= 1.5) {
-                    intake.reverse();
-
-                    if(!timerReset) {
-                        timerReset = true;
-                        pathTimer.resetTimer();
-                    }
-
-                    if (transfer.currentState == Transfer.State.IDLE &&
-                        pathTimer.getElapsedTimeSeconds() >= 0.5) {
-                        transfer.startKickSequenceRandomly();
-                    }
-
-                    if (transfer.currentState == Transfer.State.DONE) {
-                        if (!reset) {
-                            resetEverything();
-                            intake.forward();
-                        }
-
-                        follower.followPath(goToOpenTheGate,0.65, true);
-                        pathTimer.resetTimer();
-                        setPathState(-1);
-                    }
-                }
-                break;
-
-            case 6:
-                if (!follower.isBusy() &&
-                    pathTimer.getElapsedTimeSeconds() >= 2.5) {
-                    reset = false;
-
-                    follower.followPath(goToGetBalls, true);
-                    pathTimer.resetTimer();
-                    setPathState(7);
-                }
-                break;
-
-            case 7:
-                if (!follower.isBusy() &&
-                    pathTimer.getElapsedTimeSeconds() >= 2.0) {
-                    follower.followPath(goToScoreGate, true);
-                    pathTimer.resetTimer();
-                    setPathState(8);
-                }
-                break;
-            case 8:
                 if (!follower.isBusy()) {
                     intake.reverse();
 

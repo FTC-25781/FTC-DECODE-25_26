@@ -13,7 +13,7 @@ public class Turret {
     public boolean redAlliance = true;
 
     //public double kP = 0.081;
-    public double kP = 0.027;
+    public double kP = 0.021;
     public double kI = 0.0;
     public double kD = 0.0009;
     public double kF = 0.000;

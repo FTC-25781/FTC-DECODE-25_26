@@ -127,7 +127,6 @@ public class TeleOpRed extends OpMode {
 
         telemetry.addData("Position", follower.getPose());
         telemetry.addData("Velocity", follower.getVelocity());
-        telemetry.addLine("");
         telemetry.addData("Limelight Id", limelight.getLastLoggedID());
         telemetry.addData("Transfer Id", transfer.id);
         telemetry.addData("Kicker With Green", transfer.kickerWithGreen);

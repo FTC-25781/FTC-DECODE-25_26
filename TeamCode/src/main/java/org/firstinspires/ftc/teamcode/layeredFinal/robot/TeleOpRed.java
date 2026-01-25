@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.layeredFinal.robot;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Intake;
 import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
@@ -15,6 +18,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+@Config
 @Configurable
 @TeleOp(name = "TeleOp Red", group = "Main")
 public class TeleOpRed extends OpMode {
@@ -25,14 +29,16 @@ public class TeleOpRed extends OpMode {
     private Turret turret;
 
     private Follower follower;
-    public static Pose startingPose = new Pose(72, 72, Math.toRadians(90));
+    private static Pose startingPose = new Pose(72, 72, Math.toRadians(90));
     private TelemetryManager telemetryM;
-    boolean isRed = true;
+    private boolean isRed = false;
+    Timer loopTimer = new Timer();
+
 
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.setStartingPose(startingPose);
         follower.update();
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -42,23 +48,21 @@ public class TeleOpRed extends OpMode {
         deposit = new Flywheel(hardwareMap);
         limelight = new Limelight(hardwareMap);
         turret = new Turret(follower, hardwareMap);
-
         turret.setAlliance(isRed);
+        turret.startAutoAlign();
     }
 
     @Override
     public void start() {
         follower.startTeleopDrive();
+
     }
 
     @Override
     public void loop() {
-//        limelight.getIDAndLog(limelight.getID());
-
-        transfer.update();
+        loopTimer.resetTimer();
+//      limelight.getIDAndLog(limelight.getID());
         follower.update();
-        turret.update();
-
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
@@ -66,21 +70,44 @@ public class TeleOpRed extends OpMode {
                 true // Robot Centric Mode
         );
 
-        if (gamepad1.aWasPressed()) { intake.forward(); }
-        if (gamepad1.bWasPressed()) { intake.stopped(); }
-        if (gamepad1.xWasPressed()) { intake.reverse(); }
+        // Intake Commands
+        if (gamepad1.aWasPressed()) {
+            intake.forward();
+        }
 
-        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(limelight.getLastLoggedID()); }
-        if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
-        if (gamepad1.yWasPressed()) { transfer.reset(); }
+        if (gamepad1.bWasPressed()) {
+            intake.stopped();
+        }
 
+        if (gamepad1.xWasPressed()) {
+            intake.reverse();
+        }
+
+        // Transfer commands
+        if (gamepad1.dpadLeftWasPressed()) {
+            transfer.startKickSequenceInOrder(limelight.getLastLoggedID());
+        }
+
+        if (gamepad1.dpadRightWasPressed()) {
+            transfer.startKickSequenceRandomly();
+        }
+
+        if (gamepad1.yWasPressed()) {
+            transfer.reset();
+        }
+
+        // Deposit commands
         if (gamepad1.left_trigger > 0.1) {
             deposit.setVelForCloseTip();
-            turret.startAutoAlign();
+            if (!turret.autoAlign) {
+                turret.startAutoAlign();
+            }
         }
         if (gamepad1.right_trigger > 0.1) {
             deposit.setVelForFarTip();
-            turret.startAutoAlign();
+            if (!turret.autoAlign) {
+                turret.startAutoAlign();
+            }
         }
 
         if (gamepad1.leftStickButtonWasPressed()) {
@@ -88,9 +115,14 @@ public class TeleOpRed extends OpMode {
             turret.stopAutoAlign();
         }
 
-        if (gamepad1.rightStickButtonWasPressed()) { deposit.humanPlayer(); }
+        if (gamepad1.rightStickButtonWasPressed()) {
+            deposit.humanPlayer();
+        }
 
         deposit.update();
+        transfer.update();
+        turret.update();
+
 
         telemetry.addData("Position", follower.getPose());
         telemetry.addData("Velocity", follower.getVelocity());
@@ -100,6 +132,10 @@ public class TeleOpRed extends OpMode {
         telemetry.addData("Kicker With Green", transfer.kickerWithGreen);
         telemetry.addLine("");
         telemetry.addData("Deposit Velocity", deposit.getVelocity());
+        telemetry.addData("Turret Error", turret.turretPID.getError());
+        telemetry.addData("Turret Angle to Goal", turret.turretOrientation.getAngleToGoal());
+        telemetry.addData("Turret Angle from Encoder", turret.turretOrientation.encoder.getCurrentPosition());
+        telemetry.addData("Loop time", loopTimer.getElapsedTime());
         telemetry.update();
     }
 }

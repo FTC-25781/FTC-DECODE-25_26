@@ -14,15 +14,15 @@ public class TurretTracker {
     public DcMotorEx encoder;
     // Using goBilda 6000 RPM motor with 28 Ticks at output shaft.
     // 10 to 130, Tick at turret will 28*13
-    public static final double TICKS_PER_180_DEG = 182;
+    public static final double TICKS_PER_180_DEG = 181;
     public static final double DEGREES_PER_TICK = 180.0 / TICKS_PER_180_DEG;
 
     public Follower follower;
 
-    public final double blueX = 8;
-    public final double blueY = 138;
+    public final double blueX = 6;
+    public final double blueY = 141;
 
-    public final double redX = 137;
+    public final double redX = 136;
     public final double redY = 138;
 
     public boolean isRed = false;
@@ -48,6 +48,10 @@ public class TurretTracker {
         return Math.toDegrees(follower.getPose().getHeading()) + turretLocalAngle();
     }
 
+    /***
+     * Get the angle of the goal with respect to current position of the robot (Not Turret)
+      * @return angle in degrees
+     */
     public double getAngleToGoal(){
         double robotX = follower.getPose().getX();
         double robotY = follower.getPose().getY();
@@ -56,7 +60,7 @@ public class TurretTracker {
         double targetY = isRed ? redY : blueY;
 
         double angleRad = Math.atan2(targetY - robotY, targetX - robotX);
-        return Math.toDegrees(angleRad);
+        return Math.toDegrees(angleRad) - Math.toDegrees(follower.getHeading());
     }
     public double calculateDesiredTurretAngle(){
         return (getAngleToGoal() - turretGolbalAngle());

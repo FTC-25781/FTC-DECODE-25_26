@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -17,6 +18,8 @@ public class TurretTest extends OpMode {
     // Toggle logic variables
     boolean isRed = true;
     boolean lastInputA = false;
+    Timer loopTimer = new Timer();
+
 
     @Override
     public void init() {
@@ -37,6 +40,12 @@ public class TurretTest extends OpMode {
 
     @Override
     public void loop() {
+        loopTimer.resetTimer();
+        while(loopTimer.getElapsedTime() != 110){
+            telemetry.addLine("Not yet started");
+            telemetry.update();
+        }
+        loopTimer.resetTimer();
         follower.update();
         turret.update();
 
@@ -69,7 +78,9 @@ public class TurretTest extends OpMode {
         if(gamepad1.dpadLeftWasPressed()){
             turret.kD -= 0.0001;
         }
-
+        if(gamepad1.xWasPressed()){
+            turret.stopAutoAlign();
+        }
 
         telemetry.addData("TARGET", isRed ? "RED" : "BLUE");
         telemetry.addData("Turret Angle", "%.1f deg", turret.turretOrientation.turretGolbalAngle());
@@ -81,5 +92,6 @@ public class TurretTest extends OpMode {
         telemetry.addData("Proportional", turret.kP);
         telemetry.addData("Derivative", turret.kD);
         telemetry.update();
+
     }
 }

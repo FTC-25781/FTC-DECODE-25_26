@@ -57,7 +57,7 @@ public class Turret {
         if (necessaryRotation > 180) necessaryRotation -= 360;
         if (necessaryRotation <= -180) necessaryRotation += 360;
 
-        int currentVirtualPosition = turretOrientation.encoder.getCurrentPosition() - lastAutoPosition;
+        int currentVirtualPosition = turretOrientation.encoder.getCurrentPosition() + lastAutoPosition;
 
         turretPID.updatePosition(currentVirtualPosition);
         turretPID.setTargetPosition(necessaryRotation * TICKS_PER_DEGREE);

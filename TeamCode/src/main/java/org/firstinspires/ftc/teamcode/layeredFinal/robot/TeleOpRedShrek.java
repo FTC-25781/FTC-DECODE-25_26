@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Configurable
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "Main")
-public class TeleOp extends OpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp Shreesh", group = "Main")
+public class TeleOpRedShrek extends OpMode {
     private Intake intake;
     private Transfer transfer;
     private Flywheel deposit;
@@ -48,7 +48,7 @@ public class TeleOp extends OpMode {
 
     @Override
     public void start() {
-        follower.startTeleopDrive(false);
+        follower.startTeleopDrive();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class TeleOp extends OpMode {
         if (gamepad1.bWasPressed()) { intake.stopped(); }
         if (gamepad1.xWasPressed()) { intake.reverse(); }
 
-        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(); }
+        if (gamepad1.dpadLeftWasPressed()) { transfer.startKickSequenceInOrder(limelight.getLastLoggedID()); }
         if (gamepad1.dpadRightWasPressed()) { transfer.startKickSequenceRandomly(); }
         if (gamepad1.yWasPressed()) { transfer.reset(); }
 

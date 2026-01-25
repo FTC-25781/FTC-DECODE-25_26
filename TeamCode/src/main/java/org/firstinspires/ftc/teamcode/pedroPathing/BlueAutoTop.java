@@ -226,7 +226,6 @@ public class BlueAutoTop extends OpMode {
 
         follower.setStartingPose(startPose);
 
-        Turret.lastAutoPosition = 0;
     }
 
     @Override
@@ -267,6 +266,5 @@ public class BlueAutoTop extends OpMode {
 
     @Override
     public void stop() {
-        Turret.lastAutoPosition = turret.turretOrientation.encoder.getCurrentPosition();
     }
 }

@@ -276,8 +276,6 @@ public class BlueAutoBottom extends OpMode {
 
         telemetry.addData("Limelight id: ", transfer.id);
         telemetry.update();
-
-        Turret.lastAutoPosition = 0;
     }
 
     @Override
@@ -318,6 +316,5 @@ public class BlueAutoBottom extends OpMode {
 
     @Override
     public void stop() {
-        Turret.lastAutoPosition = turret.turretOrientation.encoder.getCurrentPosition();
     }
 }

@@ -50,6 +50,7 @@ public class TeleOpRed extends OpMode {
         turret = new Turret(follower, hardwareMap);
         turret.setAlliance(isRed);
         turret.startAutoAlign();
+
     }
 
     @Override

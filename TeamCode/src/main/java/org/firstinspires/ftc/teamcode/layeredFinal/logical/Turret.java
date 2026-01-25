@@ -57,7 +57,7 @@ public class Turret {
 
         turretPID.updatePosition(turretOrientation.encoder.getCurrentPosition());
         turretPID.setTargetPosition(necessaryRotation * TICKS_PER_DEGREE);
-        turretPID.updateError((necessaryRotation * TICKS_PER_DEGREE) - turretOrientation.encoder.getCurrentPosition());
+        //turretPID.updateError((necessaryRotation * TICKS_PER_DEGREE) - turretOrientation.encoder.getCurrentPosition());
         turretOrientation.encoder.setPower(turretPID.run());
     }
 }

@@ -88,6 +88,7 @@ public class TeleOpRed extends OpMode {
 
         // Transfer commands
         if (gamepad1.dpadLeftWasPressed()) {
+            transfer.updateColorSensor();
             transfer.startKickSequenceInOrder(limelight.getLastLoggedID());
         }
 
@@ -123,9 +124,8 @@ public class TeleOpRed extends OpMode {
         }
 
         deposit.update();
-        //transfer.update();
         turret.update();
-
+        transfer.update();
 
         telemetry.addData("Position", follower.getPose());
         telemetry.addData("Velocity", follower.getVelocity());

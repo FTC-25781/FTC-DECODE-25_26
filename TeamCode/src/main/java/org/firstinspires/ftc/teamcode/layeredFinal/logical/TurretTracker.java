@@ -22,9 +22,8 @@ public class TurretTracker {
     public final double blueX = 9;
     public final double blueY = 138;
 
-    public final double redX = 137;
+    public final double redX = 138;
     public final double redY = 138;
-
     public boolean isRed = false;
 
     public TurretTracker(HardwareMap hardwareMap, Follower follower)

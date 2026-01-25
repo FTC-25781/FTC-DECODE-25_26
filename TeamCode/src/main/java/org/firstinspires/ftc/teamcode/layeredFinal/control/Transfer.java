@@ -67,16 +67,7 @@ public class Transfer {
     }
 
     public void update() {
-        if (transferColors.colorOfSensor1() == TransferColorSensor.DetectedColor.GREEN) {
-            kickerWithGreen = 1;
-        } else if (transferColors.colorOfSensor2() == TransferColorSensor.DetectedColor.GREEN) {
-            kickerWithGreen = 2;
-        } else if (transferColors.colorOfSensor3() == TransferColorSensor.DetectedColor.GREEN) {
-            kickerWithGreen = 3;
-        }
-
         transferServos.update();
-        transferColors.update();
 
         // Run the state machine if a sequence is active
         if (sequenceActiveInOrder) {
@@ -85,6 +76,18 @@ public class Transfer {
 
         if (sequenceActiveRandom) {
             kick();
+        }
+    }
+
+    public void updateColorSensor() {
+        transferColors.update();
+
+        if (transferColors.colorOfSensor1() == TransferColorSensor.DetectedColor.GREEN) {
+            kickerWithGreen = 1;
+        } else if (transferColors.colorOfSensor2() == TransferColorSensor.DetectedColor.GREEN) {
+            kickerWithGreen = 2;
+        } else if (transferColors.colorOfSensor3() == TransferColorSensor.DetectedColor.GREEN) {
+            kickerWithGreen = 3;
         }
     }
 

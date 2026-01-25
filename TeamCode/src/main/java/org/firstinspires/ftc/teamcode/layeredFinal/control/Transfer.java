@@ -16,11 +16,11 @@ public class Transfer {
     public int id = 21;
     private int purpleKickerCount = 0;
 
-    public double kicker1_time_value = 0.22;
+    public double kicker1_time_value = 0.26;
     public double kicker1_servo_lower_time = 0.02;
-    public double kicker2_time_value = 0.20;
+    public double kicker2_time_value = 0.24;
     public double kicker2_servo_lower_time = 0.1;
-    public double kicker3_time_value = 0.22;
+    public double kicker3_time_value = 0.26;
     public double kicker3_servo_lower_time = 0;
 
     public enum State {

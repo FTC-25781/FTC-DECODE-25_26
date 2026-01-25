@@ -192,6 +192,7 @@ public class RedAutoTop extends OpMode {
                             flywheel.stopFlywheel();
                         }
 
+                        stop();
                         setPathState(-1);
                     }
                 }

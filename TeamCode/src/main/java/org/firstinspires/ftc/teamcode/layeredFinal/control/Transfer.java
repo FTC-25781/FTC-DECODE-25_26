@@ -19,8 +19,8 @@ public class Transfer {
     public double kicker1_time_value = 0.22;
     public double kicker1_servo_lower_time = 0.02;
     public double kicker2_time_value = 0.20;
-    public double kicker2_servo_lower_time = 0.065;
-    public double kicker3_time_value = 0.20;
+    public double kicker2_servo_lower_time = 0.1;
+    public double kicker3_time_value = 0.22;
     public double kicker3_servo_lower_time = 0;
 
     public enum State {

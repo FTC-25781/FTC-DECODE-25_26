@@ -25,6 +25,8 @@ public class RedAutoTop extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
+    public static Pose lastAutoPose = null;
+
 
     private int pathState;
 
@@ -267,5 +269,7 @@ public class RedAutoTop extends OpMode {
 
     @Override
     public void stop() {
+        lastAutoPose = follower.getPose();
+
     }
 }

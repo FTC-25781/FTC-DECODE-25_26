@@ -28,6 +28,19 @@ public class SmartLimelight {
 
         return -1;
     }
+    public double getTargetX(int targetID) {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            for(LLResultTypes.FiducialResult fiducial : fiducials){
+                if (fiducial.getFiducialId() == targetID) {
+                    return fiducial.getTargetXDegrees();
+                }
+            }
+
+        }
+        return 0;
+    }
 
     public void stop() {
         limelight.stop();

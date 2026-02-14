@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.physical.SmartLimelight;
 public class Limelight {
     private final SmartLimelight limelight;
     private final LimelightDatabase db;
+    boolean isRed = true;
 
     public Limelight(HardwareMap hardwareMap) {
         this.limelight = new SmartLimelight(hardwareMap);
@@ -19,6 +20,13 @@ public class Limelight {
             }
         }
         return id;
+    }
+    public double getAprilTagTargetX(){
+        if(isRed){
+            return limelight.getTargetX(22); //TODO: Change target ID values based on the real ones
+        } else {
+            return limelight.getTargetX(21);
+        }
     }
 
     public int getID() {

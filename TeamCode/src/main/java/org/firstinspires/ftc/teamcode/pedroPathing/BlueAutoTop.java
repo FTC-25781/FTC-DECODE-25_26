@@ -27,6 +27,8 @@ public class BlueAutoTop extends OpMode {
     private Timer pathTimer, opmodeTimer;
 
     private int pathState;
+    public static Pose lastAutoPose = null;
+
 
     private boolean timerReset = false;
     private boolean reset = false;
@@ -267,5 +269,6 @@ public class BlueAutoTop extends OpMode {
 
     @Override
     public void stop() {
+        lastAutoPose = follower.getPose();
     }
 }

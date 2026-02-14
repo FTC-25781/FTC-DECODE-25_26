@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.layeredFinal.robot;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -16,6 +14,7 @@ import org.firstinspires.ftc.teamcode.layeredFinal.control.Transfer;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Flywheel;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
+import org.firstinspires.ftc.teamcode.pedroPathing.BlueAutoTop;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable
 @TeleOp(name = "TeleOp Blue", group = "Main")
@@ -33,7 +32,9 @@ public class TeleOpBlue extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        Pose startPose = BlueAutoTop.lastAutoPose != null ? BlueAutoTop.lastAutoPose : new Pose(62.000, 82.000, Math.toRadians(180));
+
+        follower.setStartingPose(startPose);
         follower.update();
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -44,6 +45,9 @@ public class TeleOpBlue extends OpMode {
         limelight = new Limelight(hardwareMap);
         turret = new Turret(follower, hardwareMap);
         turret.setAlliance(isRed);
+        turret.turretPID.setTargetPosition(0);
+        turret.turretOrientation.encoder.setPower(0);
+
         turret.stopAutoAlign();
 
         limelight.stop();
@@ -53,6 +57,10 @@ public class TeleOpBlue extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive();
+
+        turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        turret.turretPID.setTargetPosition(0);
     }
 
     @Override
@@ -135,11 +143,16 @@ public class TeleOpBlue extends OpMode {
             turret.turretPID.setTargetPosition(0);
             //turret.turretOrientation.setLocalAngle(0);
         }
+        if(gamepad2.dpadLeftWasPressed()){
+            turret.turretOrientation.encoder.setPower(0.3);
+        }
+        if(gamepad2.dpadRightWasPressed()){
+            turret.turretOrientation.encoder.setPower(-0.3);
+        }
         deposit.update();
         transfer.update();
         turret.update();
 
-        telemetry.addData("Position", follower.getPose());
         telemetry.addData("Position", follower.getPose());
         // telemetry.addData("Velocity", follower.getVelocity());
         //telemetry.addData("Limelight Id", limelight.getLastLoggedID());

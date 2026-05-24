@@ -16,10 +16,8 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.BlueAutoTop;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.pedroPathing.RedAutoTop;
-
 @Configurable
-@TeleOp(name = "TeleOp Red", group = "Main")
+@TeleOp(name = "TeleOp Blue", group = "Main")
 public class TeleOpRed extends OpMode {
     private Intake intake;
     private Transfer transfer;
@@ -34,7 +32,7 @@ public class TeleOpRed extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        Pose startPose = RedAutoTop.lastAutoPose != null ? RedAutoTop.lastAutoPose : new Pose(62.000, 82.000, Math.toRadians(180)).mirror();
+        Pose startPose = BlueAutoTop.lastAutoPose != null ? BlueAutoTop.lastAutoPose : new Pose(62.000, 82.000, Math.toRadians(180));
 
         follower.setStartingPose(startPose);
         follower.update();

@@ -16,13 +16,15 @@ import org.firstinspires.ftc.teamcode.layeredFinal.logical.Limelight;
 import org.firstinspires.ftc.teamcode.layeredFinal.logical.Turret;
 import org.firstinspires.ftc.teamcode.pedroPathing.BlueAutoTop;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.RedAutoTop;
+
 @Configurable
-@TeleOp(name = "TeleOp Blue", group = "Main")
+@TeleOp(name = "TeleOp Red", group = "Main")
 public class TeleOpBlue extends OpMode {
     private Intake intake;
-    private Transfer transfer;
+    //    private Transfer transfer;
     private Flywheel deposit;
-    private Limelight limelight;
+    //    private Limelight limelight;
     private Turret turret;
     private Follower follower;
     private static Pose startingPose;
@@ -32,7 +34,7 @@ public class TeleOpBlue extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        Pose startPose = BlueAutoTop.lastAutoPose != null ? BlueAutoTop.lastAutoPose : new Pose(62.000, 82.000, Math.toRadians(180));
+        Pose startPose = RedAutoTop.lastAutoPose != null ? RedAutoTop.lastAutoPose : new Pose(62.000, 82.000, Math.toRadians(180)).mirror();
 
         follower.setStartingPose(startPose);
         follower.update();
@@ -40,17 +42,17 @@ public class TeleOpBlue extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         intake = new Intake(hardwareMap);
-        transfer = new Transfer(hardwareMap);
+//        transfer = new Transfer(hardwareMap);
         deposit = new Flywheel(hardwareMap);
-        limelight = new Limelight(hardwareMap);
-        turret = new Turret(follower, hardwareMap);
-        turret.setAlliance(isRed);
-        turret.turretPID.setTargetPosition(0);
-        turret.turretOrientation.encoder.setPower(0);
+//        limelight = new Limelight(hardwareMap);
+        //  turret = new Turret(follower, hardwareMap);
+//        turret.setAlliance(isRed);
+//        turret.turretPID.setTargetPosition(0);
+//        turret.turretOrientation.encoder.setPower(0);
 
-        turret.stopAutoAlign();
+//        turret.stopAutoAlign();
 
-        limelight.stop();
+//        limelight.stop();
 
     }
 
@@ -58,9 +60,9 @@ public class TeleOpBlue extends OpMode {
     public void start() {
         follower.startTeleopDrive();
 
-        turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+/*        turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         turret.turretOrientation.encoder.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        turret.turretPID.setTargetPosition(0);
+        turret.turretPID.setTargetPosition(0);*/
     }
 
     @Override
@@ -84,19 +86,19 @@ public class TeleOpBlue extends OpMode {
         if (gamepad1.xWasPressed()) {
             intake.reverse();
         }
-
+/*
         if (gamepad1.dpadLeftWasPressed()) {
             transfer.updateColorSensor();
             transfer.startKickSequenceInOrder(limelight.getLastLoggedID());
-        }
-
+        }*/
+/*
         if (gamepad1.dpadRightWasPressed()) {
             transfer.startKickSequenceRandomly();
-        }
-
+        }*/
+/*
         if (gamepad1.yWasPressed()) {
             transfer.reset();
-        }
+        }*/
         /*
         if(gamepad1.dpadDownWasPressed()){
             turret.stopAutoAlign();
@@ -105,6 +107,7 @@ public class TeleOpBlue extends OpMode {
             turret.turretPID.setTargetPosition(0);
         }
          */
+
         if (gamepad1.left_trigger > 0.1) {
             deposit.setVelForCloseTip();
             if(turret.autoAlign){
@@ -150,7 +153,7 @@ public class TeleOpBlue extends OpMode {
             turret.turretOrientation.encoder.setPower(-0.3);
         }
         deposit.update();
-        transfer.update();
+//        transfer.update();
         turret.update();
 
         telemetry.addData("Position", follower.getPose());
